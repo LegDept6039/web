@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+.env*
+*.tsbuildinfo
+test-results/
+.npm-cache/
+playwright-report/
+/tourism-source.html
+/scaffold-pages.py
+/refactor-home.py
+/tmp/
+/.pdf-tools/
+test-results-mobile/
