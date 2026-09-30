@@ -8,7 +8,7 @@ export default function NotFound() {
         The page or record you requested could not be found.
       </p>
       <Link href="/" className="button button-blue">
-        Return to the homepage
+        Return to the homepage 
       </Link>
     </section>
   );

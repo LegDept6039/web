@@ -73,7 +73,7 @@ export function Header() {
         <div className="container masthead-inner">
           <Link href="/" className="brand" onClick={close}>
             <Image
-              src="/images/logos/seal.svg"
+              src="/images/logos/seal.png"
               width={65}
               height={65}
               alt="Pinamungajan municipal identity placeholder"
@@ -83,12 +83,12 @@ export function Header() {
               <span className="brand-eyebrow">MUNICIPALITY OF</span>
               <span className="brand-name">PINAMUNGAJAN</span>
               <span className="brand-tagline">
-                Together for a progressive community
+                Province of Cebu
               </span>
             </span>
           </Link>
           <div className="masthead-right">
-            <span className="small-caps">PUBLIC SERVICE. PUBLIC TRUST.</span>
+            <span className="small-caps">TO SERVE NOT TO RULE</span>
             <Link href="/contact">
               Get in touch <ArrowUpRight size={15} />
             </Link>

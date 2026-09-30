@@ -8,7 +8,7 @@ export function Footer() {
         <div className="footer-brand">
           <div className="brand">
             <Image
-              src="/images/logos/seal.svg"
+              src="/images/logos/seal.png"
               width={60}
               height={60}
               alt="Municipal identity placeholder"
