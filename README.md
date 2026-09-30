@@ -1,6 +1,6 @@
 # Municipality of Pinamungajan
 
-A responsive, frontend-only municipal portal built with Next.js App Router, strict TypeScript, React, Tailwind CSS, and Lucide icons. Static sample content is kept separate from presentation and accessed through asynchronous service adapters.
+A responsive municipal portal built with Next.js App Router, strict TypeScript, React, Tailwind CSS, and Lucide icons. Content is accessed through a provider-independent service layer, with local mock data and a Supabase PostgreSQL provider.
 
 ## Run locally
 
@@ -14,6 +14,7 @@ npm run dev
 Open http://localhost:3000.
 
 ```sh
+npm run test:data
 npm run typecheck
 npm run lint
 npm run build
@@ -30,7 +31,7 @@ npm start
 - `public/images/`: local image assets and folders for future official photos.
 - `tests/`: browser checks for navigation, search/filter combinations, document details, and mobile layouts.
 
-No login, database, admin interface, or backend service is configured. No credentials are needed.
+The default mock mode requires no credentials. To connect Supabase, follow [the Supabase setup guide](docs/SUPABASE.md): create the project, run the supplied SQL migrations and optional seed, then configure `.env.local`. For staff authentication and the superadmin portal, follow [the account setup guide](docs/AUTH.md). Type `/login` directly into the address bar; the public website does not link to it.
 
 ## Pages and interactions
 
@@ -66,6 +67,10 @@ The test configuration uses installed Google Chrome. To use Playwright Chromium 
 
 ## Deploy on Vercel
 
-Import this repository into Vercel, choose the detected Next.js framework preset, and deploy. The defaults (`npm install`, `npm run build`) are sufficient. No environment variables or database setup are required. Public deployment is not performed by this project scaffold.
+Import this repository into Vercel, choose the detected Next.js framework preset, and deploy. The defaults (`npm install`, `npm run build`) are sufficient. Mock mode requires no environment variables. For Supabase mode, add `CONTENT_SOURCE`, `SUPABASE_URL`, and `SUPABASE_PUBLISHABLE_KEY` in Vercel and redeploy; see [the setup guide](docs/SUPABASE.md). Public deployment is not performed by this project scaffold.
 
-For a future API, configure the API base URL server-side and update `lib/api/`. The frontend should call the municipal backend, never the database directly. Keep API secrets server-only. Add runtime response validation and the appropriate error, caching, and pagination policies when the API contract is available.
+For a future API, configure the API base URL server-side and update `lib/api/`. The frontend should call the municipal backend, never the database directly. Keep API secrets server-only. The Supabase adapter already validates responses, handles errors, and reads across API row limits. Replace it with an adapter for the municipal API when ready.
+
+## Database integration
+
+See [docs/SUPABASE.md](docs/SUPABASE.md) for the schema, content publishing, public media storage, Vercel configuration, testing, and future migration steps. No live Supabase project is connected until you complete that setup.

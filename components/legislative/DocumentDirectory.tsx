@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import Link from "next/link";
 import { Search, FileText, ArrowUpRight, X } from "lucide-react";
@@ -59,7 +59,8 @@ export function DocumentDirectory({
         </button>
       </div>
       <div className="results-count" aria-live="polite">
-        {filtered.length} {kind} found <span>Sample legislative records</span>
+        {filtered.length} {kind} found{" "}
+        <span>Published legislative records</span>
       </div>
       <div className="document-list">
         {filtered.map((d) => (
@@ -73,7 +74,10 @@ export function DocumentDirectory({
                   {kind === "ordinances" ? "Ordinance" : "Resolution"} No.{" "}
                   {d.number}
                 </span>
-                <span className="status">{d.status} · sample</span>
+                <span className="status">
+                  {d.status}
+                  {d.isSample ? " \u00b7 sample" : ""}
+                </span>
               </div>
               <h2>{d.title}</h2>
               <div className="document-meta">

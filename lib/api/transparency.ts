@@ -1,4 +1,9 @@
-﻿import { documentCategories } from "@/data/transparency";
+﻿import { getCollection } from "@/lib/content/repository";
 export async function getDocumentCategories() {
-  return documentCategories;
+  return getCollection("documentCategories");
+}
+export async function getDocuments(categoryId: string) {
+  return (await getCollection("documents")).filter(
+    (d) => d.categoryId === categoryId,
+  );
 }

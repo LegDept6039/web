@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { getNews, getOrdinances, getResolutions, getServices } from "@/lib/api";
 import { PageHero } from "@/components/shared/ui";
 import { SiteSearch, type SearchRecord } from "@/components/shared/SiteSearch";
@@ -14,21 +14,21 @@ export default async function Page() {
     ...news.map((n) => ({
       id: n.slug,
       title: n.title,
-      category: "Sample news",
+      category: n.isSample ? "Sample news" : "News",
       href: `/news/${n.slug}`,
       description: n.excerpt,
     })),
     ...ordinances.map((d) => ({
       id: `ord-${d.id}`,
       title: `Ordinance ${d.number}: ${d.title}`,
-      category: "Sample ordinance",
+      category: d.isSample ? "Sample ordinance" : "Ordinance",
       href: `/legislative/ordinances/${d.id}`,
       description: d.summary,
     })),
     ...resolutions.map((d) => ({
       id: `res-${d.id}`,
       title: `Resolution ${d.number}: ${d.title}`,
-      category: "Sample resolution",
+      category: d.isSample ? "Sample resolution" : "Resolution",
       href: `/legislative/resolutions/${d.id}`,
       description: d.summary,
     })),

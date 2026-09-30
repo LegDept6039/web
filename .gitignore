@@ -12,3 +12,4 @@ playwright-report/
 /tmp/
 /.pdf-tools/
 test-results-mobile/
+!.env.example

@@ -1,4 +1,5 @@
-export const dynamicParams = false;
+import { readContentConfig } from "@/lib/content/config";
+export const dynamicParams = true;
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -7,6 +8,7 @@ import { formatDate } from "@/lib/utils";
 import { PreviewNote, SectionHeader } from "@/components/shared/ui";
 import { NewsGrid } from "@/components/news/NewsCard";
 export async function generateStaticParams() {
+  if (readContentConfig(process.env).source === "supabase") return [];
   return (await getNews()).map((n) => ({ slug: n.slug }));
 }
 export async function generateMetadata({
@@ -38,18 +40,19 @@ export default async function Page({
         <span className="eyebrow">{a.category}</span>
         <h1>{a.title}</h1>
         <p className="meta mt-5">
-          {formatDate(a.date)} · Municipal information portal · Sample article
+          {formatDate(a.date)} · Municipal information portal
+          {a.isSample ? " \u00b7 Sample article" : ""}
         </p>
         <div className="article-image">
           <Image
             src={a.image}
-            alt="Illustrative placeholder for a sample municipal article"
+            alt={a.title}
             fill
             sizes="(max-width: 800px) 100vw, 790px"
             priority
           />
         </div>
-        <PreviewNote />
+        {a.isSample && <PreviewNote />}
         <div className="article-body">
           {a.content.map((p) => (
             <p key={p}>{p}</p>

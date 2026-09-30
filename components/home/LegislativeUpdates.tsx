@@ -32,7 +32,8 @@ export function LegislativeUpdates({
                 </span>
                 <div>
                   <span className="meta">
-                    {formatDate(s.date)} · Sample session
+                    {formatDate(s.date)}
+                    {s.isSample ? " \u00b7 Sample session" : ""}
                   </span>
                   <h3>
                     {s.number} {s.type}

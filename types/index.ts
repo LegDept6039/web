@@ -1,11 +1,15 @@
-﻿export interface Official {
+export interface ContentRecord {
+  isSample?: boolean;
+}
+export interface Official extends ContentRecord {
   id: string;
   name: string;
   role: string;
+  photoUrl?: string;
   branch: "executive" | "legislative";
   description: string;
 }
-export interface LegislativeDocument {
+export interface LegislativeDocument extends ContentRecord {
   id: string;
   number: string;
   title: string;
@@ -19,7 +23,7 @@ export interface LegislativeDocument {
 }
 export type Ordinance = LegislativeDocument;
 export type Resolution = LegislativeDocument;
-export interface NewsArticle {
+export interface NewsArticle extends ContentRecord {
   slug: string;
   title: string;
   category: string;
@@ -28,7 +32,7 @@ export interface NewsArticle {
   image: string;
   content: string[];
 }
-export interface Session {
+export interface Session extends ContentRecord {
   id: string;
   number: string;
   type: "Regular session" | "Special session" | "Caucus meeting";
@@ -37,7 +41,7 @@ export interface Session {
   agenda: string[];
   image: string;
 }
-export interface Service {
+export interface Service extends ContentRecord {
   id: string;
   name: string;
   description: string;
@@ -45,25 +49,25 @@ export interface Service {
   office: string;
   steps: string[];
 }
-export interface Department {
+export interface Department extends ContentRecord {
   id: string;
   name: string;
   description: string;
 }
-export interface Program {
+export interface Program extends ContentRecord {
   id: string;
   name: string;
   description: string;
   category: string;
   status: string;
 }
-export interface Committee {
+export interface Committee extends ContentRecord {
   id: string;
   name: string;
   responsibility: string;
   chair: string;
 }
-export interface Hearing {
+export interface Hearing extends ContentRecord {
   id: string;
   title: string;
   date: string;
@@ -71,4 +75,19 @@ export interface Hearing {
   sectors: string;
   relatedOrdinance: string;
   status: "Upcoming" | "Previous";
+}
+
+export interface DocumentCategory extends ContentRecord {
+  id: string;
+  name: string;
+  description: string;
+  href?: string;
+}
+export interface MunicipalDocument extends ContentRecord {
+  id: string;
+  categoryId: string;
+  title: string;
+  description: string;
+  date: string;
+  fileUrl: string;
 }

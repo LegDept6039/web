@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { NewsArticle } from "@/types";
@@ -9,7 +9,7 @@ export function NewsCard({ article }: { article: NewsArticle }) {
       <Link href={`/news/${article.slug}`} className="news-image">
         <Image
           src={article.image}
-          alt="Illustration accompanying a sample municipal update"
+          alt={article.title}
           fill
           sizes="(max-width: 700px) 100vw, 33vw"
         />
@@ -17,7 +17,8 @@ export function NewsCard({ article }: { article: NewsArticle }) {
       </Link>
       <div className="news-card-body">
         <span className="meta">
-          {formatDate(article.date)} <span>· Sample update</span>
+          {formatDate(article.date)}{" "}
+          {article.isSample && <span>· Sample update</span>}
         </span>
         <h3>
           <Link href={`/news/${article.slug}`}>{article.title}</Link>

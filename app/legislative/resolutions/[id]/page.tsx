@@ -1,8 +1,10 @@
-export const dynamicParams = false;
+import { readContentConfig } from "@/lib/content/config";
+export const dynamicParams = true;
 import { notFound } from "next/navigation";
 import { getResolutions } from "@/lib/api";
 import { DocumentDetail } from "@/components/legislative/DocumentDetail";
 export async function generateStaticParams() {
+  if (readContentConfig(process.env).source === "supabase") return [];
   return (await getResolutions()).map((d) => ({ id: d.id }));
 }
 export async function generateMetadata({

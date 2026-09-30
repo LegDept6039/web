@@ -20,12 +20,13 @@ export function Hero() {
               <span /> WESTERN CEBU, PHILIPPINES
             </span>
             <h1>
-              <em>Pinamungajan </em>
+              <em>Pinamungajan </em></h1>
+           
+              <h2> 
+              Our Pride,
               <br />
-              Our Pride.
-              <br />
-              Your Destination
-            </h1>
+              Your Destination.
+            </h2>
             <p>
               Transparent governance. Responsive leadership.
               <br className="hidden sm:block" /> A progressive community,

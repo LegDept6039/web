@@ -16,22 +16,26 @@ export function DocumentDetail({
       <PageHero
         title={`${label} No. ${d.number}`}
         description={d.title}
-        eyebrow="SAMPLE LEGISLATIVE RECORD"
+        eyebrow={
+          d.isSample ? "SAMPLE LEGISLATIVE RECORD" : "LEGISLATIVE RECORD"
+        }
       />
       <section className="container section">
         <div className="article record-detail">
-          <PreviewNote>
-            This is a fictional sample record. It is not an enacted municipal
-            measure or an official legal document.
-          </PreviewNote>
+          {d.isSample && (
+            <PreviewNote>
+              This is a fictional sample record. It is not an enacted municipal
+              measure or an official legal document.
+            </PreviewNote>
+          )}
           <h2>{d.title}</h2>
           <dl>
             <div>
-              <dt>Date approved (sample)</dt>
+              <dt>Date approved{d.isSample ? " (sample)" : ""}</dt>
               <dd>{formatDate(d.dateApproved)}</dd>
             </div>
             <div>
-              <dt>Status (sample)</dt>
+              <dt>Status{d.isSample ? " (sample)" : ""}</dt>
               <dd>{d.status}</dd>
             </div>
             <div>
@@ -50,10 +54,12 @@ export function DocumentDetail({
           <div className="info-card my-8">
             <FileText className="mb-4" />
             <h3>Document attachment</h3>
-            <p className="mb-4">
-              The linked file is a shared demonstration attachment, not the
-              official text of this record.
-            </p>
+            {d.isSample && (
+              <p className="mb-4">
+                The linked file is a shared demonstration attachment, not the
+                official text of this record.
+              </p>
+            )}
             {d.pdfUrl ? (
               <a
                 className="text-link"
@@ -61,7 +67,7 @@ export function DocumentDetail({
                 target="_blank"
                 rel="noreferrer"
               >
-                View sample PDF document
+                {d.isSample ? "View sample PDF document" : "View PDF document"}
               </a>
             ) : (
               <p>

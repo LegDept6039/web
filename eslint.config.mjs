@@ -9,6 +9,8 @@ export default defineConfig([
     ".npm-cache/**",
     "playwright-report/**",
     "test-results/**",
+    "test-results-mobile/**",
+    "tmp/**",
     "next-env.d.ts",
   ]),
 ]);

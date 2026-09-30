@@ -1,44 +1,34 @@
-﻿import { ordinances } from "@/data/ordinances";
-import { resolutions } from "@/data/resolutions";
-import { officials } from "@/data/officials";
-import { news } from "@/data/news";
-import { sessions } from "@/data/sessions";
-import { services } from "@/data/services";
-import { programs } from "@/data/programs";
-import { departments } from "@/data/departments";
-import { committees } from "@/data/committees";
-import { hearings } from "@/data/hearings";
-// Replace these adapters with validated municipal API requests when available.
+﻿import { getCollection } from "@/lib/content/repository";
 export async function getOrdinances() {
-  return ordinances;
+  return getCollection("ordinances");
 }
 export async function getResolutions() {
-  return resolutions;
+  return getCollection("resolutions");
 }
 export async function getOfficials() {
-  return officials;
+  return getCollection("officials");
 }
 export async function getNews() {
-  return news;
+  return getCollection("news");
 }
 export async function getArticle(slug: string) {
-  return news.find((article) => article.slug === slug);
+  return (await getNews()).find((article) => article.slug === slug);
 }
 export async function getSessions() {
-  return sessions;
+  return getCollection("sessions");
 }
 export async function getServices() {
-  return services;
+  return getCollection("services");
 }
 export async function getPrograms() {
-  return programs;
+  return getCollection("programs");
 }
 export async function getDepartments() {
-  return departments;
+  return getCollection("departments");
 }
 export async function getCommittees() {
-  return committees;
+  return getCollection("committees");
 }
 export async function getHearings() {
-  return hearings;
+  return getCollection("hearings");
 }

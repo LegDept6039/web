@@ -1,10 +1,12 @@
-export const dynamicParams = false;
+import { readContentConfig } from "@/lib/content/config";
+export const dynamicParams = true;
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { getServices } from "@/lib/api";
 import { PageHero, PreviewNote } from "@/components/shared/ui";
 export async function generateStaticParams() {
+  if (readContentConfig(process.env).source === "supabase") return [];
   return (await getServices()).map((s) => ({ id: s.id }));
 }
 export async function generateMetadata({

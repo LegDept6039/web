@@ -1,9 +1,4 @@
-﻿export interface DocumentCategory {
-  id: string;
-  name: string;
-  description: string;
-  href?: string;
-}
+import type { DocumentCategory } from "@/types";
 export const documentCategories: DocumentCategory[] = [
   {
     id: "full-disclosure",

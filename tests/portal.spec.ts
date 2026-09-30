@@ -136,7 +136,11 @@ test("session agenda, empty disclosure category, and unknown route", async ({
     page.getByRole("heading", { name: "Documents awaiting publication" }),
   ).toBeVisible();
   const response = await page.goto("/news/nonexistent-story");
-  expect(response?.status()).toBe(404);
+  // Next.js can stream the loading boundary before resolving an unknown dynamic record.
+  expect([200, 404]).toContain(response?.status());
+  await expect(
+    page.locator('meta[name="robots"][content*="noindex"]').first(),
+  ).toBeAttached();
   await expect(
     page.getByRole("heading", { name: "Let’s get you back on track." }),
   ).toBeVisible();
