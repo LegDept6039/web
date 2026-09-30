@@ -20,7 +20,7 @@ export function Hero() {
               <span /> WESTERN CEBU, PHILIPPINES
             </span>
             <h1>
-              <em>Pinamungajan asdasdas asd </em>
+              <em>Pinamungajan </em>
               <br />
               Our Pride.
               <br />
