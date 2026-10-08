@@ -13,14 +13,15 @@ if (
 } else {
   const tables = [
     "officials",
-    "news",
+    "published_news",
     "ordinances",
     "resolutions",
     "sessions",
     "hearings",
     "services",
     "departments",
-    "programs",
+    "department_contacts",
+    "published_programs",
     "committees",
     "document_categories",
     "municipal_documents",
@@ -28,7 +29,7 @@ if (
   for (const table of tables) {
     try {
       const result = await fetch(
-        `${url.replace(/\/$/, "")}/rest/v1/${table}?select=${table === "news" ? "slug" : "id"}&published=eq.true&limit=1`,
+        `${url.replace(/\/$/, "")}/rest/v1/${table}?select=${table === "officials" ? "id,legislative_role,content_scope" : table === "published_news" ? "id,slug,content_scope,office_id,source" : table === "departments" ? "id,slug,short_name,active,body,image_url,head_name,head_photo,office_id,content_scope" : table === "published_programs" ? "id,slug,image,content_scope" : "id,content_scope"}&published=eq.true&limit=1`,
         {
           headers: { apikey: key, Accept: "application/json" },
           redirect: "error",

@@ -11,7 +11,10 @@
     "test:e2e": "playwright test",
     "format": "prettier --write app components data lib types tests playwright.config.ts",
     "test:data": "playwright test --config playwright.data.config.ts",
-    "db:check": "node --env-file=.env.local scripts/check-supabase.mjs"
+    "db:check": "node --env-file=.env.local scripts/check-supabase.mjs",
+    "auth:check": "node --env-file=.env.local scripts/check-auth.mjs",
+    "test:admin": "playwright test --config playwright.administration.config.ts",
+    "test:public": "playwright test --config playwright.public.config.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -19,7 +22,8 @@
     "lucide-react": "1.48.0",
     "next": "16.3.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",

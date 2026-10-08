@@ -5,7 +5,6 @@ import { news } from "@/data/news";
 import { sessions } from "@/data/sessions";
 import { services } from "@/data/services";
 import { programs } from "@/data/programs";
-import { departments } from "@/data/departments";
 import { committees } from "@/data/committees";
 import { hearings } from "@/data/hearings";
 import { documentCategories } from "@/data/transparency";
@@ -18,7 +17,8 @@ export const mockCollections: { [K in Collection]: Collections[K][] } = {
   sessions,
   services,
   programs,
-  departments,
+  departments: [],
+  contacts: [],
   committees,
   hearings,
   documentCategories,

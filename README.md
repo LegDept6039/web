@@ -74,3 +74,15 @@ For a future API, configure the API base URL server-side and update `lib/api/`. 
 ## Database integration
 
 See [docs/SUPABASE.md](docs/SUPABASE.md) for the schema, content publishing, public media storage, Vercel configuration, testing, and future migration steps. No live Supabase project is connected until you complete that setup.
+
+## Office administration
+
+Enter `/login` directly; no public page links to it. Super Admins use `/superadmin` to create users, assign multiple offices, manage offices, and review audit logs. Office staff use `/admin` with database-enforced role and office permissions. See [upgrade and deployment instructions](docs/AUTH.md) and [the implementation inventory](docs/ADMIN-IMPLEMENTATION.md). Apply migration `202610010004_office_access.sql` and configure the server-only administration key before using these features.
+
+Run `npm run test:admin` for isolated browser workflow checks and `npm run auth:check` for read-only configuration diagnostics.
+
+Legislative officials, image uploads, and single-office Legislative Access: [setup and implementation report](docs/LEGISLATIVE-IMPLEMENTATION.md). Apply migration 007 after migrations 001-006 before deploying this update.
+
+Department ownership and public department pages: apply migration 008 before deploying this revision. See [setup and verification](docs/DEPARTMENT-IMPLEMENTATION.md).
+
+Current Department setup: [migration 009 and dynamic workflow](docs/DYNAMIC-DEPARTMENTS.md). Apply 009 after 001-008 before deploying this revision.

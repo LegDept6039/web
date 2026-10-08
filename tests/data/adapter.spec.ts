@@ -23,7 +23,10 @@ const row = {
 };
 
 test("mock mode is explicit; Supabase mode fails closed for missing or privileged credentials", () => {
-  expect(readContentConfig({})).toEqual({ source: "mock" });
+  expect(() => readContentConfig({})).toThrow();
+  expect(readContentConfig({ CONTENT_SOURCE: "mock" })).toEqual({
+    source: "mock",
+  });
   expect(
     readContentConfig({
       CONTENT_SOURCE: "supabase",
@@ -176,4 +179,30 @@ test("unsafe links and impossible dates are rejected", () => {
       is_sample: false,
     }),
   ).toThrow("date");
+});
+
+test("department detail and owned resources use database filters with publication constraints", async () => {
+  for (const [collection, filters] of [
+    ["departments", { slug: "new-department" }],
+    ["news", { office_id: "department-uuid" }],
+    ["programs", { office_id: "department-uuid" }],
+    ["contacts", { office_id: "department-uuid" }],
+  ] as const) {
+    await readSupabaseCollection(
+      collection,
+      config,
+      async (url) => {
+        const params = new URL(url).searchParams;
+        expect(params.get("published")).toBe("eq.true");
+        for (const [key, value] of Object.entries(filters))
+          expect(params.get(key)).toBe(`eq.${value}`);
+        if (collection === "departments") {
+          expect(params.get("active")).toBe("eq.true");
+          expect(params.get("archived_at")).toBe("is.null");
+        }
+        return Response.json([]);
+      },
+      filters,
+    );
+  }
 });

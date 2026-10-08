@@ -2,7 +2,13 @@
 import { redirect } from "next/navigation";
 import { authClient } from "@/lib/auth/server";
 import { cookies } from "next/headers";
-import { readContentConfig } from "@/lib/content/config";
+import { authConfig } from "@/lib/auth/config";
+import { resolveStaff } from "@/lib/auth/resolve-staff";
+import {
+  authDiagnostic,
+  errorCode,
+  passwordError,
+} from "@/lib/auth/diagnostics";
 
 export async function login(
   _previous: string,
@@ -12,7 +18,7 @@ export async function login(
   const password = String(form.get("password") ?? "");
   if (!email || email.length > 254 || !password || password.length > 1024)
     return "Enter your email and password.";
-  let destination = "/account";
+  let destination = "/admin";
   try {
     const client = await authClient(true);
     if (!client) return "Staff login has not been configured yet.";
@@ -20,38 +26,53 @@ export async function login(
       email,
       password,
     });
-    if (error || !data.user)
-      return "Unable to sign in. Check your credentials or try again later.";
-    const { data: profile, error: profileError } = await client
-      .from("staff_accounts")
-      .select("role,active")
-      .eq("user_id", data.user.id)
-      .single();
-    if (
-      profileError ||
-      !profile?.active ||
-      !["user", "superadmin"].includes(profile.role)
-    ) {
-      await client.auth.signOut({ scope: "local" });
-      return "Your staff access is not enabled. Contact your administrator.";
+    if (error || !data.user || !data.session) {
+      authDiagnostic("password", {
+        outcome: "auth_error",
+        code: errorCode(error),
+        status: error?.status,
+        sessionPresent: !!data.session,
+      });
+      return error
+        ? passwordError(error)
+        : "Unable to sign in. The authentication service returned no session.";
     }
-    destination = profile.role === "superadmin" ? "/admin" : "/account";
-  } catch {
+    authDiagnostic("password", {
+      outcome: "ok",
+      userId: data.user.id,
+      sessionPresent: true,
+    });
+    const resolved = await resolveStaff(client, data.user.id);
+    if (!resolved.ok) {
+      try {
+        await client.auth.signOut({ scope: "local" });
+      } catch {
+        authDiagnostic("signout", { outcome: "cleanup_error" });
+      }
+      return resolved.message;
+    }
+    destination =
+      resolved.profile.role === "superadmin" ? "/superadmin" : "/admin";
+  } catch (error) {
+    authDiagnostic("login", {
+      outcome: "service_error",
+      code: errorCode(error),
+    });
     return "The sign-in service is unavailable. Please try again later.";
   }
   redirect(destination);
 }
 
 export async function logout() {
-  const config = readContentConfig(process.env);
+  const config = authConfig();
   try {
     const client = await authClient(true);
     await client?.auth.signOut({ scope: "local" });
   } catch {
     // Clear this browser's session even when the Auth service is unreachable.
   } finally {
-    if (config.source === "supabase") {
-      const prefix = `sb-${new URL(config.supabase.url).hostname.split(".")[0]}-auth-token`;
+    if (config) {
+      const prefix = `sb-${new URL(config.url).hostname.split(".")[0]}-auth-token`;
       const jar = await cookies();
       for (const cookie of jar.getAll()) {
         if (cookie.name === prefix || cookie.name.startsWith(`${prefix}.`)) {

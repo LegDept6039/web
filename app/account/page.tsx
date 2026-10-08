@@ -1,41 +1,34 @@
-import Link from "next/link";
-import { requireStaff } from "@/lib/auth/server";
-import { logout } from "@/app/login/actions";
-import "../staff.css";
-export const dynamic = "force-dynamic";
+import { officeContext } from "@/lib/offices/server";
+import { PasswordForm } from "./PasswordForm";
 export const metadata = {
-  title: "Staff account",
+  title: "Staff profile",
   robots: { index: false, follow: false },
 };
-export default async function AccountPage() {
-  const { profile } = await requireStaff();
+export default async function Account() {
+  const context = await officeContext();
+  const { profile, offices, access } = context;
   return (
-    <section className="section container">
-      <div className="staff-card">
-        <p className="eyebrow">Staff portal</p>
-        <h1>Your account</h1>
-        <p>Welcome, {profile.display_name || profile.email}.</p>
-        <p>
-          Role:{" "}
-          <strong>
-            {profile.role === "superadmin" ? "Superadmin" : "User"}
-          </strong>
-        </p>
-        {profile.role === "superadmin" ? (
-          <Link className="button button-blue" href="/admin">
-            Open administration
-          </Link>
-        ) : (
-          <p>
-            Your account is active. Content editing is reserved for superadmins.
-          </p>
-        )}
-        <form action={logout}>
-          <button className="button" type="submit">
-            Sign out
-          </button>
-        </form>
-      </div>
-    </section>
+    <div className="staff-card">
+      <h1>Your profile</h1>
+      <p>{profile.display_name}</p>
+      <p>{profile.email}</p>
+      <p>
+        Role: <strong>{profile.role}</strong>
+      </p>
+      <h2>Office access</h2>
+      {profile.role === "superadmin" ? (
+        <p>All offices and all content.</p>
+      ) : (
+        <ul>
+          {offices.map((o) => (
+            <li key={o.id}>
+              {o.name}:{" "}
+              {access.find((a) => a.office_id === o.id)?.permission_level}
+            </li>
+          ))}
+        </ul>
+      )}
+      <PasswordForm />
+    </div>
   );
 }

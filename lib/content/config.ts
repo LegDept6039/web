@@ -7,7 +7,7 @@ export type ContentConfig =
 export function readContentConfig(
   env: Record<string, string | undefined>,
 ): ContentConfig {
-  const source = env.CONTENT_SOURCE ?? "mock";
+  const source = env.CONTENT_SOURCE ?? "supabase";
   if (source === "mock") return { source };
   if (source !== "supabase")
     throw new Error("CONTENT_SOURCE must be mock or supabase.");

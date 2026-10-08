@@ -57,12 +57,12 @@ test("ordinances search, year filter, empty state, reset and record detail", asy
   page,
 }) => {
   await page.goto("/legislative/ordinances");
-  await expect(page.locator(".document-card")).toHaveCount(4);
+  await expect(page.locator(".legislative-table tbody tr")).toHaveCount(4);
   await page
     .getByRole("combobox", { name: "Filter by year" })
     .selectOption("2025");
-  await expect(page.locator(".document-card")).toHaveCount(1);
-  await expect(page.locator(".document-card")).toContainText(
+  await expect(page.locator(".legislative-table tbody tr")).toHaveCount(1);
+  await expect(page.locator(".legislative-table tbody tr")).toContainText(
     "coastal protection",
   );
   await page.getByRole("textbox", { name: "Search ordinances" }).fill("water");
@@ -73,7 +73,7 @@ test("ordinances search, year filter, empty state, reset and record detail", asy
   await page
     .getByRole("textbox", { name: "Search ordinances" })
     .fill("01-2026");
-  await expect(page.locator(".document-card")).toHaveCount(1);
+  await expect(page.locator(".legislative-table tbody tr")).toHaveCount(1);
   await page.getByRole("link", { name: "View record" }).click();
   await expect(
     page.getByRole("heading", { name: "Ordinance No. 01-2026", exact: true }),
@@ -93,7 +93,7 @@ test("resolution co-author and year searches", async ({ page }) => {
   await page
     .getByRole("textbox", { name: "Search resolutions" })
     .fill("Sample Council Member C");
-  await expect(page.locator(".document-card")).toHaveCount(1);
+  await expect(page.locator(".legislative-table tbody tr")).toHaveCount(1);
   await page.getByRole("link", { name: "View record" }).click();
   await expect(page.getByText("Co-author", { exact: true })).toBeVisible();
 });
@@ -186,5 +186,45 @@ test("all main routes render without overflow or broken images", async ({
         )
         .toBeTruthy();
     }
+  }
+});
+
+test("compact legislative tables prioritize full long titles on both screen sizes", async ({
+  page,
+}, info) => {
+  for (const kind of ["ordinances", "resolutions"]) {
+    await page.goto(`/legislative/${kind}`);
+    // Exercise a client filter first so hydration cannot overwrite the stress-test text.
+    const number = await page
+      .locator(".legislative-table tbody tr td")
+      .first()
+      .innerText();
+    await page.getByRole("textbox", { name: `Search ${kind}` }).fill(number);
+    await expect(page.locator(".legislative-table tbody tr")).toHaveCount(1);
+    const title = page.locator(".record-title h2").first();
+    const long =
+      "AN ORDINANCE ESTABLISHING COMPREHENSIVE COMMUNITY HEALTH AND ENVIRONMENTAL PROTECTION SERVICES ".repeat(
+        8,
+      );
+    await title.evaluate((element, text) => {
+      element.textContent = text;
+    }, long);
+    await expect(title).toHaveText(long.trim());
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    const size = await title.boundingBox();
+    expect(size?.height).toBeGreaterThan(40);
+    if (info.project.name !== "mobile") {
+      const cell = await page.locator(".record-title").first().boundingBox();
+      const table = await page.locator(".legislative-table").boundingBox();
+      expect(cell!.width / table!.width).toBeGreaterThan(0.6);
+    }
+    await page.screenshot({
+      path: info.outputPath(`${kind}-compact.png`),
+      fullPage: true,
+    });
   }
 });

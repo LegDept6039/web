@@ -10,6 +10,7 @@ test("login is URL-only and anonymous admin routes are protected", async ({
   await expect(
     page.getByRole("heading", { name: "Staff sign in" }),
   ).toBeVisible();
+  await expect(page.locator("header, footer")).toHaveCount(0);
   await expect(page.getByLabel("Email address")).toBeVisible();
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
   expect(
@@ -24,6 +25,9 @@ test("login is URL-only and anonymous admin routes are protected", async ({
     "/admin/content/news/new",
     "/admin/content/news/edit/example",
     "/account",
+    "/superadmin",
+    "/superadmin/users",
+    "/superadmin/offices",
   ]) {
     await page.goto(url);
     await expect(page).toHaveURL(/\/login$/);

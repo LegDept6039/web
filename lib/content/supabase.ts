@@ -14,6 +14,7 @@ export async function readSupabaseCollection<K extends Collection>(
   collection: K,
   config: SupabaseConfig,
   request: ContentFetch = fetch,
+  filters: Partial<Record<"slug" | "id" | "office_id", string>> = {},
 ): Promise<Collections[K][]> {
   const definition = definitions[collection];
   const results: Collections[K][] = [];
@@ -22,16 +23,24 @@ export async function readSupabaseCollection<K extends Collection>(
     .join(",");
   for (let page = 0; page < 200; page++) {
     const params = new URLSearchParams({
-      select: columns,
+      select:
+        columns + (["news", "programs"].includes(collection) ? ",source" : ""),
       published: "eq.true",
       order: `sort_order.asc,${definition.key}.asc`,
       limit: "500",
       offset: String(results.length),
     });
+    if (collection === "departments") {
+      params.set("active", "eq.true");
+      params.set("archived_at", "is.null");
+      params.set("department", "eq.executive");
+    }
+    for (const [key, value] of Object.entries(filters))
+      params.set(key, `eq.${value}`);
     let response: Response;
     try {
       response = await request(
-        `${config.url}/rest/v1/${definition.table}?${params}`,
+        `${config.url}/rest/v1/${["news", "programs"].includes(collection) ? `published_${collection}` : definition.table}?${params}`,
         {
           headers: {
             apikey: config.key,

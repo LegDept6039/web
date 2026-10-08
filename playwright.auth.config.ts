@@ -1,5 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
+  outputDir: "test-results/auth",
   testDir: "./tests",
   testMatch: "auth.spec.ts",
   testIgnore: "**/data/**",
@@ -27,7 +28,12 @@ export default defineConfig({
     command: "npm run start -- --hostname 127.0.0.1 --port 3002",
     url: "http://127.0.0.1:3002/login",
     reuseExistingServer: false,
-    env: { CONTENT_SOURCE: "mock" },
+    env: {
+      CONTENT_SOURCE: "mock",
+      SUPABASE_URL: "",
+      SUPABASE_PUBLISHABLE_KEY: "",
+      SUPABASE_SERVICE_ROLE_KEY: "",
+    },
     timeout: 120000,
   },
 });

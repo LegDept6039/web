@@ -1,11 +1,19 @@
+> Department workflow update: after migration 009, apply `supabase/migrations/202610050010_department_identity.sql`. See [Dynamic Departments](DYNAMIC-DEPARTMENTS.md) for the complete Superadmin workflow and upgrade notes.
+
+> Migration **009** consolidates the Department system. See [Dynamic departments](DYNAMIC-DEPARTMENTS.md) for the current architecture and deployment steps.
+
+> Current department scoping and public routes require migration **008**. See [Department implementation](DEPARTMENT-IMPLEMENTATION.md) for upgrade instructions and verification.
+
 # Connect the municipal portal to Supabase
+
+> Current model: Legislative has one office, **Legislative Access**, using the same office permissions as Executive offices. Apply migration 007 after 001-006. See [current setup](LEGISLATIVE-IMPLEMENTATION.md). No module permissions or separate SB/VMO/Secretary access remain.
 
 The application now supports two content sources:
 
 - `CONTENT_SOURCE=mock`: the existing local sample data. This is the default.
 - `CONTENT_SOURCE=supabase`: published records from your Supabase project.
 
-The public website reads data on the Next.js server through Supabase's REST Data API. There is no database password or privileged key in the app. Content can be edited in the Supabase Dashboard or through the protected superadmin portal. Follow [Staff login and superadmin setup](AUTH.md) to enable `/login` and `/admin`. There are no public navigation links to login.
+The public website reads data on the Next.js server through Supabase's REST Data API using a publishable key. Privileged Auth operations use a separate server-only key. Content can be edited in the Supabase Dashboard or through the protected superadmin portal. Follow [Staff login and superadmin setup](AUTH.md) to enable `/login` and `/admin`. There are no public navigation links to login.
 
 ## 1. Create a Supabase project
 
@@ -14,15 +22,17 @@ The public website reads data on the Next.js server through Supabase's REST Data
 3. Wait for provisioning to complete.
 4. In the project's Connect dialog / Settings, copy the **Project URL** and **publishable API key** (`sb_publishable_...`).
 
-Use the publishable key only. Do not put the database password, secret key, or `service_role` key into this project. The code deliberately rejects non-publishable keys.
+Use the publishable key in `SUPABASE_PUBLISHABLE_KEY`. Public content never uses a privileged key. Website user creation and administrator password resets additionally require a separate server-only `SUPABASE_SERVICE_ROLE_KEY`; follow [AUTH.md](AUTH.md). Never put that key in a `NEXT_PUBLIC_` variable or the publishable-key field.
 
 ## 2. Create the tables
 
 Open **SQL Editor ? New query**. Run these files in order, one at a time:
 
-1. `supabase/migrations/202609300001_content.sql` — creates the content tables, constraints, indexes, timestamp triggers, and access policies.
-2. `supabase/migrations/202609300002_media.sql` — creates the public `municipal-media` storage bucket.
-3. Optional: `supabase/seed.sql` — inserts the existing sample content so the connected site has content immediately.
+1. `supabase/migrations/202609300001_content.sql` â€” creates the content tables, constraints, indexes, timestamp triggers, and access policies.
+2. `supabase/migrations/202609300002_media.sql` â€” creates the public `municipal-media` storage bucket.
+3. `supabase/migrations/202609300003_auth.sql` - initial staff authentication.
+4. `supabase/migrations/202610010004_office_access.sql` - roles, offices, permissions, ownership, audit logs, and initial offices.
+5. Optional: `supabase/seed.sql` â€” inserts the existing sample content so the connected site has content immediately.
 
 Run each migration once on a new project. If a table already exists, inspect the existing schema instead of dropping it. The optional seed can be rerun safely: `ON CONFLICT DO NOTHING` preserves existing records and edits. Seeded records are published but marked `is_sample=true` and contain fictional content.
 
@@ -49,7 +59,7 @@ npm run dev
 
 ## 4. Manage and publish content
 
-Use **Table Editor** in Supabase. New records default to `published=false` and are invisible to public visitors until you set that field to `true`.
+Use the office-aware **Content Management** screen after signing in at `/login`, or **Table Editor** in Supabase. New records default to `published=false` and are invisible to public visitors until you set that field to `true`.
 
 | Table | Website content |
 |---|---|
@@ -147,5 +157,3 @@ The header, hero, vision/mission, contact details, mayor introduction, and gener
 - https://supabase.com/docs/guides/getting-started/api-keys
 - https://supabase.com/docs/guides/database/postgres/row-level-security
 - https://supabase.com/docs/guides/storage/buckets/creating-buckets
-
-

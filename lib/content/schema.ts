@@ -1,4 +1,6 @@
-﻿import type {
+import { legislativeRoles } from "@/lib/officials/roles";
+import type {
+  DepartmentContact,
   Official,
   Ordinance,
   Resolution,
@@ -13,6 +15,7 @@
   MunicipalDocument,
 } from "@/types";
 export interface Collections {
+  contacts: DepartmentContact;
   officials: Official;
   ordinances: Ordinance;
   resolutions: Resolution;
@@ -36,7 +39,7 @@ type Field = {
 type Definition<T> = {
   table: string;
   key: string;
-  fields: { [P in keyof T]-?: Field };
+  fields: { [P in keyof Omit<T, "source">]-?: Field };
 };
 const text = (column: string): Field => ({ column, kind: "text" });
 const url = (column: string, optional = false): Field => ({
@@ -61,12 +64,36 @@ const documentFields = {
   isSample: sample,
 };
 export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
+  contacts: {
+    table: "department_contacts",
+    key: "id",
+    fields: {
+      id: text("id"),
+      officeId: text("office_id"),
+      contentScope: {
+        ...text("content_scope"),
+        values: ["executive", "legislative"],
+      },
+      type: {
+        ...text("type"),
+        values: ["PHONE", "LANDLINE", "EMAIL", "LOCATION"],
+      },
+      value: text("value"),
+      label: { ...text("label"), optional: true },
+      isSample: sample,
+    },
+  },
   officials: {
     table: "officials",
     key: "id",
     fields: {
       id: text("id"),
       name: text("name"),
+      legislativeRole: {
+        ...text("legislative_role"),
+        optional: true,
+        values: Object.keys(legislativeRoles),
+      },
       role: text("role"),
       branch: { ...text("branch"), values: ["executive", "legislative"] },
       description: text("description"),
@@ -78,8 +105,15 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
   resolutions: { table: "resolutions", key: "id", fields: documentFields },
   news: {
     table: "news",
-    key: "slug",
+    key: "id",
     fields: {
+      id: { ...text("id"), optional: true },
+      officeId: { ...text("office_id"), optional: true },
+      contentScope: {
+        ...text("content_scope"),
+        optional: true,
+        values: ["executive", "legislative"],
+      },
       slug: text("slug"),
       title: text("title"),
       category: text("category"),
@@ -124,6 +158,21 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "departments",
     key: "id",
     fields: {
+      acronym: { ...text("short_name"), optional: true },
+      body: { ...text("body"), optional: true },
+      imageUrl: url("image_url", true),
+      active: { column: "active", kind: "boolean", optional: true },
+      headDescription: { ...text("head_description"), optional: true },
+      slug: { ...text("slug"), optional: true },
+      headName: { ...text("head_name"), optional: true },
+      headTitle: { ...text("head_title"), optional: true },
+      headPhoto: url("head_photo", true),
+      officeId: { ...text("office_id"), optional: true },
+      contentScope: {
+        ...text("content_scope"),
+        optional: true,
+        values: ["executive", "legislative"],
+      },
       id: text("id"),
       name: text("name"),
       description: text("description"),
@@ -134,6 +183,14 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "programs",
     key: "id",
     fields: {
+      slug: { ...text("slug"), optional: true },
+      image: url("image", true),
+      officeId: { ...text("office_id"), optional: true },
+      contentScope: {
+        ...text("content_scope"),
+        optional: true,
+        values: ["executive", "legislative"],
+      },
       id: text("id"),
       name: text("name"),
       description: text("description"),
@@ -250,6 +307,21 @@ export function decodeRecord<K extends Collection>(
         `Invalid ${collection}.${field.column}. Check this field in Supabase.`,
       );
     output[name] = value;
+  }
+  if (
+    ["news", "programs"].includes(collection) &&
+    row.source &&
+    typeof row.source === "object"
+  ) {
+    const source = row.source as Record<string, unknown>;
+    if (typeof source.name === "string")
+      output.source = {
+        name: source.name,
+        ...(typeof source.slug === "string" &&
+        /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(source.slug)
+          ? { slug: source.slug }
+          : {}),
+      };
   }
   // Every domain field was validated against its collection's typed definition above.
   return output as unknown as Collections[K];

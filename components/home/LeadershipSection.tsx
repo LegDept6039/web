@@ -1,3 +1,4 @@
+import { isLegislativeRole } from "@/lib/officials/roles";
 import Link from "next/link";
 import { Landmark, ShieldCheck, ArrowRight, ArrowUpRight } from "lucide-react";
 import { SectionHeader } from "@/components/shared/ui";
@@ -50,7 +51,9 @@ export function LeadershipSection({ officials }: { officials: Official[] }) {
           </Link>
         </div>
         <OfficialGrid
-          officials={officials.filter((o) => o.branch === "legislative")}
+          officials={officials.filter((o) =>
+            isLegislativeRole(o.legislativeRole),
+          )}
         />
         <div className="directory-heading">
           <h3>Executive leadership</h3>

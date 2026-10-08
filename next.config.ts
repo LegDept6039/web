@@ -1,6 +1,7 @@
 ﻿import type { NextConfig } from "next";
 const projectUrl = process.env.SUPABASE_URL;
 const config: NextConfig = {
+  experimental: { serverActions: { bodySizeLimit: "5mb" } },
   images: {
     remotePatterns: projectUrl
       ? [

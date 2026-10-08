@@ -2,6 +2,9 @@
 -- Existing records are never overwritten; drafts/edits stay as they are on rerun.
 begin;
 
+-- Support both the initial schema and the Legislative-role upgrade without overwriting rows.
+do $seed$
+declare statement text := $sample$
 insert into public.officials (id, name, role, branch, description, photo_url, is_sample, published, sort_order) values
   ('mayor', 'Municipal Mayor', 'Office of the Municipal Mayor', 'executive', 'Leading the delivery of public services and the implementation of municipal programs.', NULL, true, true, 0),
   ('administrator', 'Municipal Administrator', 'Office of the Administrator', 'executive', 'Coordinating municipal operations and supporting responsive public administration.', NULL, true, true, 1),
@@ -12,6 +15,16 @@ insert into public.officials (id, name, role, branch, description, photo_url, is
   ('committees', 'Standing Committees', 'Legislative Committees', 'legislative', 'Reviewing proposals through focused study and consultation.', NULL, true, true, 6),
   ('secretariat', 'SB Secretariat', 'Office of the Secretary', 'legislative', 'Maintaining legislative records and supporting council proceedings.', NULL, true, true, 7)
 on conflict (id) do nothing;
+$sample$;
+begin
+ if exists(select 1 from information_schema.columns where table_schema='public' and table_name='officials' and column_name='legislative_role') then
+  statement=replace(statement,'published, sort_order) values',
+   'published, sort_order, legislative_role, content_scope) select seed.*, (case when branch=''executive'' then null when id=''vice-mayor'' then ''MUNICIPAL_VICE_MAYOR'' when id=''secretariat'' then ''SECRETARY_TO_THE_SANGGUNIANG_BAYAN'' else ''SANGGUNIANG_BAYAN'' end)::public.legislative_official_role, branch from (values');
+  statement=replace(statement,'on conflict (id) do nothing;',') as seed(id,name,role,branch,description,photo_url,is_sample,published,sort_order) on conflict (id) do nothing;');
+ end if;
+ execute statement;
+end;
+$seed$;
 
 insert into public.ordinances (id, number, title, date_approved, year, author, co_author, status, summary, pdf_url, is_sample, published, sort_order) values
   ('water-safety', '01-2026', 'Establishing community water safety standards', '2026-01-20', 2026, 'Sample Council Member A', NULL, 'Approved', 'A sample ordinance outlining water quality monitoring, reporting, and community awareness measures.', '/documents/sample-legislative-document.pdf', true, true, 0),

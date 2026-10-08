@@ -2,6 +2,7 @@ export interface ContentRecord {
   isSample?: boolean;
 }
 export interface Official extends ContentRecord {
+  legislativeRole?: import("@/lib/officials/roles").LegislativeRole;
   id: string;
   name: string;
   role: string;
@@ -24,6 +25,10 @@ export interface LegislativeDocument extends ContentRecord {
 export type Ordinance = LegislativeDocument;
 export type Resolution = LegislativeDocument;
 export interface NewsArticle extends ContentRecord {
+  id?: string;
+  source?: { name: string; slug?: string };
+  officeId?: string;
+  contentScope?: "executive" | "legislative";
   slug: string;
   title: string;
   category: string;
@@ -50,11 +55,27 @@ export interface Service extends ContentRecord {
   steps: string[];
 }
 export interface Department extends ContentRecord {
+  acronym?: string;
+  body?: string;
+  imageUrl?: string;
+  active?: boolean;
+  headDescription?: string;
+  slug?: string;
+  headName?: string;
+  headTitle?: string;
+  headPhoto?: string;
+  officeId?: string;
+  contentScope?: "executive" | "legislative";
   id: string;
   name: string;
   description: string;
 }
 export interface Program extends ContentRecord {
+  source?: { name: string; slug?: string };
+  slug?: string;
+  image?: string;
+  officeId?: string;
+  contentScope?: "executive" | "legislative";
   id: string;
   name: string;
   description: string;
@@ -90,4 +111,13 @@ export interface MunicipalDocument extends ContentRecord {
   description: string;
   date: string;
   fileUrl: string;
+}
+
+export interface DepartmentContact extends ContentRecord {
+  id: string;
+  officeId: string;
+  contentScope: "executive" | "legislative";
+  type: "PHONE" | "LANDLINE" | "EMAIL" | "LOCATION";
+  value: string;
+  label?: string;
 }

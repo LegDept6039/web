@@ -1,3 +1,4 @@
+import { NewsSource } from "./NewsSource";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -23,6 +24,7 @@ export function NewsCard({ article }: { article: NewsArticle }) {
         <h3>
           <Link href={`/news/${article.slug}`}>{article.title}</Link>
         </h3>
+        <NewsSource article={article} />
         <p>{article.excerpt}</p>
         <Link href={`/news/${article.slug}`} className="text-link">
           Read story

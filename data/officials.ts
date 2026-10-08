@@ -32,6 +32,7 @@ export const officials: Official[] = [
   },
   {
     id: "vice-mayor",
+    legislativeRole: "MUNICIPAL_VICE_MAYOR",
     name: "Municipal Vice Mayor",
     role: "Presiding Officer",
     branch: "legislative",
@@ -40,6 +41,7 @@ export const officials: Official[] = [
   },
   {
     id: "members",
+    legislativeRole: "SANGGUNIANG_BAYAN",
     name: "Sangguniang Bayan",
     role: "Municipal Council Members",
     branch: "legislative",
@@ -48,6 +50,7 @@ export const officials: Official[] = [
   },
   {
     id: "committees",
+    legislativeRole: "SANGGUNIANG_BAYAN",
     name: "Standing Committees",
     role: "Legislative Committees",
     branch: "legislative",
@@ -55,6 +58,7 @@ export const officials: Official[] = [
   },
   {
     id: "secretariat",
+    legislativeRole: "SECRETARY_TO_THE_SANGGUNIANG_BAYAN",
     name: "SB Secretariat",
     role: "Office of the Secretary",
     branch: "legislative",

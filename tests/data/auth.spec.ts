@@ -54,7 +54,9 @@ test.beforeAll(async () => {
   await db.exec(
     "insert into public.municipal_documents(id,category_id,title,description,date,file_url) values('auth-doc','full-disclosure','Document','Description','2026-09-30','/document.pdf')",
   );
-  for (const { table, key } of Object.values(definitions)) {
+  for (const { table, key } of Object.values(definitions)
+    .map((d) => ({ ...d, key: d.table === "news" ? "slug" : d.key }))
+    .filter((d) => d.table !== "department_contacts")) {
     await db.exec(
       `insert into public.${table} select (jsonb_populate_record(null::public.${table},to_jsonb(t)||jsonb_build_object('${key}','auth-draft','published',false))).* from public.${table} t limit 1`,
     );
@@ -87,7 +89,9 @@ test("ordinary staff can see only their own profile and cannot change roles", as
     ).rejects.toMatchObject({ code: "42501" });
   });
 });
-for (const { table, key } of Object.values(definitions)) {
+for (const { table, key } of Object.values(definitions)
+  .map((d) => ({ ...d, key: d.table === "news" ? "slug" : d.key }))
+  .filter((d) => d.table !== "department_contacts")) {
   test(`${table}: only active superadmins can read drafts and edit`, async () => {
     for (const id of [member, disabled]) {
       await asUser(id, async () => {

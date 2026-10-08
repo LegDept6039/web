@@ -1,0 +1,804 @@
+# Task: Refactor the Department System to Be Fully Dynamic and Database-Driven
+Review and restructure the existing **database schema, authentication, authorization, API routes, admin navigation, and Department UI**.
+The main goal is to make all municipal offices/departments **fully dynamic and database-driven**.
+There must be **no hardcoded department pages, department-specific routes, office lists, office access options, or department-specific permission logic**.
+When the Superadmin creates a new department, that department should automatically become usable throughout the entire system without requiring additional source-code changes.
+---
+# 1. Review the Existing Architecture First
+Before modifying anything, inspect the current implementation for:
+- Database schema
+- Existing `Department` model/table
+- User model
+- Authentication/session handling
+- Role/permission implementation
+- API routes
+- Admin routes
+- Admin sidebar/navigation
+- Department-related components
+- News system
+- Programs system
+- Existing department head implementation
+- Existing uploaded images/media handling
+- Existing public `/departments` page
+- Existing department-specific pages
+Reuse the current architecture where reasonable.
+Do **not** create a second parallel Department system if one already exists.
+Migrate existing department data safely into the improved structure.
+Do not delete working data unnecessarily.
+---
+# 2. Department Model
+All municipal offices must belong to a single dynamic `Department` system.
+Example department:
+- Name: `Human Resource Management Office`
+- Acronym: `HRMO`
+- Slug: `hrmo`
+- Short Description
+- Body / About
+- Department Head
+- Department Image
+- Active Status
+- Optional display/sort order
+Use the existing Department model if possible and extend it where necessary.
+A possible structure could resemble:
+```text
+Department
+id
+name
+acronym
+slug
+short_description
+body
+image_url
+department_head_id
+is_active
+sort_order
+created_at
+updated_at
+```
+Follow the project's existing naming conventions and ORM/database architecture.
+The slug must be unique.
+---
+# 3. Creating a Department Must Automatically Enable It Everywhere
+Example:
+Superadmin creates:
+```text
+Human Resource Management Office
+Acronym: HRMO
+Slug: hrmo
+```
+After creation, HRMO must automatically:
+- Appear on the public `/departments` page
+- Appear as a Department card/module in the UI
+- Have its own dynamic public page
+- Become available in the User → Office Access dropdown
+- Allow an Editor to be assigned to HRMO
+- Support its own Department Head
+- Support its own About/Body content
+- Support its own News
+- Support its own Programs
+- Support its own Contacts
+No developer should need to modify the source code just because a new department was added.
+---
+# 4. Dynamic Department Routes
+Do **not** create pages such as:
+```text
+/hrmo
+/mpdc
+/assessor
+/rhu
+```
+as separate hardcoded implementations.
+Use one dynamic route.
+Preferred public route:
+```text
+/departments/[slug]
+```
+Examples:
+```text
+/departments/hrmo
+/departments/mpdc
+/departments/assessor
+/departments/rhu
+/departments/engineering
+```
+All pages must use the same reusable Department page structure.
+The page must load the Department from the database using the slug.
+Example logic:
+```text
+slug = "hrmo"
+Find Department where:
+department.slug === "hrmo"
+```
+If the department does not exist or is inactive, handle it properly with the existing application's 404/not-found behavior.
+---
+# 5. Do Not Make Departments User Roles
+Departments and application roles must be separate concepts.
+Do NOT create roles such as:
+```text
+HRMO
+MPDC
+ASSESSOR
+RHU
+ENGINEERING
+TREASURER
+```
+Department names must never be added into the application role enum.
+Roles should represent permission levels.
+For example:
+```text
+SUPERADMIN
+EDITOR
+LEGISLATIVE_EDITOR
+```
+Only retain `LEGISLATIVE_EDITOR` if it is actually required by the existing architecture.
+A user's office assignment must instead reference the Department table.
+Example:
+```text
+role = EDITOR
+department_id = <HRMO department ID>
+```
+Conceptually:
+```text
+User
+ ├── role
+ └── department_id
+          ↓
+      Department
+```
+---
+# 6. Dynamic Office Access
+In Superadmin → User Management:
+Add or update the field:
+```text
+Office Access
+```
+The options must come directly from active records in the `Department` table.
+Example:
+```text
+Office Access
+Human Resource Management Office
+Municipal Planning and Development Office
+Municipal Assessor's Office
+Rural Health Unit
+Municipal Engineering Office
+Municipal Treasurer's Office
+...
+```
+Do not hardcode these options.
+When the Superadmin adds another department, for example:
+```text
+Municipal Agriculture Office
+```
+it must automatically appear in this dropdown.
+---
+# 7. User Structure
+An Editor should effectively have:
+```text
+Role: EDITOR
+Office Access: HRMO
+```
+Internally:
+```text
+role = EDITOR
+department_id = <HRMO ID>
+```
+A Superadmin may have:
+```text
+role = SUPERADMIN
+department_id = null
+```
+unless the current architecture requires otherwise.
+Keep authentication and authorization separate.
+Authentication answers:
+```text
+Who is this user?
+```
+Authorization answers:
+```text
+What is this user allowed to access?
+```
+---
+# 8. Department Editor Permissions
+Example user:
+```text
+Role: EDITOR
+Office Access: HRMO
+```
+This user must only be allowed to manage HRMO-related content.
+The HRMO Editor can manage:
+- HRMO Department Page
+- HRMO Department Head
+- HRMO About / Body
+- HRMO Department Image
+- HRMO News
+- HRMO Programs
+- HRMO Contacts
+They should be able to:
+- Edit HRMO information
+- Edit HRMO's short description
+- Edit HRMO's About/Body content
+- Upload/change HRMO's department image
+- Edit HRMO's Department Head
+- Upload/change Department Head photo
+- Create HRMO news
+- Edit HRMO news
+- Delete HRMO news
+- Create HRMO programs
+- Edit HRMO programs
+- Delete HRMO programs
+- Add HRMO contacts
+- Edit HRMO contacts
+- Delete HRMO contacts
+---
+# 9. Department Editor Restrictions
+An HRMO Editor must NOT be able to access or manage:
+- Other departments
+- Other department heads
+- Other departments' news
+- Other departments' programs
+- Other departments' contacts
+- User Management
+- Superadmin Settings
+- Ordinances
+- Resolutions
+- Sessions
+- Committee Hearings
+- Legislative Officials
+- Other Legislative modules
+- Any content outside the user's assigned Department
+This restriction must apply to:
+- UI
+- Routes
+- API
+- Database operations
+Do not rely only on hiding buttons or sidebar items.
+---
+# 10. Backend Authorization Is Mandatory
+Frontend restrictions are not sufficient.
+Every protected API operation must verify the authenticated user's permissions.
+Conceptually:
+```text
+if user.role === SUPERADMIN:
+    allow
+else if:
+    user.role === EDITOR
+    AND user.department_id === requested_department_id:
+        allow
+else:
+    return 403 Forbidden
+```
+For nested resources such as News, Programs, and Contacts, do not trust a department ID supplied by the frontend without validation.
+Example:
+If an HRMO Editor calls:
+```text
+PATCH /api/departments/assessor
+```
+or manually modifies the request body to target the Assessor's Office, the backend must reject it with:
+```text
+403 Forbidden
+```
+The same must apply to:
+```text
+News
+Programs
+Contacts
+Department Head
+Department Information
+```
+---
+# 11. Prevent Cross-Department Resource Editing
+For nested records, authorization must verify ownership through the database.
+Example:
+```text
+News
+- id
+- department_id
+```
+If the logged-in user belongs to HRMO and attempts to modify News ID `123`, the backend must first determine:
+```text
+news.department_id
+```
+Then verify:
+```text
+news.department_id === user.department_id
+```
+Do this for:
+```text
+News
+Programs
+Contacts
+Department Head
+other Department-owned resources
+```
+Never authorize an operation solely because the frontend submitted:
+```text
+department_id = HRMO
+```
+Verify ownership from the database.
+---
+# 12. Admin Navigation Must Be Permission-Aware
+For a Department Editor such as HRMO, simplify the admin navigation.
+Example:
+```text
+HRMO
+- Department Page
+- Department Head
+- News
+- Programs
+- Contacts
+```
+Do not show:
+```text
+Departments Management
+Users
+Ordinances
+Resolutions
+Sessions
+Committee Hearings
+Legislative Officials
+Superadmin Settings
+```
+The Superadmin can still access the complete system.
+The navigation should be generated based on the user's role and assigned Department.
+Do not create separate hardcoded navigation implementations for HRMO, MPDC, Assessor, RHU, etc.
+---
+# 13. Department Head
+Each Department should support its own Department Head.
+Department Head information should include, where appropriate:
+```text
+Name
+Position/Title
+Photo
+Optional Description
+```
+Do not create separate database tables such as:
+```text
+HRMOHead
+MPDCHead
+AssessorHead
+```
+Use a reusable Department relationship/model.
+If a Department Head implementation already exists, integrate it rather than duplicating it.
+---
+# 14. Department News
+News must belong to a Department.
+Conceptually:
+```text
+Department
+    ↓
+   News
+```
+Example relationship:
+```text
+News
+id
+department_id
+title
+slug
+content
+image
+published_at
+status
+created_at
+updated_at
+```
+Reuse the existing News model where possible.
+A Department page must only display News belonging to the current Department.
+Example:
+```text
+/departments/hrmo
+```
+must only show:
+```text
+News where department_id = HRMO_ID
+```
+---
+# 15. Department Programs
+Programs must also belong to a Department.
+Example relationship:
+```text
+Department
+    ↓
+ Programs
+```
+Conceptually:
+```text
+Program
+id
+department_id
+title
+description
+image
+status
+created_at
+updated_at
+```
+Reuse the existing model if one already exists.
+On:
+```text
+/departments/hrmo
+```
+only HRMO programs should appear.
+---
+# 16. Add Department Contacts
+Add a Contacts feature for every Department.
+A Department may have multiple contact records.
+Suggested model:
+```text
+DepartmentContact
+id
+department_id
+type
+value
+label
+sort_order
+created_at
+updated_at
+```
+Contact Type enum:
+```text
+PHONE
+LANDLINE
+EMAIL
+LOCATION
+```
+Use relationships similar to:
+```text
+Department
+    ↓
+DepartmentContact[]
+```
+---
+# 17. Multiple Contacts Must Be Supported
+A Department may have multiple records of the same type.
+Example HRMO:
+```text
+PHONE
+0917 XXX XXXX
+PHONE
+0928 XXX XXXX
+LANDLINE
+(032) XXX-XXXX
+EMAIL
+hrmo@example.gov.ph
+EMAIL
+hrmo.records@example.gov.ph
+LOCATION
+Municipal Hall, Pinamungajan, Cebu
+```
+Do not limit a Department to one phone number or one email address.
+---
+# 18. Contacts UI
+In the admin interface, allow authorized users to:
+- Add Contact
+- Edit Contact
+- Delete Contact
+- Select Contact Type
+- Enter Contact Value
+- Enter optional Label
+- Set optional order
+Example:
+```text
+Type: PHONE
+Label: Office Mobile
+Value: 0917 XXX XXXX
+```
+Another:
+```text
+Type: EMAIL
+Label: Records Section
+Value: hrmo.records@example.gov.ph
+```
+---
+# 19. Public Contact Display
+On the public Department page, group contacts appropriately.
+Example:
+```text
+Contact Information
+Phone
+0917 XXX XXXX
+0928 XXX XXXX
+Landline
+(032) XXX-XXXX
+Email
+hrmo@example.gov.ph
+hrmo.records@example.gov.ph
+Location
+Municipal Hall, Pinamungajan, Cebu
+```
+Only display categories containing actual records.
+For example, if HRMO has no landline, do NOT show:
+```text
+Landline
+N/A
+```
+Hide the entire Landline section.
+The same rule applies to every empty contact category.
+---
+# 20. Public `/departments` Page
+The public:
+```text
+/departments
+```
+page must load active Departments from the database.
+Do not maintain a manually written Department array in the frontend.
+Each Department card should contain:
+- Department Image
+- Placeholder image if none exists
+- Acronym
+- Full Department Name
+- Short Description
+- Link to the Department page
+Example:
+```text
+HRMO
+Human Resource Management Office
+[short description]
+View Department
+```
+Clicking the card should open:
+```text
+/departments/hrmo
+```
+Use the Department's database slug.
+---
+# 21. Placeholder Images
+If a Department does not yet have an uploaded image, use one shared default Department placeholder.
+Do not create separate placeholders for individual Departments.
+Example behavior:
+```text
+department.image exists
+    → show uploaded image
+department.image does not exist
+    → show /default-department-placeholder
+```
+Follow the application's existing image/storage architecture.
+---
+# 22. Dynamic Department Page Layout
+Every Department should use the same page/component structure.
+Suggested order:
+```text
+1. Department Header
+2. Department Head
+3. About / Department Body
+4. News
+5. Programs
+6. Contact Information
+```
+Conceptually:
+```text
+Department Header
+        ↓
+Department Head
+        ↓
+About the Department
+        ↓
+News
+        ↓
+Programs
+        ↓
+Contact Information
+```
+Do not create separate page layouts for HRMO, MPDC, Assessor, Engineering, etc.
+---
+# 23. Empty Sections
+Handle empty Department sections cleanly.
+For example:
+If there are no Programs, either hide the Programs section or use the project's existing empty-state component.
+Do not populate missing information with fake values.
+For Contacts specifically, hide empty contact categories.
+---
+# 24. Superadmin Department Management
+The Superadmin must be able to:
+- Create Departments
+- Edit Departments
+- Activate/deactivate Departments
+- Upload Department images
+- Manage Department Head
+- Manage Department News
+- Manage Department Programs
+- Manage Department Contacts
+- Assign users to Departments
+Deleting a Department should be handled safely.
+Before implementing permanent deletion, inspect relationships such as:
+```text
+Users
+News
+Programs
+Contacts
+Department Head
+```
+Do not accidentally orphan or delete important records.
+Prefer the project's existing soft-delete or active/inactive architecture if one already exists.
+---
+# 25. Existing Data Migration
+Do not wipe the existing Department information.
+If department information currently exists as hardcoded frontend objects, individual pages, or separate schemas:
+1. Identify the existing data.
+2. Move it into the central Department database structure where appropriate.
+3. Update related records with the correct `department_id`.
+4. Update frontend pages to consume the API/database.
+5. Remove obsolete hardcoded implementations only after the dynamic version works.
+6. Avoid duplicate Departments, News, Programs, or other records.
+Make the migration safe and incremental.
+---
+# 26. Important Rule: No Department-Specific Source Code
+After this refactor, adding a Department must NOT require code like:
+```text
+if department === "HRMO"
+if department === "MPDC"
+if department === "ASSESSOR"
+```
+Avoid Department-specific switch statements such as:
+```text
+switch (department) {
+    case "HRMO":
+    case "MPDC":
+    case "RHU":
+}
+```
+Department-specific behavior should be derived from database relationships and permissions.
+---
+# 27. Do Not Hardcode These
+Do not hardcode:
+- Department names
+- Department acronyms
+- Department IDs
+- Department routes
+- Department cards
+- Office Access values
+- Department role values
+- Department editor permissions
+- Department News
+- Department Programs
+- Department Contacts
+- Department Heads
+- Department page content
+- Sidebar entries for individual departments
+The database must be the source of truth.
+---
+# 28. Expected End-to-End Behavior
+Test this scenario.
+Superadmin creates:
+```text
+Name:
+Municipal Agriculture Office
+Acronym:
+MAO
+Slug:
+municipal-agriculture
+```
+Without changing any source code afterward, the system should automatically:
+1. Save MAO in the Department database.
+2. Display MAO on `/departments`.
+3. Create access to:
+```text
+/departments/municipal-agriculture
+```
+through the shared dynamic route.
+4. Display the default Department placeholder until an image is uploaded.
+5. Add MAO to the Office Access dropdown in User Management.
+6. Allow Superadmin to create:
+```text
+Role: EDITOR
+Office Access: Municipal Agriculture Office
+```
+7. When that Editor logs in, show only MAO management options.
+8. Allow that Editor to manage only:
+   - MAO information
+   - MAO Department Head
+   - MAO News
+   - MAO Programs
+   - MAO Contacts
+9. Prevent that Editor from accessing another Department's records.
+10. Prevent the Editor from accessing Legislative/Superadmin modules.
+11. Enforce all restrictions on both the frontend and backend.
+If all of this works without adding new code specifically for MAO, the Department architecture is working correctly.
+---
+# 29. Authorization Test Cases
+Explicitly test these cases.
+### Superadmin
+```text
+SUPERADMIN
+```
+Expected:
+```text
+Can manage all Departments.
+Can manage all Department content.
+Can manage users.
+Can assign Office Access.
+Can access system-wide administrative modules.
+```
+### HRMO Editor
+```text
+role = EDITOR
+department = HRMO
+```
+Expected:
+```text
+Can edit HRMO.
+Can manage HRMO Department Head.
+Can manage HRMO News.
+Can manage HRMO Programs.
+Can manage HRMO Contacts.
+```
+Must fail:
+```text
+Edit Assessor Department
+Delete RHU News
+Create MPDC Program
+Edit Engineering Contact
+Access User Management
+Access Ordinances
+Access Resolutions
+Access Sessions
+Access Committee Hearings
+```
+These unauthorized requests should return the appropriate response, preferably:
+```text
+403 Forbidden
+```
+---
+# 30. Security Requirement
+Never trust authorization information sent by the client.
+Do not rely on values such as:
+```text
+department_id
+role
+user_id
+```
+from editable form bodies for permission decisions.
+Determine the logged-in user's identity and Department assignment using the authenticated server-side session/token and database record.
+Authorization must be enforced server-side.
+---
+# 31. Implementation Approach
+Implement this carefully in stages:
+```text
+1. Inspect existing architecture.
+2. Update/refactor database relationships.
+3. Create necessary safe migrations.
+4. Update authentication/authorization logic.
+5. Update Department APIs.
+6. Update News/Programs/Contacts ownership logic.
+7. Update Superadmin Department management.
+8. Update User Management Office Access.
+9. Update Department Editor admin navigation.
+10. Update `/departments`.
+11. Implement `/departments/[slug]`.
+12. Migrate existing Department data.
+13. Remove obsolete hardcoded Department logic.
+14. Test permissions and cross-department access.
+15. Run build/lint/type checks and fix regressions.
+```
+Do not rewrite unrelated working parts of the project unnecessarily.
+---
+# Final Requirement
+The final architecture should essentially behave like this:
+```text
+Department
+│
+├── Department Head
+├── News[]
+├── Programs[]
+├── Contacts[]
+│
+└── Users[]
+```
+And:
+```text
+User
+│
+├── Role
+│   ├── SUPERADMIN
+│   ├── EDITOR
+│   └── LEGISLATIVE_EDITOR if still necessary
+│
+└── Department / Office Access
+```
+The important separation is:
+```text
+ROLE = what the user is allowed to do
+DEPARTMENT = which office's data the user is allowed to manage
+```
+A new Department added through Superadmin must immediately become a first-class Department throughout the website without requiring another source-code modification.
+Before finishing, review the implementation for any remaining hardcoded Department names, routes, office lists, role values, sidebar entries, or Department-specific conditional logic and replace them with dynamic database-driven behavior where appropriate.

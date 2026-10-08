@@ -15,7 +15,7 @@ const branches = {
   Executive: [
     ["Overview", "/executive"],
     ["Municipal Mayor", "/executive/mayor"],
-    ["Departments", "/executive/departments"],
+    ["Departments", "/departments"],
     ["Programs & projects", "/executive/programs"],
     ["Activities", "/executive/activities"],
   ],
@@ -82,9 +82,7 @@ export function Header() {
             <span>
               <span className="brand-eyebrow">MUNICIPALITY OF</span>
               <span className="brand-name">PINAMUNGAJAN</span>
-              <span className="brand-tagline">
-                Province of Cebu
-              </span>
+              <span className="brand-tagline">Province of Cebu</span>
             </span>
           </Link>
           <div className="masthead-right">

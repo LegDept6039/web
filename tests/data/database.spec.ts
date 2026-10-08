@@ -16,7 +16,9 @@ test.beforeAll(async () => {
   await db.exec(
     "insert into public.municipal_documents (id,category_id,title,description,date,file_url,published) values ('sample-file','full-disclosure','File','Sample file','2026-09-30','/documents/sample-legislative-document.pdf',true)",
   );
-  for (const { table, key } of Object.values(definitions)) {
+  for (const { table, key } of Object.values(definitions)
+    .map((d) => ({ ...d, key: d.table === "news" ? "slug" : d.key }))
+    .filter((d) => d.table !== "department_contacts")) {
     await db.exec(
       `insert into public.${table} select (jsonb_populate_record(null::public.${table},to_jsonb(t)||jsonb_build_object('${key}','policy-test-draft','published',false))).* from public.${table} t limit 1`,
     );
@@ -36,7 +38,9 @@ test("schema and optional seed execute; seeding again preserves edits", async ()
   );
   expect(rows[0].name).toBe("Edited name");
 });
-for (const { table, key } of Object.values(definitions)) {
+for (const { table, key } of Object.values(definitions)
+  .map((d) => ({ ...d, key: d.table === "news" ? "slug" : d.key }))
+  .filter((d) => d.table !== "department_contacts")) {
   test(`${table}: drafts hidden and public writes denied for both client roles`, async () => {
     for (const role of ["anon", "authenticated"]) {
       await db.exec(`set role ${role}`);

@@ -2,13 +2,15 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { readContentConfig } from "@/lib/content/config";
+import { authConfig } from "./config";
+import { resolveStaff } from "./resolve-staff";
+import { authDiagnostic, errorCode } from "./diagnostics";
 
 export async function authClient(writable = false) {
-  const config = readContentConfig(process.env);
-  if (config.source !== "supabase") return null;
+  const config = authConfig();
+  if (!config) return null;
   const jar = await cookies();
-  return createServerClient(config.supabase.url, config.supabase.key, {
+  return createServerClient(config.url, config.key, {
     cookieOptions: {
       httpOnly: true,
       sameSite: "lax",
@@ -35,25 +37,23 @@ export async function currentStaff(writable = false) {
     data: { user },
     error,
   } = await client.auth.getUser();
-  if (error || !user) return null;
-  const { data: profile, error: profileError } = await client
-    .from("staff_accounts")
-    .select("user_id,email,display_name,role,active")
-    .eq("user_id", user.id)
-    .single();
-  if (
-    profileError ||
-    !profile ||
-    !profile.active ||
-    !["user", "superadmin"].includes(profile.role)
-  )
+  if (error || !user) {
+    if (error && error.name !== "AuthSessionMissingError")
+      authDiagnostic("session", {
+        outcome: "auth_error",
+        code: errorCode(error),
+        status: error.status,
+      });
     return null;
-  return { client, user, profile };
+  }
+  const resolved = await resolveStaff(client, user.id);
+  if (!resolved.ok) return null;
+  return { client, user, profile: resolved.profile };
 }
 
 export async function requireStaff(superadmin = false, writable = false) {
   const staff = await currentStaff(writable);
   if (!staff) redirect("/login");
-  if (superadmin && staff.profile.role !== "superadmin") redirect("/account");
+  if (superadmin && staff.profile.role !== "superadmin") redirect("/admin");
   return staff;
 }
