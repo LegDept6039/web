@@ -10,7 +10,7 @@ export default async function Page() {
         description="Working together to deliver the services our community needs."
       />
       <section className="container section">
-        <DepartmentGrid departments={await getDepartments()} />
+        <DepartmentGrid portraits departments={await getDepartments()} />
       </section>
     </>
   );

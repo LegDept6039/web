@@ -98,7 +98,7 @@ test("new department becomes public, assignable and manageable without adding so
     }),
   ).toBeVisible();
   await expect(page.locator(".department-photo img")).toBeVisible();
-  await expect(page.locator(".department-feature-image img")).toBeVisible();
+  await expect(page.locator(".department-feature-image")).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Contact Information", exact: true }),
   ).toHaveCount(0);
@@ -270,7 +270,7 @@ test("new department becomes public, assignable and manageable without adding so
   await page
     .getByRole("button", { name: "Delete record", exact: true })
     .click();
-  await expect(page).toHaveURL(/\/admin\/content\/contacts$/);
+  await expect(page).toHaveURL(`/admin/content/contacts?office=${id}`);
   await page.goto("/admin/content/departments/edit/test-assessor");
   await expect(page.getByText("PAGE NOT FOUND", { exact: true })).toBeVisible();
   for (const c of ["ordinances", "resolutions", "sessions", "hearings"]) {

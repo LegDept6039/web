@@ -285,3 +285,40 @@ test("dropdown dismissal, focus, route aliases and activity department filter", 
     fullPage: true,
   });
 });
+
+test("news directory cards align and clamp long excerpts at responsive widths", async ({
+  page,
+}, info) => {
+  for (const width of [1440, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/news");
+    const cards = page.locator(".news-grid-uniform .news-card");
+    expect(await cards.count()).toBeGreaterThan(1);
+    const excerpt = cards.first().locator(".news-card-body > p");
+    await expect(excerpt).toBeVisible();
+    await excerpt.evaluate((el) => {
+      el.textContent =
+        "Long news excerpt for checking readable card layout. ".repeat(25);
+    });
+    const size = await excerpt.evaluate((el) => ({
+      visible: el.clientHeight,
+      full: el.scrollHeight,
+    }));
+    expect(size.full).toBeGreaterThan(size.visible);
+    if (width >= 768) {
+      const boxes = await cards.evaluateAll((els) =>
+        els.map((el) => ({ height: el.getBoundingClientRect().height })),
+      );
+      expect(Math.abs(boxes[0].height - boxes[1].height)).toBeLessThan(2);
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: info.outputPath(`news-cards-${width}.png`),
+      fullPage: true,
+    });
+  }
+});

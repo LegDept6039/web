@@ -3,6 +3,7 @@ export default defineConfig({
   outputDir: "test-results/admin",
   testDir: "./tests",
   testMatch: [
+    "department-portraits.spec.ts",
     "admin-authoring.spec.ts",
     "content-workflows.spec.ts",
     "administration.spec.ts",

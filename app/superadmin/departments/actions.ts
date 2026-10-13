@@ -1,4 +1,5 @@
 "use server";
+import { validateBiography } from "@/lib/content/department-biography";
 import { publicationPosition, saveError } from "@/lib/admin/publication";
 import { uploadOfficialPhoto } from "@/lib/admin/photo";
 import { uploadFile } from "@/lib/admin/upload-file";
@@ -13,6 +14,7 @@ export async function saveOffice(
   const id = String(form.get("id") || "");
   let position: number;
   try {
+    validateBiography(String(form.get("head_description") || ""));
     position = publicationPosition(form);
   } catch (error) {
     return error instanceof Error
@@ -31,7 +33,9 @@ export async function saveOffice(
     body: String(form.get("body") || "").trim(),
     head_name: String(form.get("head_name") || "").trim() || null,
     head_title: String(form.get("head_title") || "").trim() || null,
-    head_description: String(form.get("head_description") || "").trim(),
+    head_description: validateBiography(
+      String(form.get("head_description") || ""),
+    ).trim(),
     head_photo: null as string | null,
     image_url: null as string | null,
   };

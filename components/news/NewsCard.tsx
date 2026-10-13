@@ -47,13 +47,19 @@ export function NewsCard({
 export function NewsGrid({
   articles,
   compact = false,
+  uniform = false,
 }: {
   articles: NewsArticle[];
   compact?: boolean;
+  uniform?: boolean;
 }) {
   return (
     <div
-      className={compact ? "news-grid-compact" : "grid gap-6 md:grid-cols-3"}
+      className={
+        compact
+          ? "news-grid-compact"
+          : `grid gap-6 md:grid-cols-3${uniform ? " news-grid-uniform" : ""}`
+      }
     >
       {articles.map((article) => (
         <NewsCard key={article.slug} article={article} compact={compact} />

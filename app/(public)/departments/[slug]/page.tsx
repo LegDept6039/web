@@ -3,7 +3,6 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { getDepartment, getDepartmentContent } from "@/lib/api";
 import { PageHero } from "@/components/shared/ui";
 import { OfficialPhoto } from "@/components/officials/OfficialPhoto";
-import { DepartmentImage } from "@/components/departments/DepartmentImage";
 import { NewsGrid } from "@/components/news/NewsCard";
 import { ProgramGrid } from "@/components/departments/DepartmentGrid";
 import { DepartmentContacts } from "@/components/departments/DepartmentContacts";
@@ -41,11 +40,6 @@ export default async function Page({
         <Link className="text-link" href="/departments">
           All departments
         </Link>
-        {d.imageUrl && (
-          <div className="department-feature-image">
-            <DepartmentImage src={d.imageUrl} name={d.name} />
-          </div>
-        )}
         <section
           className="department-profile"
           aria-label="Department head and overview"
@@ -54,6 +48,7 @@ export default async function Page({
             <OfficialPhoto
               src={d.headPhoto}
               name={d.headName || "Department head"}
+              sizes="(max-width: 600px) 85vw, 300px"
             />
           </div>
           <div>
@@ -62,7 +57,9 @@ export default async function Page({
             )}
             {d.headName && <h2>{d.headName}</h2>}
             {d.description && <p>{d.description}</p>}
-            {d.headDescription && <p>{d.headDescription}</p>}
+            {d.headDescription && (
+              <p className="department-biography">{d.headDescription}</p>
+            )}
           </div>
         </section>
         <section className="mt-16">

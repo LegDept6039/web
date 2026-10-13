@@ -1,4 +1,5 @@
 "use client";
+import { DepartmentBiography } from "@/components/admin/DepartmentBiography";
 import dynamic from "next/dynamic";
 import { PublicationFields } from "@/components/admin/PublicationFields";
 import {
@@ -415,6 +416,14 @@ export function ContentForm({
                 (scope === "legislative" && name === "role"))
             )
               return null;
+            if (collection === "departments" && name === "headDescription")
+              return (
+                <DepartmentBiography
+                  key={name}
+                  initial={String(row.head_description || "")}
+                  label="Head Description (optional)"
+                />
+              );
             const value = row[field.column];
             const required =
               !field.optional || (collection === "programs" && name === "slug");

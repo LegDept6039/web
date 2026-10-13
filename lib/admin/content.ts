@@ -1,3 +1,4 @@
+import { validateBiography } from "@/lib/content/department-biography";
 import { publicationPosition } from "./publication";
 import {
   definitions,
@@ -18,6 +19,8 @@ export function label(value: string) {
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 export function parseContent(collection: Collection, form: FormData) {
+  if (collection === "departments")
+    validateBiography(String(form.get("head_description") || ""));
   const definition = definitions[collection];
   const row: Record<string, unknown> = {};
   for (const field of Object.values(definition.fields)) {
@@ -29,7 +32,12 @@ export function parseContent(collection: Collection, form: FormData) {
       row.id = "validation-only";
       continue;
     }
-    const raw = String(form.get(field.column) ?? "").trim();
+    const input = String(form.get(field.column) ?? "");
+    const raw = (
+      collection === "departments" && field.column === "head_description"
+        ? validateBiography(input)
+        : input
+    ).trim();
     if (raw.length > 30000)
       throw new Error(`${label(field.column)} is too long.`);
     if (field.kind === "boolean") row[field.column] = raw === "on";

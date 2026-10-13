@@ -47,6 +47,12 @@ export default async function Offices({
                   <td>
                     {o.name}
                     <small>{o.slug}</small>
+                    {String(o.head_description || "").replace(/\r\n?/g, "\n")
+                      .length > 800 && (
+                      <small className="biography-review">
+                        Biography exceeds 800 characters - review required.
+                      </small>
+                    )}
                   </td>
                   <td>{o.short_name}</td>
                   <td>{o.department}</td>

@@ -56,7 +56,7 @@ export default async function Page() {
           href="/departments"
           linkText="View All Departments"
         />
-        <DepartmentGrid departments={departments} />
+        <DepartmentGrid portraits departments={departments.slice(0, 3)} />
         <div className="mt-16">
           <SectionHeader
             eyebrow="OUR SHARED PRIORITIES"
@@ -66,6 +66,7 @@ export default async function Page() {
           <div className="content-grid">
             {programs
               .filter((p) => p.contentScope !== "legislative")
+              .slice(0, 3)
               .map((p) => (
                 <article className="info-card" key={p.id}>
                   <span className="eyebrow">{p.category}</span>
@@ -83,11 +84,13 @@ export default async function Page() {
             href="/executive/activities"
           />
           <NewsGrid
-            articles={news.filter((n) =>
-              n.contentScope
-                ? n.contentScope === "executive"
-                : n.category !== "Legislative",
-            )}
+            articles={news
+              .filter((n) =>
+                n.contentScope
+                  ? n.contentScope === "executive"
+                  : n.category !== "Legislative",
+              )
+              .slice(0, 3)}
           />
         </div>
       </section>

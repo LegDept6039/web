@@ -82,7 +82,11 @@ export function NewsDirectory({
       <p className="results-count" aria-live="polite">
         {filtered.length} updates found
       </p>
-      {filtered.length ? <NewsGrid articles={filtered} /> : <EmptyState />}
+      {filtered.length ? (
+        <NewsGrid articles={filtered} uniform />
+      ) : (
+        <EmptyState />
+      )}
     </>
   );
 }

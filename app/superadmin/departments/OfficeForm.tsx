@@ -1,4 +1,5 @@
 "use client";
+import { DepartmentBiography } from "@/components/admin/DepartmentBiography";
 import { useActionState, useRef, useState } from "react";
 import { saveOffice, deleteOffice } from "./actions";
 import type { Office } from "@/lib/offices/permissions";
@@ -121,14 +122,7 @@ export function OfficeForm({
             maxLength={300}
           />
         </label>
-        <label>
-          Department Head Description
-          <textarea
-            name="head_description"
-            defaultValue={office?.head_description}
-            maxLength={10000}
-          />
-        </label>
+        <DepartmentBiography initial={office?.head_description} />
         <ImageUpload
           name="department_image"
           label="Department Image"
