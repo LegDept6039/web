@@ -1,3 +1,6 @@
+import { OfficesNav } from "./OfficesNav";
+import { definitions, type Collection } from "@/lib/content/schema";
+import { label } from "@/lib/admin/content";
 import { OfficeLink } from "./OfficeLink";
 import { SidebarNav } from "./SidebarNav";
 import Link from "next/link";
@@ -12,7 +15,7 @@ export async function AdminShell({
   superadmin?: boolean;
 }) {
   const context = await officeContext();
-  const base = superadmin ? "/superadmin" : "/admin";
+  const base = context.profile.role === "superadmin" ? "/superadmin" : "/admin";
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
@@ -29,34 +32,60 @@ export async function AdminShell({
               <Link href="/superadmin/audit">Audit log</Link>
             </>
           )}
-          <span className="admin-nav-label">Your offices</span>
-          {context.offices
-            .filter((o) => o.active)
-            .map((o) => (
-              <div key={o.id}>
-                <OfficeLink office={o.id} name={o.short_name || o.name} />
-                {o.department === "executive" &&
-                  context.profile.role !== "superadmin" && (
-                    <div className="admin-module-links">
-                      <Link
-                        href={`/admin/content/departments/edit/${o.id}?office=${o.id}`}
-                      >
-                        Department Page & Head
-                      </Link>
-                      {(["news", "programs", "contacts"] as const)
-                        .filter((c) => available(context, c, o.id))
-                        .map((c) => (
+          {context.profile.role === "superadmin" ? (
+            <OfficesNav
+              offices={context.offices
+                .filter((o) => o.active)
+                .map((o) => ({
+                  id: o.id,
+                  name: o.short_name || o.name,
+                  modules: (Object.keys(definitions) as Collection[])
+                    .filter((c) => available(context, c, o.id))
+                    .map((c) => ({
+                      key: c,
+                      label:
+                        c === "departments"
+                          ? "Department Page & Head"
+                          : label(c),
+                      href:
+                        c === "departments"
+                          ? `/admin/content/departments/edit/${o.id}?office=${o.id}`
+                          : `/admin/content/${c}?office=${o.id}`,
+                    })),
+                }))}
+            />
+          ) : (
+            <>
+              <span className="admin-nav-label">Your offices</span>
+              {context.offices
+                .filter((o) => o.active)
+                .map((o) => (
+                  <div key={o.id}>
+                    <OfficeLink office={o.id} name={o.short_name || o.name} />
+                    {o.department === "executive" &&
+                      context.profile.role !== "superadmin" && (
+                        <div className="admin-module-links">
                           <Link
-                            key={c}
-                            href={`/admin/content/${c}?office=${o.id}`}
+                            href={`/admin/content/departments/edit/${o.id}?office=${o.id}`}
                           >
-                            {c.charAt(0).toUpperCase() + c.slice(1)}
+                            Department Page & Head
                           </Link>
-                        ))}
-                    </div>
-                  )}
-              </div>
-            ))}
+                          {(["news", "programs", "contacts"] as const)
+                            .filter((c) => available(context, c, o.id))
+                            .map((c) => (
+                              <Link
+                                key={c}
+                                href={`/admin/content/${c}?office=${o.id}`}
+                              >
+                                {c.charAt(0).toUpperCase() + c.slice(1)}
+                              </Link>
+                            ))}
+                        </div>
+                      )}
+                  </div>
+                ))}
+            </>
+          )}
           <Link href="/account">Profile</Link>
           <Link href="/">Public website</Link>
         </SidebarNav>
@@ -75,6 +104,13 @@ export async function AdminShell({
           </span>
         </header>
         <main id="main" className="admin-content">
+          <p className="staff-note">
+            Fields marked{" "}
+            <span className="required-star" aria-hidden="true">
+              *
+            </span>{" "}
+            are required.
+          </p>
           {children}
         </main>
       </div>

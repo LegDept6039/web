@@ -1,10 +1,16 @@
-﻿import {
+import {
   decodeRecord,
   definitions,
   type Collection,
   type Collections,
 } from "./schema";
 import type { SupabaseConfig } from "./config";
+export type ContentFilters = Partial<
+  Record<
+    "slug" | "id" | "office_id" | "branch" | "content_scope" | "role",
+    string
+  >
+>;
 export type ContentFetch = (
   url: string,
   init: RequestInit,
@@ -14,8 +20,11 @@ export async function readSupabaseCollection<K extends Collection>(
   collection: K,
   config: SupabaseConfig,
   request: ContentFetch = fetch,
-  filters: Partial<Record<"slug" | "id" | "office_id", string>> = {},
+  filters: ContentFilters = {},
+  limit?: number,
 ): Promise<Collections[K][]> {
+  if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1))
+    throw new Error("Invalid content limit.");
   const definition = definitions[collection];
   const results: Collections[K][] = [];
   const columns = Object.values(definition.fields)
@@ -24,12 +33,17 @@ export async function readSupabaseCollection<K extends Collection>(
   for (let page = 0; page < 200; page++) {
     const params = new URLSearchParams({
       select:
-        columns + (["news", "programs"].includes(collection) ? ",source" : ""),
+        columns +
+        (["news", "programs"].includes(collection) ? ",source,rich_body" : ""),
       published: "eq.true",
       order: `sort_order.asc,${definition.key}.asc`,
-      limit: "500",
+      limit: String(
+        Math.min(500, limit === undefined ? 500 : limit - results.length),
+      ),
       offset: String(results.length),
     });
+    if (collection === "officials" && filters.branch === "legislative")
+      params.set("legislative_role", "not.is.null");
     if (collection === "departments") {
       params.set("active", "eq.true");
       params.set("archived_at", "is.null");
@@ -74,6 +88,8 @@ export async function readSupabaseCollection<K extends Collection>(
       return results;
     }
     results.push(...rows.map((row) => decodeRecord(collection, row)));
+    if (limit !== undefined && results.length >= limit)
+      return results.slice(0, limit);
     if (total !== undefined && results.length >= total) return results;
     // Continue even if the server's configured row limit is below our requested page size.
   }

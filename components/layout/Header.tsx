@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -14,10 +14,10 @@ import {
 const branches = {
   Executive: [
     ["Overview", "/executive"],
-    ["Municipal Mayor", "/executive/mayor"],
-    ["Departments", "/departments"],
+    ["Municipal Mayor", "/mayor"],
+    ["Executive Departments", "/departments"],
     ["Programs & projects", "/executive/programs"],
-    ["Activities", "/executive/activities"],
+    ["News and Activities", "/activities"],
   ],
   Legislative: [
     ["Overview", "/legislative"],
@@ -31,8 +31,28 @@ const branches = {
 };
 export function Header() {
   const pathname = usePathname();
+  const header = useRef<HTMLElement>(null);
+  const [lastPath, setLastPath] = useState(pathname);
   const [mobile, setMobile] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setMobile(false);
+    setOpen(null);
+  }
+  useEffect(() => {
+    if (!open && !mobile) return;
+    const outside = (event: PointerEvent) => {
+      const target = event.target;
+      if (target instanceof Node && !header.current?.contains(target)) {
+        setOpen(null);
+        setMobile(false);
+      } else if (target instanceof Element && !target.closest(".nav-dropdown"))
+        setOpen(null);
+    };
+    document.addEventListener("pointerdown", outside);
+    return () => document.removeEventListener("pointerdown", outside);
+  }, [open, mobile]);
   const [date, setDate] = useState("Philippine Standard Time");
   useEffect(() => {
     const refresh = () =>
@@ -55,8 +75,23 @@ export function Header() {
   };
   return (
     <header
+      ref={header}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(null);
+      }}
       onKeyDown={(e) => {
-        if (e.key === "Escape") close();
+        if (e.key === "Escape") {
+          const trigger = open
+            ? header.current?.querySelector<HTMLButtonElement>(
+                `button[aria-controls="menu-${open}"]`,
+              )
+            : header.current?.querySelector<HTMLButtonElement>(
+                ".mobile-toggle",
+              );
+          setOpen(null);
+          if (!open) setMobile(false);
+          trigger?.focus();
+        }
       }}
     >
       <div className="government-bar">

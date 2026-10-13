@@ -1,3 +1,4 @@
+import { validateRichText } from "./rich-text";
 import { legislativeRoles } from "@/lib/officials/roles";
 import type {
   DepartmentContact,
@@ -39,7 +40,7 @@ type Field = {
 type Definition<T> = {
   table: string;
   key: string;
-  fields: { [P in keyof Omit<T, "source">]-?: Field };
+  fields: { [P in keyof Omit<T, "source" | "richBody">]-?: Field };
 };
 const text = (column: string): Field => ({ column, kind: "text" });
 const url = (column: string, optional = false): Field => ({
@@ -323,6 +324,8 @@ export function decodeRecord<K extends Collection>(
           : {}),
       };
   }
+  if (["news", "programs"].includes(collection) && row.rich_body != null)
+    output.richBody = validateRichText(row.rich_body);
   // Every domain field was validated against its collection's typed definition above.
   return output as unknown as Collections[K];
 }

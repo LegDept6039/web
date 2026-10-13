@@ -1,3 +1,4 @@
+import { Phone, Mail, MapPin } from "lucide-react";
 import type { DepartmentContact } from "@/types";
 const types = {
   PHONE: "Phone",
@@ -12,15 +13,24 @@ export function DepartmentContacts({
 }) {
   if (!contacts.length) return null;
   return (
-    <section className="mt-16">
-      <h2 className="mb-6">Contact Information</h2>
-      <div className="content-grid">
+    <section className="department-contacts">
+      <h2 className="mb-4">Contact Information</h2>
+      <div className="department-contact-grid">
         {Object.entries(types).map(([type, label]) => {
           const records = contacts.filter((c) => c.type === type);
           if (!records.length) return null;
           return (
-            <section className="info-card" key={type}>
-              <h3>{label}</h3>
+            <section className="department-contact-group" key={type}>
+              <h3>
+                {type === "EMAIL" ? (
+                  <Mail size={16} />
+                ) : type === "LOCATION" ? (
+                  <MapPin size={16} />
+                ) : (
+                  <Phone size={16} />
+                )}{" "}
+                {label}
+              </h3>
               <ul>
                 {records.map((c) => (
                   <li key={c.id}>

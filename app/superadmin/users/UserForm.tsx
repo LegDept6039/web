@@ -72,7 +72,7 @@ export function UserForm({
       )}
       <label>
         Role
-        <select name="role" defaultValue={account?.role || "viewer"}>
+        <select name="role" required defaultValue={account?.role || "viewer"}>
           {roles.map((role) => (
             <option key={role} value={role}>
               {role === "superadmin"

@@ -5,7 +5,7 @@ export function TourismFeature() {
     <>
       <section className="container tourism-section">
         <a
-          href="https://tourism.cebu.gov.ph/explore/pinamungajan/"
+          href="http://www.pinamungajan.gov.ph/"
           target="_blank"
           rel="noreferrer"
           className="tourism-banner"
@@ -20,7 +20,7 @@ export function TourismFeature() {
           </div>
           <div className="tourism-copy">
             <span className="eyebrow">
-              A PLACE TO EXPLORE. A PLACE TO BELONG.
+              OUR PRIDE, YOUR DESTINATION 
             </span>
             <h2>Experience Pinamungajan</h2>
             <p>

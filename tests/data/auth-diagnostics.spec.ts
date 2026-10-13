@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { databaseMessage, passwordError } from "../../lib/auth/diagnostics";
+import {
+  databaseMessage,
+  passwordError,
+  errorCode,
+} from "../../lib/auth/diagnostics";
 
 test("diagnostics retain database errors while removing credential-shaped content", () => {
   const result = databaseMessage({
@@ -60,4 +64,24 @@ test("session recovery only targets terminal refresh errors and this project's s
     "sb-project-auth-token.other",
   ])
     expect(sessionCookieName("https://project.supabase.co", name)).toBe(false);
+});
+
+test("network failures are distinct from rejected credentials and missing codes stay absent", () => {
+  for (const code of [undefined, null, "undefined", "null", 0])
+    expect(errorCode({ code })).toBeUndefined();
+  expect(errorCode({ code: "invalid_credentials" })).toBe(
+    "invalid_credentials",
+  );
+  expect(
+    passwordError({
+      status: 0,
+      code: undefined,
+      name: "AuthRetryableFetchError",
+    }),
+  ).toContain("Unable to reach");
+  expect(passwordError({ status: 0 })).not.toContain("undefined");
+  expect(passwordError({ status: 503 })).toContain("temporarily unavailable");
+  expect(passwordError({ status: 400, code: "invalid_credentials" })).toContain(
+    "Invalid email or password",
+  );
 });

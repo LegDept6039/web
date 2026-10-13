@@ -1,9 +1,16 @@
+import { getCollection } from "@/lib/content/repository";
+import { OfficialPhoto } from "@/components/officials/OfficialPhoto";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { UserRound, ArrowRight } from "lucide-react";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { ArrowRight } from "lucide-react";
+import { PageHero } from "@/components/shared/ui";
 export const metadata: Metadata = { title: "Office of the Municipal Mayor" };
-export default function Page() {
+export default async function Page() {
+  const [mayor] = await getCollection(
+    "officials",
+    { branch: "executive", role: "Office of the Municipal Mayor" },
+    1,
+  );
   return (
     <>
       <PageHero
@@ -11,33 +18,40 @@ export default function Page() {
         description="Leadership committed to responsive service and shared progress."
       />
       <section className="container section">
-        <PreviewNote>
-          The verified name, portrait, biography, and message of the Municipal
-          Mayor will be supplied by the municipality.
-        </PreviewNote>
-        <div className="contact-grid">
-          <div className="official-portrait" style={{ height: 360 }}>
-            <UserRound size={150} />
-            <span>OFFICIAL PORTRAIT TO BE PROVIDED</span>
+        <article className="mayor-profile" aria-labelledby="mayor-name">
+          <div className="official-portrait mayor-profile-photo">
+            <OfficialPhoto
+              src={mayor?.photoUrl}
+              name={mayor?.name || "Municipal Mayor"}
+            />
           </div>
-          <div>
-            <span className="eyebrow">MUNICIPAL MAYOR</span>
-            <h2>Serving the people of Pinamungajan</h2>
-            <p className="body-copy mt-5">
-              The Office of the Municipal Mayor leads the executive branch,
-              oversees the delivery of municipal services, and coordinates the
-              implementation of local programs and development priorities.
+          <div className="mayor-profile-information">
+            <h2 id="mayor-name">
+              {mayor?.name || "Office of the Municipal Mayor"}
+            </h2>
+            <p className="eyebrow mayor-profile-title">Municipal Mayor</p>
+            <p className="mayor-profile-description">
+              {mayor?.description ||
+                "The mayor?s profile will be published once the official information is available."}
             </p>
-            <p className="body-copy mt-5">
-              This profile is prepared for the official biography, priorities,
-              and message to the community.
-            </p>
-            <Link href="/executive/programs" className="text-link mt-8">
-              Explore programs & projects
-              <ArrowRight size={16} />
-            </Link>
+            {mayor?.isSample && (
+              <p className="meta">Name and portrait to be confirmed.</p>
+            )}
+            <nav
+              className="mayor-profile-links"
+              aria-label="Explore Executive services"
+            >
+              <Link href="/departments" className="text-link">
+                View Executive Departments{" "}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+              <Link href="/executive/programs" className="text-link">
+                Explore programs &amp; projects{" "}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </nav>
           </div>
-        </div>
+        </article>
       </section>
     </>
   );

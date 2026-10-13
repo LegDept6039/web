@@ -1,7 +1,7 @@
 import "server-only";
 import sharp from "sharp";
 import type { SupabaseClient } from "@supabase/supabase-js";
-export const PHOTO_LIMIT = 2 * 1024 * 1024;
+export const PHOTO_LIMIT = 10 * 1024 * 1024;
 export async function uploadOfficialPhoto(
   client: SupabaseClient,
   userId: string,
@@ -9,7 +9,7 @@ export async function uploadOfficialPhoto(
   folder: "officials" | "departments" = "officials",
 ) {
   if (file.size > PHOTO_LIMIT)
-    throw new Error("Choose an image smaller than 2 MB.");
+    throw new Error("Choose an image up to 10 MB.");
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type))
     throw new Error("Choose a JPEG, PNG, or WebP image.");
   let bytes: Buffer;

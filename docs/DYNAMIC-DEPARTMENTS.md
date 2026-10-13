@@ -1,5 +1,6 @@
 # Dynamic departments (migrations 009-010)
 
+Current publication, ordering, rich-text editing and office-navigation behavior is documented in [Admin authoring (migration 012)](ADMIN-AUTHORING.md). Apply 012 after 011 for this application version.
 ## Finalized workflow (migration 010)
 
 Apply the **contents** of `supabase/migrations/202610050010_department_identity.sql` after migration 009, then deploy this application version. This update has not been applied to live Supabase or deployed to production.
@@ -95,3 +96,7 @@ Browser tests use isolated transport fixtures. Windows test-server teardown agai
 - Reviewed generated department screenshots and searched `app`, `components`, and `lib` for office-specific names/conditions and old office-table queries; none remain for the individual offices tested.
 
 Browser tests use an isolated Supabase transport fixture. Database permission tests execute the real migrations in PGlite. These are local checks, not a live Supabase/Vercel deployment verification. The Windows Playwright web-server teardown remained running after its assertions; owned test sessions were interrupted after collecting results, so those interrupted commands exit 1 even though the reported assertions passed.
+
+## Homepage ordering and activities
+
+See [UI and navigation improvements](UI-NAVIGATION.md) for bounded homepage department cards, visible sort order, compact contacts and the dynamic UUID-based activities filter. No additional migration is required.

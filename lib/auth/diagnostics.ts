@@ -40,11 +40,24 @@ export function authDiagnostic(
 export function errorCode(error: unknown): string | undefined {
   if (!error || typeof error !== "object" || !("code" in error))
     return undefined;
-  const code = String(error.code);
+  if (
+    typeof error.code !== "string" ||
+    ["undefined", "null"].includes(error.code)
+  )
+    return undefined;
+  const code = error.code;
   return /^[a-zA-Z0-9_]{1,64}$/.test(code) ? code : undefined;
 }
 
-export function passwordError(error: { code?: string; status?: number }) {
+export function passwordError(error: {
+  code?: string;
+  status?: number;
+  name?: string;
+}) {
+  if (error.status === 0 || error.name === "AuthRetryableFetchError")
+    return "Unable to reach the sign-in service. Check the server?s internet connection and try again. If this continues, contact your administrator.";
+  if (error.status !== undefined && error.status >= 500)
+    return "The sign-in service is temporarily unavailable. Please try again later.";
   switch (error.code) {
     case "invalid_credentials":
       return "Unable to sign in. Invalid email or password.";

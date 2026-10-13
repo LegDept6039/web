@@ -1,11 +1,23 @@
 "use client";
+import dynamic from "next/dynamic";
+import { PublicationFields } from "@/components/admin/PublicationFields";
+import {
+  legacyDocument,
+  richTextPlain,
+  validateRichText,
+  type RichNode,
+} from "@/lib/content/rich-text";
 import Image from "next/image";
-import { useActionState, useState, useEffect } from "react";
+import { useActionState, useState, useEffect, useRef } from "react";
 import { legislativeRoles } from "@/lib/officials/roles";
 import type { Office } from "@/lib/offices/permissions";
 import { definitions, type Collection } from "@/lib/content/schema";
 import { label } from "@/lib/admin/content";
 import { saveContent, deleteContent } from "./actions";
+const RichTextEditor = dynamic(
+  () => import("@/components/admin/RichTextEditor"),
+  { ssr: false },
+);
 export function ContentForm({
   collection,
   row = {},
@@ -23,9 +35,46 @@ export function ContentForm({
   superadmin?: boolean;
   scope?: "legislative" | "executive";
 }) {
+  // React resets native file inputs after an action, including validation errors.
+  // Keep the selected bytes with the preview so a retry cannot silently omit them.
+  const [selectedOffice, setSelectedOffice] = useState(
+    String(
+      row.office_id ||
+        (scope === "legislative"
+          ? offices.find((o) => o.department === "legislative")?.id
+          : offices.length === 1
+            ? offices[0].id
+            : "") ||
+        "",
+    ),
+  );
+  const [initialRich] = useState<RichNode>(
+    () =>
+      (row.rich_body as RichNode) ||
+      legacyDocument(
+        collection === "news"
+          ? Array.isArray(row.content)
+            ? row.content
+            : []
+          : String(row.description || ""),
+      ),
+  );
+  const rich = useRef(initialRich);
+  const selectedFiles = useRef<Record<string, File>>({});
   const [uploadStatus, setUploadStatus] = useState("");
   const [error, action, pending] = useActionState(
     async (state: string, form: FormData) => {
+      if (["news", "programs"].includes(collection)) {
+        try {
+          const doc = validateRichText(rich.current, true);
+          form.set("rich_body", JSON.stringify(doc));
+          if (collection === "news") form.set("content", richTextPlain(doc));
+        } catch (error) {
+          return error instanceof Error ? error.message : "Invalid content.";
+        }
+      }
+      for (const [name, file] of Object.entries(selectedFiles.current))
+        form.set(name, file);
       const file = form.get("news_image");
       form.delete("news_image"); // Image bytes go directly to Storage, never through a Server Action.
       if (collection === "news" && file instanceof File && file.size) {
@@ -105,7 +154,20 @@ export function ContentForm({
   );
   return (
     <>
-      <form className="staff-form staff-card" action={action}>
+      <form
+        className="staff-form staff-card"
+        action={action}
+        onChange={(event) => {
+          const input = event.target;
+          if (input instanceof HTMLSelectElement && input.name === "office_id")
+            setSelectedOffice(input.value);
+          if (input instanceof HTMLInputElement && input.type === "file") {
+            const file = input.files?.[0];
+            if (file) selectedFiles.current[input.name] = file;
+            else delete selectedFiles.current[input.name];
+          }
+        }}
+      >
         {hidden}
         <fieldset disabled={!canWrite || pending}>
           <legend>{canWrite ? "Record details" : "View only"}</legend>
@@ -131,7 +193,11 @@ export function ContentForm({
                 <select
                   name="office_id"
                   defaultValue={String(row.office_id || "")}
-                  required={!superadmin}
+                  required={
+                    ["news", "programs", "departments", "contacts"].includes(
+                      collection,
+                    ) || !superadmin
+                  }
                   disabled={Boolean(original) && !superadmin}
                 >
                   <option value="">Unassigned (Super Admin only)</option>
@@ -166,7 +232,7 @@ export function ContentForm({
                 </label>
               )}
               <label>
-                Profile picture (JPEG, PNG, WebP; up to 2 MB)
+                Profile picture (JPEG, PNG, WebP; up to 10 MB)
                 <input
                   name="photo"
                   type="file"
@@ -176,7 +242,7 @@ export function ContentForm({
                     setPhotoError("");
                     if (
                       file &&
-                      (file.size > 2 * 1024 * 1024 ||
+                      (file.size > 10 * 1024 * 1024 ||
                         !["image/jpeg", "image/png", "image/webp"].includes(
                           file.type,
                         ))
@@ -184,7 +250,7 @@ export function ContentForm({
                       event.target.value = "";
                       setPreview(undefined);
                       setPhotoError(
-                        "Choose a JPEG, PNG, or WebP image up to 2 MB.",
+                        "Choose a JPEG, PNG, or WebP image up to 10 MB.",
                       );
                       return;
                     }
@@ -225,13 +291,29 @@ export function ContentForm({
           )}
           {collection === "departments" && (
             <label>
-              Department image (JPEG, PNG, WebP; up to 2 MB)
+              Department image (JPEG, PNG, WebP; up to 10 MB)
               <input
                 type="file"
                 name="department_image"
                 accept="image/jpeg,image/png,image/webp"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
+                  setPhotoError("");
+                  if (
+                    file &&
+                    (!file.size ||
+                      file.size > 10 * 1024 * 1024 ||
+                      !["image/jpeg", "image/png", "image/webp"].includes(
+                        file.type,
+                      ))
+                  ) {
+                    e.target.value = "";
+                    setDepartmentPreview(undefined);
+                    setPhotoError(
+                      "Choose a JPEG, PNG, or WebP department image up to 10 MB.",
+                    );
+                    return;
+                  }
                   setDepartmentPreview(
                     file ? URL.createObjectURL(file) : undefined,
                   );
@@ -306,6 +388,22 @@ export function ContentForm({
                 <input key={name} type="hidden" name="id" value={original} />
               ) : null;
             if (collection === "news" && name === "image") return null;
+            if (collection === "news" && name === "content")
+              return (
+                <div key={name}>
+                  <p className="required-field-title">
+                    Content <span aria-hidden="true">*</span>
+                  </p>
+                  <RichTextEditor
+                    initial={initialRich}
+                    legacy={[]}
+                    disabled={!canWrite || pending}
+                    onChange={(doc) => {
+                      rich.current = doc;
+                    }}
+                  />
+                </div>
+              );
             if (
               collection === "departments" &&
               ["name", "acronym", "slug", "active", "isSample"].includes(name)
@@ -381,26 +479,31 @@ export function ContentForm({
               </label>
             );
           })}
+          {collection === "programs" && (
+            <div>
+              <p className="required-field-title">
+                Body <span aria-hidden="true">*</span>
+              </p>
+              <RichTextEditor
+                label="Body"
+                initial={initialRich}
+                legacy={[]}
+                disabled={!canWrite || pending}
+                onChange={(doc) => {
+                  rich.current = doc;
+                }}
+              />
+            </div>
+          )}
           {collection !== "departments" && (
-            <>
-              <label>
-                Sort order
-                <input
-                  name="sort_order"
-                  type="number"
-                  step="1"
-                  defaultValue={Number(row.sort_order || 0)}
-                />
-              </label>
-              <label>
-                <input
-                  name="published"
-                  type="checkbox"
-                  defaultChecked={row.published === true}
-                />
-                Published — visible on the public website
-              </label>
-            </>
+            <PublicationFields
+              collection={collection}
+              office={selectedOffice}
+              branch={scope}
+              original={String(row.id || "")}
+              published={row.published === true}
+              position={Number(row.sort_order || 0)}
+            />
           )}
         </fieldset>
         {error && (

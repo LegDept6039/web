@@ -1,10 +1,13 @@
 "use server";
+import { validateRichText, richTextPlain } from "@/lib/content/rich-text";
+import { saveError } from "@/lib/admin/publication";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { officeContext, contentAllowed, allowed } from "@/lib/offices/server";
 import { collectionName, parseContent } from "@/lib/admin/content";
 import { uploadOfficialPhoto } from "@/lib/admin/photo";
 import { uploadNewsImage } from "@/lib/admin/news-image";
+import { uploadFile } from "@/lib/admin/upload-file";
 import { legislativeRoles, isLegislativeRole } from "@/lib/officials/roles";
 import { definitions } from "@/lib/content/schema";
 
@@ -14,6 +17,13 @@ export async function saveContent(
 ): Promise<string> {
   const context = await officeContext(true);
   const { client } = context;
+  let image: File | null, photo: File | null;
+  try {
+    image = uploadFile(form, "department_image");
+    photo = uploadFile(form, "photo");
+  } catch (error) {
+    return error instanceof Error ? error.message : "Invalid image attachment.";
+  }
   const collection = collectionName(String(form.get("collection")));
   if (!collection) return "Unknown content collection.";
   const definition = definitions[collection];
@@ -102,6 +112,13 @@ export async function saveContent(
   let row: Record<string, unknown>;
   try {
     row = parseContent(collection, form);
+    if (["news", "programs"].includes(collection) && form.has("rich_body")) {
+      const raw = String(form.get("rich_body"));
+      if (raw.length > 200000) return "Content is too long.";
+      const doc = validateRichText(JSON.parse(raw), true);
+      row.rich_body = doc;
+      if (collection === "news") row.content = richTextPlain(doc).split("\n");
+    }
   } catch (error) {
     return error instanceof Error ? error.message : "Check the form fields.";
   }
@@ -186,8 +203,7 @@ export async function saveContent(
       form.get("remove_image") === "on" ? null : existing?.image_url || null;
   let departmentImage:
     Awaited<ReturnType<typeof uploadOfficialPhoto>> | undefined;
-  const image = form.get("department_image");
-  if (collection === "departments" && image instanceof File && image.size) {
+  if (collection === "departments" && image) {
     try {
       departmentImage = await uploadOfficialPhoto(
         client,
@@ -203,12 +219,7 @@ export async function saveContent(
     }
   }
   let uploaded: Awaited<ReturnType<typeof uploadOfficialPhoto>> | undefined;
-  const photo = form.get("photo");
-  if (
-    ["officials", "departments"].includes(collection) &&
-    photo instanceof File &&
-    photo.size
-  ) {
+  if (["officials", "departments"].includes(collection) && photo) {
     try {
       uploaded = await uploadOfficialPhoto(
         client,
@@ -249,11 +260,14 @@ export async function saveContent(
   if ((result.error || !result.data?.length) && departmentImage)
     await client.storage.from("municipal-media").remove([departmentImage.path]);
   if (result.error)
-    return result.error.code === "23505"
-      ? "That ID or slug already exists. Choose a unique slug."
-      : result.error.code === "23503"
-        ? "Choose an existing related record (for example, a document category)."
-        : "Could not save. Check the fields and your access, then try again.";
+    return (
+      saveError(result.error.code) ||
+      (result.error.code === "23505"
+        ? "That ID or slug already exists. Choose a unique slug."
+        : result.error.code === "23503"
+          ? "Choose an existing related record (for example, a document category)."
+          : "Could not save. Check the fields and your access, then try again.")
+    );
   if (!result.data?.length)
     return "This record changed or your access was removed. Reload before saving.";
   revalidatePath("/", "layout");
@@ -290,9 +304,14 @@ export async function deleteContent(
     .eq("updated_at", String(form.get("updated_at")))
     .select(definition.key);
   if (error)
-    return "Could not delete. Remove related records first and check your access.";
+    return (
+      saveError(error.code) ||
+      "Could not delete. Remove related records first and check your access."
+    );
   if (!data?.length)
     return "This record changed or no longer exists. Reload the page.";
   revalidatePath("/", "layout");
-  redirect(`/admin/content/${collection}`);
+  redirect(
+    `/admin/content/${collection}${existing.office_id ? `?office=${existing.office_id}` : ""}`,
+  );
 }

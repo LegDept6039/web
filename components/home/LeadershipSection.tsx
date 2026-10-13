@@ -3,8 +3,15 @@ import Link from "next/link";
 import { Landmark, ShieldCheck, ArrowRight, ArrowUpRight } from "lucide-react";
 import { SectionHeader } from "@/components/shared/ui";
 import { OfficialGrid } from "@/components/officials/OfficialGrid";
-import type { Official } from "@/types";
-export function LeadershipSection({ officials }: { officials: Official[] }) {
+import { DepartmentGrid } from "@/components/departments/DepartmentGrid";
+import type { Department, Official } from "@/types";
+export function LeadershipSection({
+  officials,
+  departments,
+}: {
+  officials: Official[];
+  departments: Department[];
+}) {
   return (
     <>
       <section className="container section">
@@ -51,20 +58,20 @@ export function LeadershipSection({ officials }: { officials: Official[] }) {
           </Link>
         </div>
         <OfficialGrid
-          officials={officials.filter((o) =>
-            isLegislativeRole(o.legislativeRole),
-          )}
+          officials={officials
+            .filter((o) => isLegislativeRole(o.legislativeRole))
+            .slice(0, 4)}
         />
         <div className="directory-heading">
-          <h3>Executive leadership</h3>
-          <Link className="text-link" href="/executive">
-            Explore the executive
+          <h3>Executive departments</h3>
+          <Link className="text-link" href="/departments">
+            View all departments
             <ArrowRight size={15} />
           </Link>
         </div>
-        <OfficialGrid
-          officials={officials.filter((o) => o.branch === "executive")}
-        />
+        <div className="home-departments">
+          <DepartmentGrid departments={departments.slice(0, 4)} />
+        </div>
       </section>
     </>
   );

@@ -1,3 +1,4 @@
+import { RichText } from "@/components/shared/RichText";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -53,9 +54,7 @@ export default async function ProgramPage({
           </div>
         )}
         <div className="article-body">
-          {program.description.split(/\n\n/).map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
+          <RichText document={program.richBody} legacy={program.description} />
         </div>
       </article>
     </section>

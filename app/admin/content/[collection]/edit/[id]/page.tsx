@@ -33,7 +33,12 @@ export default async function EditContent({
     .maybeSingle();
   if (error) return <p role="alert">Unable to load record.</p>;
   if (!data || !contentAllowed(context, collection, data, "read")) notFound();
-  if (legacyNewsSlug) redirect(`/admin/content/news/edit/${data.id}`);
+  const requestedOffice = (await searchParams).office;
+  if (requestedOffice && requestedOffice !== data.office_id) notFound();
+  if (legacyNewsSlug || (!requestedOffice && data.office_id))
+    redirect(
+      `/admin/content/${collection}/edit/${legacyNewsSlug ? data.id : id}${data.office_id ? `?office=${data.office_id}` : ""}`,
+    );
   return (
     <>
       <ContentBreadcrumb
@@ -46,6 +51,7 @@ export default async function EditContent({
         record
       </h1>
       <ContentForm
+        key={`${collection}:${data[definition.key]}`}
         collection={collection}
         scope={
           data.content_scope === "legislative" ? "legislative" : "executive"

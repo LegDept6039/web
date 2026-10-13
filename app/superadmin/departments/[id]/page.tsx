@@ -19,7 +19,7 @@ export default async function EditOffice({
   return (
     <>
       <h1>Edit department</h1>
-      <OfficeForm key={data.updated_at} office={data} />
+      <OfficeForm key={`${id}:${data.updated_at}`} office={data} />
     </>
   );
 }

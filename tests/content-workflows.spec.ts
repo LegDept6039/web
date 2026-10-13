@@ -11,7 +11,11 @@ async function login(page: Page, user = "mho") {
 }
 async function fill(page: Page, values: Record<string, string>) {
   for (const [name, value] of Object.entries(values))
-    await page.locator(`form [name="${name}"]`).fill(value);
+    await (
+      name === "content"
+        ? page.getByRole("textbox", { name: "Content", exact: true })
+        : page.locator(`form [name="${name}"]`)
+    ).fill(value);
 }
 test("program create, stable edit, slug update, public detail and draft exclusion", async ({
   page,
@@ -27,7 +31,11 @@ test("program create, stable edit, slug update, public detail and draft exclusio
     category: "Services",
     status: "Active",
   });
+  await page
+    .getByRole("textbox", { name: "Body", exact: true })
+    .fill("Program description");
   await page.locator('form [name="published"]').check();
+  await page.locator('input[name="sort_order"]').fill("1");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page.getByRole("status")).toHaveText(
     "Record saved successfully.",
@@ -47,6 +55,9 @@ test("program create, stable edit, slug update, public detail and draft exclusio
     slug: `${slug}-renamed`,
     description: "Updated program details",
   });
+  await page
+    .getByRole("textbox", { name: "Body", exact: true })
+    .fill("Updated program details");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page.getByRole("status")).toHaveText(
     "Record saved successfully.",
@@ -136,6 +147,23 @@ test("news image create, edit by UUID after slug changes and immutable replaceme
   });
   await expect(page.getByAltText("News image preview")).toBeVisible();
   await page.locator('form [name="published"]').check();
+  await page
+    .locator("form.staff-form")
+    .evaluate((el) => ((el as HTMLFormElement).noValidate = true));
+  await page.locator('form [name="sort_order"]').fill("2147483648");
+  await page.getByRole("button", { name: "Save record", exact: true }).click();
+  await expect(page.locator(".staff-error")).toContainText("sort position");
+  await fill(page, {
+    slug,
+    title: `Image news ${info.project.name}`,
+    category: "Services",
+    date: "2026-10-08",
+    excerpt: "News excerpt",
+    content: "First story",
+    sort_order: "1",
+  });
+  await page.locator('form [name="published"]').check();
+  await page.locator('input[name="sort_order"]').fill("1");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page.getByRole("status")).toHaveText(
     "Record saved successfully.",
@@ -163,9 +191,9 @@ test("news image create, edit by UUID after slug changes and immutable replaceme
     "Record saved successfully.",
   );
   await page.goto(edit!);
-  await expect(page.locator('form [name="content"]')).toHaveValue(
-    "Updated story",
-  );
+  await expect(
+    page.getByRole("textbox", { name: "Content", exact: true }),
+  ).toHaveText("Updated story");
   const second = await page
     .getByAltText("News image preview")
     .getAttribute("src");
@@ -196,6 +224,52 @@ test("news image create, edit by UUID after slug changes and immutable replaceme
   );
   expect(denied).toBe(403);
 });
+test("Legislative news creation receives its owning department for image uploads", async ({
+  page,
+}, info) => {
+  const png = await sharp("public/images/logos/seal.png")
+    .resize(40, 40)
+    .png()
+    .toBuffer();
+  await page.route("https://fixture.supabase.test/storage/**", (r) =>
+    r.request().method() === "PUT"
+      ? r.fulfill({
+          json: { Key: "fixture-upload" },
+          headers: { "Access-Control-Allow-Origin": "*" },
+        })
+      : r.fulfill({ contentType: "image/png", body: png }),
+  );
+  await login(page, "legislative-editor");
+  await page.goto(
+    "/admin/content/news/new?office=10000000-0000-4000-8000-000000000004",
+  );
+  const slug = `legislative-image-${info.project.name}`;
+  await fill(page, {
+    slug,
+    title: slug,
+    category: "Legislative",
+    date: "2026-10-08",
+    excerpt: "Test image",
+    content: "Test story",
+  });
+  await page
+    .locator('input[name="news_image"]')
+    .setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: png });
+  await page.getByRole("button", { name: "Save record", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText(
+    "Record saved successfully.",
+  );
+  await page
+    .getByRole("row")
+    .filter({ hasText: slug })
+    .getByRole("link", { name: "Edit", exact: true })
+    .click();
+  await expect(page.getByAltText("News image preview")).toHaveAttribute(
+    "src",
+    new RegExp(`legislative-access_news_${slug}_`),
+  );
+});
+
 test("publication status and department-page-and-head shortcut preserve editor access", async ({
   page,
 }, info) => {
@@ -233,6 +307,7 @@ test("publication status and department-page-and-head shortcut preserve editor a
   await login(page, "superadmin");
   await page.goto(`/superadmin/departments/${office}`);
   await page.locator('form [name="published"]').check();
+  await page.locator('input[name="sort_order"]').fill("1");
   await page
     .getByRole("button", { name: "Save department", exact: true })
     .click();

@@ -31,7 +31,7 @@ npm start
 - `public/images/`: local image assets and folders for future official photos.
 - `tests/`: browser checks for navigation, search/filter combinations, document details, and mobile layouts.
 
-The default mock mode requires no credentials. To connect Supabase, follow [the Supabase setup guide](docs/SUPABASE.md): create the project, run the supplied SQL migrations and optional seed, then configure `.env.local`. For staff authentication and the superadmin portal, follow [the account setup guide](docs/AUTH.md). Type `/login` directly into the address bar; the public website does not link to it.
+Supabase is the default content source. Use `CONTENT_SOURCE=mock` explicitly for an isolated preview without credentials. To connect Supabase, follow [the Supabase setup guide](docs/SUPABASE.md): create the project, run the supplied SQL migrations and optional seed, then configure `.env.local`. For staff authentication and the superadmin portal, follow [the account setup guide](docs/AUTH.md). Type `/login` directly into the address bar; the public website does not link to it.
 
 ## Pages and interactions
 
@@ -86,3 +86,5 @@ Legislative officials, image uploads, and single-office Legislative Access: [set
 Department ownership and public department pages: apply migration 008 before deploying this revision. See [setup and verification](docs/DEPARTMENT-IMPLEMENTATION.md).
 
 Current Department setup: [migration 009 and dynamic workflow](docs/DYNAMIC-DEPARTMENTS.md). Apply 009 after 001-008 before deploying this revision.
+
+Current admin authoring: [migration 012, rich text, publication order and Offices navigation](docs/ADMIN-AUTHORING.md). Apply 012 after 011 before deploying this application version.

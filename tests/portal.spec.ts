@@ -228,3 +228,60 @@ test("compact legislative tables prioritize full long titles on both screen size
     });
   }
 });
+
+test("dropdown dismissal, focus, route aliases and activity department filter", async ({
+  page,
+}, info) => {
+  await page.goto("/");
+  if (info.project.name === "mobile")
+    await page.getByRole("button", { name: "Open navigation" }).click();
+  const executive = page.getByRole("button", {
+    name: "Executive",
+    exact: true,
+  });
+  const legislative = page.getByRole("button", {
+    name: "Legislative",
+    exact: true,
+  });
+  await executive.click();
+  await expect(executive).toHaveAttribute("aria-expanded", "true");
+  await executive.click();
+  await expect(executive).toHaveAttribute("aria-expanded", "false");
+  await executive.click();
+  await legislative.click();
+  await expect(executive).toHaveAttribute("aria-expanded", "false");
+  await page.keyboard.press("Escape");
+  await expect(legislative).toBeFocused();
+  await expect(legislative).toHaveAttribute("aria-expanded", "false");
+  await executive.click();
+  await page.locator("main h1").click();
+  await expect(
+    page.locator('button[aria-controls="menu-Executive"]'),
+  ).toHaveAttribute("aria-expanded", "false");
+  if (info.project.name === "mobile")
+    await page.getByRole("button", { name: "Open navigation" }).click();
+  await executive.click();
+  await page
+    .locator("#menu-Executive")
+    .getByRole("link", { name: "Municipal Mayor", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/mayor$/);
+  await expect(
+    page.getByRole("link", { name: "View Executive Departments" }),
+  ).toHaveAttribute("href", "/departments");
+  await page.goto("/activities");
+  await expect(
+    page.getByRole("combobox", { name: "Department", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("combobox", { name: "News category" }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("textbox", { name: "Search news" })
+    .fill("no-such-activity-123");
+  await expect(page.getByText("No matching results")).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("activities-filter.png"),
+    fullPage: true,
+  });
+});

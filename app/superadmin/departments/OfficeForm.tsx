@@ -1,7 +1,9 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { saveOffice, deleteOffice } from "./actions";
 import type { Office } from "@/lib/offices/permissions";
+import { PublicationFields } from "@/components/admin/PublicationFields";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 export function OfficeForm({
   office,
 }: {
@@ -16,7 +18,16 @@ export function OfficeForm({
     sort_order?: number;
   };
 }) {
-  const [message, action, pending] = useActionState(saveOffice, "");
+  const [branch, setBranch] = useState(office?.department || "executive");
+  const selectedFiles = useRef<Record<string, File>>({});
+  const [message, action, pending] = useActionState(
+    async (state: string, form: FormData) => {
+      for (const [name, file] of Object.entries(selectedFiles.current))
+        form.set(name, file);
+      return saveOffice(state, form);
+    },
+    "",
+  );
   const [deleteMessage, remove, deleting] = useActionState(deleteOffice, "");
   const hidden = (
     <>
@@ -26,7 +37,20 @@ export function OfficeForm({
   );
   return (
     <>
-      <form className="staff-form staff-card" action={action}>
+      <form
+        className="staff-form staff-card"
+        action={action}
+        onChange={(event) => {
+          const input = event.target;
+          if (input instanceof HTMLSelectElement && input.name === "department")
+            setBranch(input.value as "executive" | "legislative");
+          if (input instanceof HTMLInputElement && input.type === "file") {
+            const file = input.files?.[0];
+            if (file) selectedFiles.current[input.name] = file;
+            else delete selectedFiles.current[input.name];
+          }
+        }}
+      >
         {hidden}
         <label>
           Department name
@@ -58,6 +82,7 @@ export function OfficeForm({
           Branch
           <select
             name="department"
+            required
             defaultValue={office?.department || "executive"}
             disabled={Boolean(office)}
           >
@@ -78,11 +103,7 @@ export function OfficeForm({
         </label>
         <label>
           Body / About content
-          <textarea
-            name="body"
-            defaultValue={office?.body}
-            maxLength={30000}
-          />
+          <textarea name="body" defaultValue={office?.body} maxLength={30000} />
         </label>
         <label>
           Department Head Name
@@ -108,52 +129,35 @@ export function OfficeForm({
             maxLength={10000}
           />
         </label>
-        <label>
-          Department Image (JPEG, PNG, WebP; up to 2 MB)
-          <input
-            type="file"
-            name="department_image"
-            accept="image/jpeg,image/png,image/webp"
-          />
-        </label>
+        <ImageUpload
+          name="department_image"
+          label="Department Image"
+          current={office?.image_url}
+        />
         {office?.image_url && (
           <label>
             <input type="checkbox" name="remove_image" />
             Remove current department image
           </label>
         )}
-        <label>
-          Department Head Photo (JPEG, PNG, WebP; up to 2 MB)
-          <input
-            type="file"
-            name="photo"
-            accept="image/jpeg,image/png,image/webp"
-          />
-        </label>
+        <ImageUpload
+          name="photo"
+          label="Department Head Photo"
+          current={office?.head_photo}
+        />
         {office?.head_photo && (
           <label>
             <input type="checkbox" name="remove_photo" />
             Remove current head photo
           </label>
         )}
-        <label>
-          Display Order
-          <input
-            type="number"
-            name="sort_order"
-            step="1"
-            defaultValue={office?.sort_order || 0}
-            required
-          />
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="published"
-            defaultChecked={office ? office.published : true}
-          />
-          Published
-        </label>
+        <PublicationFields
+          collection="departments"
+          branch={branch}
+          original={office?.id}
+          published={office ? office.published : false}
+          position={office?.sort_order}
+        />
         <label>
           <input
             type="checkbox"

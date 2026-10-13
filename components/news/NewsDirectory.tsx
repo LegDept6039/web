@@ -1,11 +1,18 @@
-﻿"use client";
+"use client";
 import { useState } from "react";
 import { Search, X } from "lucide-react";
 import type { NewsArticle } from "@/types";
 import { NewsGrid } from "./NewsCard";
 import { EmptyState } from "@/components/shared/ui";
-export function NewsDirectory({ articles }: { articles: NewsArticle[] }) {
+export function NewsDirectory({
+  articles,
+  departments,
+}: {
+  articles: NewsArticle[];
+  departments?: { id: string; name: string }[];
+}) {
   const [query, setQuery] = useState("");
+  const [department, setDepartment] = useState("");
   const [category, setCategory] = useState("All updates");
   const categories = [
     "All updates",
@@ -13,7 +20,9 @@ export function NewsDirectory({ articles }: { articles: NewsArticle[] }) {
   ];
   const filtered = articles.filter(
     (n) =>
-      (category === "All updates" || n.category === category) &&
+      (departments
+        ? !department || n.officeId === department
+        : category === "All updates" || n.category === category) &&
       `${n.title} ${n.excerpt} ${n.category}`
         .toLowerCase()
         .includes(query.toLowerCase()),
@@ -30,21 +39,39 @@ export function NewsDirectory({ articles }: { articles: NewsArticle[] }) {
             placeholder="Search news and updates…"
           />
         </label>
-        <label className="select-field">
-          <span className="sr-only">News category</span>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            {categories.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </label>
+        {departments ? (
+          <label className="select-field">
+            <span className="sr-only">Department</span>
+            <select
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+            >
+              <option value="">All Departments</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <label className="select-field">
+            <span className="sr-only">News category</span>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              {categories.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+        )}
         <button
           className="reset-button"
           onClick={() => {
             setQuery("");
+            setDepartment("");
             setCategory("All updates");
           }}
         >

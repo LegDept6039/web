@@ -47,3 +47,12 @@ Recovery validation: build, standalone typecheck, lint and three diagnostic/sess
 See `tests/login-resolution.spec.ts` for Superadmin without membership, Legislative editor, department editor, inactive account, invalid credentials, missing profile, no membership, invalid role and profile/membership query errors. Database tests exercise self-profile/membership RLS after migrations through 010 and retain cross-department boundaries. Diagnostics tests check credential redaction. Browser transport fixtures are isolated; they do not prove live hosted login.
 
 Validation completed: production build, standalone typecheck and lint passed; all 10 targeted data/diagnostic tests passed; all 28 desktop/mobile login and administration scenarios reported passing assertions. Windows browser-server teardown remained running and the owned session was interrupted after collecting results (command exit 1 from teardown). The live audit was read-only; no real account login was attempted without the user's credentials.
+
+
+## AuthRetryableFetchError, status 0 (2026-10-09)
+
+Status 0 / fetch failed is a transport failure, not a Supabase password rejection. Error-code formatting now omits undefined/null codes, and the sign-in form reports connection failures separately from invalid credentials or service HTTP errors. Four diagnostics regression tests and focused lint passed.
+
+Read-only diagnostics on the local machine: configured Supabase DNS resolved to IPv4 addresses; Auth health and supabase.com HTTPS timed out in Node, and supabase.com timed out in Windows curl. An unrelated Microsoft HTTPS request succeeded over IPv6 but timed out when forced to IPv4. Windows reported IPv4 LocalNetwork and IPv6 Internet. This points to unavailable IPv4 internet connectivity on the tested network, rather than a credentials/schema problem. No credentials, database records, session policies or network settings were changed.
+
+Try a different connection such as a phone hotspot, or restore IPv4 internet access through the router/network administrator. Retry localhost login after connectivity is restored. Do not reset passwords or reapply SQL migrations to address this transport failure. Existing SDK refresh retries explain the long waits; transient network errors must not be treated as terminal invalid-refresh errors or used to clear valid sessions.

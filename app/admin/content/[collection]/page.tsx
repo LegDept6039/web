@@ -83,6 +83,7 @@ export default async function ContentPage({
                   <th>Record</th>
                   <th>Office</th>
                   <th>Status</th>
+                  <th>Sort Order</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -101,6 +102,7 @@ export default async function ContentPage({
                             ?.short_name || "Unassigned"}
                     </td>
                     <td>{row.published ? "Published" : "Draft"}</td>
+                    <td>{row.sort_order}</td>
                     <td>
                       <Link
                         href={`/admin/content/${collection}/edit/${encodeURIComponent(row[key])}${office ? `?office=${office}` : ""}`}

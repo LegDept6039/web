@@ -1,3 +1,4 @@
+import { RichText } from "@/components/shared/RichText";
 import { NewsSource } from "@/components/news/NewsSource";
 export const dynamicParams = true;
 import Link from "next/link";
@@ -51,9 +52,7 @@ export default async function Page({
         </div>
         {a.isSample && <PreviewNote />}
         <div className="article-body">
-          {a.content.map((p) => (
-            <p key={p}>{p}</p>
-          ))}
+          <RichText document={a.richBody} legacy={a.content} />
         </div>
       </article>
       <div className="mt-16">

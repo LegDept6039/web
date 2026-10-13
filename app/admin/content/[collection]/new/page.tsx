@@ -22,7 +22,7 @@ export default async function NewContent({
   const scope = workflow(context, office);
   if (!available(context, collection, office, "write")) notFound();
   const offices = context.offices.filter(
-    (o) => o.department === "executive" && allowed(context, o.id, "write"),
+    (o) => o.department === scope && allowed(context, o.id, "write"),
   );
   const superadmin = context.profile.role === "superadmin";
   if (!superadmin && scope === "executive" && !offices.length)
@@ -38,6 +38,7 @@ export default async function NewContent({
       />
       <h1>Add {label(collection).toLowerCase()} record</h1>
       <ContentForm
+        key={`${collection}:${office || scope}`}
         collection={collection}
         scope={scope}
         offices={offices}

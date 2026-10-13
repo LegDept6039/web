@@ -129,7 +129,11 @@ export function available(
   officeId?: string,
   operation: Operation = "read",
 ) {
-  if (context.profile.role === "superadmin") return true;
+  if (context.profile.role === "superadmin") {
+    if (!officeId) return true;
+    const office = context.offices.find((o) => o.id === officeId && o.active);
+    return Boolean(office && branchAllows(office.department, collection));
+  }
   const branch = workflow(context, officeId);
   return context.offices.some(
     (o) =>

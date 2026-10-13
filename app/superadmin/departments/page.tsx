@@ -13,7 +13,7 @@ export default async function Offices({
     .select("*", { count: "exact" })
     .is("archived_at", null)
     .order("department")
-    .order("name")
+    .order("sort_order")
     .order("id")
     .range((page - 1) * 25, page * 25 - 1);
   return (
@@ -37,6 +37,7 @@ export default async function Offices({
                 <th>Branch</th>
                 <th>Status</th>
                 <th>Publication Status</th>
+                <th>Sort Order</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -57,6 +58,7 @@ export default async function Offices({
                       {o.published ? "Published" : "Unpublished"}
                     </span>
                   </td>
+                  <td>{o.sort_order}</td>
                   <td>
                     <Link href={`/superadmin/departments/${o.id}`}>
                       Edit / Deactivate

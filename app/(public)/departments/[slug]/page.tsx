@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { getDepartment, getDepartmentContent } from "@/lib/api";
 import { PageHero } from "@/components/shared/ui";
 import { OfficialPhoto } from "@/components/officials/OfficialPhoto";
+import { DepartmentImage } from "@/components/departments/DepartmentImage";
 import { NewsGrid } from "@/components/news/NewsCard";
 import { ProgramGrid } from "@/components/departments/DepartmentGrid";
 import { DepartmentContacts } from "@/components/departments/DepartmentContacts";
@@ -40,6 +41,11 @@ export default async function Page({
         <Link className="text-link" href="/departments">
           All departments
         </Link>
+        {d.imageUrl && (
+          <div className="department-feature-image">
+            <DepartmentImage src={d.imageUrl} name={d.name} />
+          </div>
+        )}
         <section
           className="department-profile"
           aria-label="Department head and overview"
@@ -73,7 +79,7 @@ export default async function Page({
         <section className="mt-16">
           <h2 className="mb-6">Department news</h2>
           {news.length ? (
-            <NewsGrid articles={news} />
+            <NewsGrid articles={news} compact />
           ) : (
             <p>No news has been published by this department yet.</p>
           )}

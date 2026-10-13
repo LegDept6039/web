@@ -1,3 +1,4 @@
+import { publicationPosition } from "./publication";
 import {
   definitions,
   decodeRecord,
@@ -64,11 +65,6 @@ export function parseContent(collection: Collection, form: FormData) {
       "Use lowercase letters, numbers, and single hyphens for the slug.",
     );
   row.published = form.get("published") === "on";
-  row.sort_order = Number(form.get("sort_order") || 0);
-  if (
-    !Number.isSafeInteger(row.sort_order) ||
-    Math.abs(Number(row.sort_order)) > 2147483647
-  )
-    throw new Error("Sort order must be a valid integer.");
+  row.sort_order = publicationPosition(form);
   return row;
 }

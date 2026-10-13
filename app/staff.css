@@ -19,6 +19,7 @@
   margin-top: 24px;
 }
 .staff-form label {
+  position: relative;
   display: grid;
   gap: 6px;
   font-weight: 600;
@@ -365,4 +366,113 @@ html:has(.admin-shell) {
 .publication-status.is-unpublished {
   color: #664812;
   background: #fff4d6;
+}
+
+.staff-form label:has(> input:required)::before,
+.staff-form label:has(> select:required)::before,
+.staff-form label:has(> textarea:required)::before {
+  content: "* " / "";
+  position: absolute;
+  inset-inline-start: -12px;
+  top: 0;
+  color: #b42318;
+}
+.required-star,
+.required-field-title > span {
+  color: #b42318;
+}
+.rich-editor {
+  border: 1px solid #cad5df;
+  border-radius: 4px;
+  margin: 8px 0 20px;
+}
+.rich-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  border-bottom: 1px solid #cad5df;
+  background: #f3f6f9;
+}
+.rich-toolbar button {
+  padding: 6px 9px;
+  border: 1px solid #b8c6d4;
+  background: white;
+  border-radius: 3px;
+  font-size: 12px;
+}
+.rich-toolbar button[aria-pressed="true"] {
+  background: #102b43;
+  color: white;
+}
+.rich-toolbar button:disabled {
+  opacity: 0.5;
+}
+.rich-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.rich-toolbar select {
+  width: auto;
+  margin: 0;
+  padding: 4px;
+}
+.rich-editor-content {
+  min-height: 220px;
+  padding: 16px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.rich-editor-content:focus {
+  outline: 2px solid #b48b37;
+  outline-offset: 2px;
+}
+.rich-editor .staff-note,
+.rich-editor > p {
+  padding: 8px 16px;
+}
+.publication-fields {
+  margin: 12px 0;
+}
+.office-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+.office-toggle span {
+  overflow-wrap: anywhere;
+}
+.office-toggle[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+.office-toggle:hover,
+.office-toggle.is-active {
+  background: #ffffff12;
+}
+.offices-nav .admin-module-links a {
+  font-size: 12px;
+  padding: 7px 12px;
+}
+.offices-nav a[aria-current="page"] {
+  background: #ffffff20;
+  border-left: 3px solid #d2af60;
+}
+
+.offices-nav {
+  width: 100%;
+  min-width: 0;
+}
+.offices-nav > .admin-nav-label {
+  display: block;
 }

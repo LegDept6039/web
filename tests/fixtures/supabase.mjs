@@ -160,6 +160,54 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
   ];
   const programs = [];
   const department_contacts = [];
+  for (const [i, d] of departments.filter((d) => d.published).entries())
+    d.sort_order = i + 1;
+  const collections = {
+    officials,
+    news,
+    programs,
+    departments,
+    department_contacts,
+  };
+  const scope = (table, row) =>
+    table === "departments"
+      ? row.department
+      : `${row.content_scope}:${row.office_id || "unassigned"}`;
+  function reorder(table, old, next) {
+    const all = collections[table];
+    if (!all) return;
+    if (
+      old &&
+      next &&
+      old.published === next.published &&
+      old.sort_order === next.sort_order &&
+      scope(table, old) === scope(table, next)
+    )
+      return;
+    if (old?.published)
+      for (const r of all)
+        if (
+          r !== old &&
+          r.published &&
+          scope(table, r) === scope(table, old) &&
+          r.sort_order > old.sort_order
+        ) {
+          r.sort_order--;
+          r.updated_at = new Date().toISOString();
+        }
+    if (next?.published)
+      for (const r of all)
+        if (
+          r !== old &&
+          r.published &&
+          scope(table, r) === scope(table, next) &&
+          r.sort_order >= next.sort_order
+        ) {
+          r.sort_order++;
+          r.updated_at = new Date().toISOString();
+        }
+    if (next && !next.published) next.sort_order = 0;
+  }
   const authUser = (p) => ({
     id: p.user_id,
     email: p.email,
@@ -224,7 +272,10 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         url: url.pathname.replace("/storage/v1", "") + "?token=fixture-upload",
       });
     if (
-      (url.pathname.startsWith("/storage/v1/object/municipal-news-staging/") || url.pathname.startsWith("/storage/v1/object/public/municipal-media/")) &&
+      (url.pathname.startsWith("/storage/v1/object/municipal-news-staging/") ||
+        url.pathname.startsWith(
+          "/storage/v1/object/public/municipal-media/",
+        )) &&
       method === "GET"
     ) {
       const { default: sharp } = await import("sharp");
@@ -367,6 +418,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             body: body.body ?? "",
             head_description: body.head_description ?? "",
           });
+        reorder(table, null, row);
         ({ officials, news, programs, departments, department_contacts })[
           table
         ].push(row);
@@ -434,6 +486,9 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       for (const [key, val] of url.searchParams) {
         if (val.startsWith("eq."))
           rows = rows.filter((r) => String(r[key]) === val.slice(3));
+        if (val.startsWith("neq."))
+          rows = rows.filter((r) => String(r[key]) !== val.slice(4));
+        if (val === "not.is.null") rows = rows.filter((r) => r[key] != null);
         if (val.startsWith("is.null"))
           rows = rows.filter((r) => r[key] == null);
         if (val.startsWith("in.(")) {
@@ -442,17 +497,35 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         }
       }
       if (method === "PATCH") {
-        rows.forEach((r) =>
-          Object.assign(r, body, { updated_at: new Date().toISOString() }),
-        );
+        rows.forEach((r) => {
+          const next = { ...r, ...body };
+          reorder(table, r, next);
+          Object.assign(r, next, { updated_at: new Date().toISOString() });
+        });
         return response(rows);
       }
       if (method === "DELETE") {
-        const target = { officials, news, programs, departments }[table];
+        const target = collections[table];
         if (target)
-          for (const row of rows) target.splice(target.indexOf(row), 1);
+          for (const row of rows) {
+            reorder(table, row, null);
+            target.splice(target.indexOf(row), 1);
+          }
         return response(rows);
       }
+      const order = (url.searchParams.get("order") || "")
+        .split(",")
+        .filter(Boolean);
+      rows = [...rows].sort((a, b) => {
+        for (const field of order) {
+          const [key, direction] = field.split(".");
+          const x = a[key],
+            y = b[key];
+          const cmp = x === y ? 0 : x < y ? -1 : 1;
+          if (cmp) return direction === "desc" ? -cmp : cmp;
+        }
+        return 0;
+      });
       const count = rows.length;
       const offset = Number(url.searchParams.get("offset") || 0),
         limit = Number(url.searchParams.get("limit") || 1000);

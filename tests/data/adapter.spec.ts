@@ -206,3 +206,46 @@ test("department detail and owned resources use database filters with publicatio
     );
   }
 });
+
+test("homepage reads stop at four with stable ordering and publication filters", async () => {
+  const calls: URL[] = [];
+  const result = await readSupabaseCollection(
+    "departments",
+    config,
+    async (url) => {
+      const u = new URL(url);
+      calls.push(u);
+      return Response.json(
+        Array.from({ length: 2 }, (_, i) => ({
+          ...row,
+          id: `dept-${Number(u.searchParams.get("offset")) + i}`,
+        })),
+        { headers: { "content-range": "0-1/20" } },
+      );
+    },
+    {},
+    4,
+  );
+  expect(result).toHaveLength(4);
+  expect(calls).toHaveLength(2);
+  expect(calls.map((u) => u.searchParams.get("limit"))).toEqual(["4", "2"]);
+  for (const u of calls) {
+    expect(u.searchParams.get("order")).toBe("sort_order.asc,id.asc");
+    expect(u.searchParams.get("published")).toBe("eq.true");
+    expect(u.searchParams.get("active")).toBe("eq.true");
+    expect(u.searchParams.get("department")).toBe("eq.executive");
+  }
+  await readSupabaseCollection(
+    "officials",
+    config,
+    async (url) => {
+      const u = new URL(url);
+      expect(u.searchParams.get("branch")).toBe("eq.legislative");
+      expect(u.searchParams.get("legislative_role")).toBe("not.is.null");
+      expect(u.searchParams.get("limit")).toBe("4");
+      return Response.json([]);
+    },
+    { branch: "legislative" },
+    4,
+  );
+});

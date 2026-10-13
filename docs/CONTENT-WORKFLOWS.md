@@ -1,5 +1,6 @@
 # Department, program and news workflows (migration 011)
 
+Current publication, ordering, rich-text editing and office-navigation behavior is documented in [Admin authoring (migration 012)](ADMIN-AUTHORING.md). Apply 012 after 011 for this application version.
 ## Apply before deploying this version
 
 After migrations 001–010, run the **contents** of `supabase/migrations/202610080011_content_workflows.sql` in Supabase SQL Editor. Do not paste its filename or rerun the historical seed. Then deploy the application and run `npm run db:check` with the target environment configured. No live migration or deployment was performed during this implementation.
@@ -52,3 +53,25 @@ Local tests use PGlite for real SQL/RLS and an isolated Supabase transport for b
 - Some Windows browser-server teardown runs needed interruption after assertions. A trace-writing ENOSPC error was resolved by removing only generated production build cache; the subsequent build passed. Sandbox helper initialization failed on resume; remaining checks ran through approved execution outside that sandbox.
 
 The browser Storage transport is simulated. Actual byte validation tests use Sharp, and actual SQL policy tests use PGlite. Perform one real hosted upload and edit check after applying migration 011 and deploying; no live upload, live migration, or deployment was performed here.
+
+## Image save/display follow-up
+
+A read-only check on 2026-10-08 confirmed the configured project's public media bucket, private news staging bucket, allowed image types and 10 MiB limits. The built image hostname matched that project. At the time of the check, none of its six news or eighteen department records had a remote image reference; this is not evidence that Vercel uses the same environment.
+
+The department detail page omitted `image_url` entirely and displayed only the head photo. It now renders the saved department image above the head section. Superadmin department forms now preview both selected and saved images.
+
+The content creation page supplied only Executive offices to its form, even in Legislative workflows. Legislative news upload preparation therefore lacked the owning department. It now supplies authorized offices from the selected branch. Form instances are keyed by record/office so an unsaved selection cannot carry into a different record.
+
+React resets native file inputs after a Server Action returns a validation error. Previously the preview remained visible while a retry could submit no file. Content and Superadmin department forms now retain selected files across retries, matching their previews. Server-side file reading uses the FormData file interface rather than a realm-specific `instanceof File` check; malformed attachments fail explicitly instead of being silently skipped, while empty native file inputs remain optional. Department image selection now validates its existing 2 MiB/type limit immediately. News retains its 10 MiB limit.
+
+These fixes need an application update, not a new SQL migration. Reopen the affected record, select the image again and save; a previous save with no stored image reference cannot recover the original file. Local browser fixtures explicitly exercise news and department validation-error retries and the public department image. Live data was inspected but not changed.
+
+## Photo size limit
+
+Official photos, department images and department-head photos now accept JPEG/PNG/WebP files up to 10 MiB each. News remains at 10 MiB. Server validation and client labels use the same limit. Local/self-hosted Server Actions allow 22 MiB for two department photos plus form data. Restart the app after this configuration change.
+
+Vercel still caps function requests at 4.5 MB. The new request setting does not override that platform limit: department/official photos above that request size need a direct-to-Storage flow before they can work on Vercel. News already uses direct Storage uploads. No database migration is required for this size setting; migration 011 already allows 10 MiB in the media bucket.
+
+## Activities navigation and filtering
+
+`/activities` and `/executive/activities` now filter published Executive news using department UUIDs from the public department directory. Editorial category remains independent. Existing ownership enforcement and source attribution are unchanged. See [UI and navigation improvements](UI-NAVIGATION.md).

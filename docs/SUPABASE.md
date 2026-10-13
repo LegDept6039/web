@@ -1,3 +1,5 @@
+> Current application: apply migrations through **012**, in order. For an existing 011 installation, run the contents of `supabase/migrations/202610100012_admin_authoring.sql` once, then deploy. See [Admin authoring](ADMIN-AUTHORING.md).
+
 > Department workflow update: after migration 009, apply `supabase/migrations/202610050010_department_identity.sql`. See [Dynamic Departments](DYNAMIC-DEPARTMENTS.md) for the complete Superadmin workflow and upgrade notes.
 
 > Migration **009** consolidates the Department system. See [Dynamic departments](DYNAMIC-DEPARTMENTS.md) for the current architecture and deployment steps.
@@ -32,9 +34,18 @@ Open **SQL Editor ? New query**. Run these files in order, one at a time:
 2. `supabase/migrations/202609300002_media.sql` — creates the public `municipal-media` storage bucket.
 3. `supabase/migrations/202609300003_auth.sql` - initial staff authentication.
 4. `supabase/migrations/202610010004_office_access.sql` - roles, offices, permissions, ownership, audit logs, and initial offices.
-5. Optional: `supabase/seed.sql` — inserts the existing sample content so the connected site has content immediately.
+5. `supabase/migrations/202610010005_legislative_modules.sql` - legislative content structures.
+6. Optional, new historical setup only: `supabase/seed.sql` — inserts the existing sample content so the connected site has content immediately.
 
-Run each migration once on a new project. If a table already exists, inspect the existing schema instead of dropping it. The optional seed can be rerun safely: `ON CONFLICT DO NOTHING` preserves existing records and edits. Seeded records are published but marked `is_sample=true` and contain fictional content.
+7. `supabase/migrations/202610010006_official_photos.sql`.
+8. `supabase/migrations/202610010007_single_legislative_access.sql`.
+9. `supabase/migrations/202610020008_department_scope.sql`.
+10. `supabase/migrations/202610020009_dynamic_departments.sql`.
+11. `supabase/migrations/202610050010_department_identity.sql`.
+12. `supabase/migrations/202610080011_content_workflows.sql`.
+13. `supabase/migrations/202610100012_admin_authoring.sql`.
+
+Open each file locally and paste its SQL **contents**, not its filename, into a new query. Run each migration once. Existing projects should apply only missing migrations in sequence. Do not drop existing tables to make a migration run. The optional historical seed belongs before migration 008 and must not be rerun against the consolidated schema; seeded sample content is fictional.
 
 ## 3. Configure local development
 

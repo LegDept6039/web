@@ -45,7 +45,8 @@ test("new department becomes public, assignable and manageable without adding so
   await page
     .getByLabel("Department Head Description", { exact: true })
     .fill("Serving the community.");
-  await page.getByLabel("Display Order", { exact: true }).fill("7");
+  await page.locator('input[name="published"]').check();
+  await page.getByLabel("Display Order", { exact: true }).fill("2");
   await page
     .locator('input[name="photo"]')
     .setInputFiles({ name: "head.png", mimeType: "image/png", buffer: photo });
@@ -68,6 +69,22 @@ test("new department becomes public, assignable and manageable without adding so
     .getByRole("link", { name: "Edit / Deactivate", exact: true })
     .getAttribute("href");
   const id = href!.split("/").pop()!;
+  await page.goto(href!);
+  await page.getByLabel("Display Order", { exact: true }).fill("1");
+  await page
+    .getByRole("button", { name: "Save department", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/superadmin\/departments$/);
+  await expect(
+    page.getByRole("columnheader", { name: "Sort Order", exact: true }),
+  ).toBeVisible();
+  await page.goto("/");
+  await expect(page.locator(".department-card h2").first()).toHaveText(name);
+  expect(await page.locator(".department-card").count()).toBeLessThanOrEqual(4);
+  await page.goto("/activities");
+  await expect(
+    page.locator("select option").filter({ hasText: name }),
+  ).toHaveAttribute("value", id);
   await page.goto("/departments");
   await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
   await page.goto(`/departments/${slug}`);
@@ -81,6 +98,7 @@ test("new department becomes public, assignable and manageable without adding so
     }),
   ).toBeVisible();
   await expect(page.locator(".department-photo img")).toBeVisible();
+  await expect(page.locator(".department-feature-image img")).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Contact Information", exact: true }),
   ).toHaveCount(0);
@@ -189,6 +207,14 @@ test("new department becomes public, assignable and manageable without adding so
     mimeType: "image/png",
     buffer: photo,
   });
+  await page.locator('textarea[name="body"]').fill("x".repeat(30001));
+  await page.getByRole("button", { name: "Save record", exact: true }).click();
+  await expect(page.locator(".staff-error")).toContainText("too long");
+  await page
+    .locator('textarea[name="body"]')
+    .fill("Working with local farmers.");
+  await page.locator('input[name="head_name"]').fill("Agriculture Head");
+  await page.locator('input[name="head_title"]').fill("Department Officer");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/departments\?/);
   for (const [type, value, label] of [
@@ -201,6 +227,7 @@ test("new department becomes public, assignable and manageable without adding so
     await page.locator('input[name="value"]').fill(value);
     await page.locator('input[name="label"]').fill(label);
     await page.locator('input[name="published"]').check();
+    await page.locator('input[name="sort_order"]').fill("1");
     await page
       .getByRole("button", { name: "Save record", exact: true })
       .click();

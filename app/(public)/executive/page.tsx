@@ -32,11 +32,19 @@ export default async function Page() {
             ["Municipal Mayor", "mayor"],
             ["Departments", "department"],
             ["Programs & projects", "programs"],
-            ["Activities", "activities"],
+            ["News and Activities", "activities"],
           ].map(([n, h]) => (
             <Link
               key={h}
-              href={h === "department" ? "/departments" : `/executive/${h}`}
+              href={
+                h === "department"
+                  ? "/departments"
+                  : h === "mayor"
+                    ? "/mayor"
+                    : h === "activities"
+                      ? "/activities"
+                      : `/executive/${h}`
+              }
             >
               {n}
             </Link>

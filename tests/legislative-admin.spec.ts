@@ -82,6 +82,9 @@ test("Executive user cannot forge Legislative access", async ({ page }) => {
   );
   await expect(page.getByText("PAGE NOT FOUND", { exact: true })).toBeVisible();
   await page.goto(`/admin/content/news/new?office=${officeIds.mayor}`);
+  await page
+    .getByRole("textbox", { name: "Content", exact: true })
+    .fill("Valid content before tampering with collection access.");
   await page.locator("form.staff-form").evaluate((element) => {
     const form = element as HTMLFormElement;
     form.noValidate = true;
@@ -136,7 +139,7 @@ test("Secretary creates and uploads one official, VMO edits it, public card has 
     buffer: Buffer.from("bad"),
   });
   await expect(
-    page.getByText("Choose a JPEG, PNG, or WebP image up to 2 MB.", {
+    page.getByText("Choose a JPEG, PNG, or WebP image up to 10 MB.", {
       exact: true,
     }),
   ).toBeVisible();
@@ -145,6 +148,7 @@ test("Secretary creates and uploads one official, VMO edits it, public card has 
     .setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: png });
   await expect(page.getByAltText("Profile photo preview")).toBeVisible();
   await page.locator('input[name="published"]').check();
+  await page.locator('input[name="sort_order"]').fill("1");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/officials(?:\?|$)/);
   await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(1);
@@ -192,10 +196,10 @@ test("official photos reject oversized files and forged image contents", async (
   await page.locator('input[type="file"]').setInputFiles({
     name: "large.png",
     mimeType: "image/png",
-    buffer: Buffer.alloc(2 * 1024 * 1024 + 1),
+    buffer: Buffer.alloc(10 * 1024 * 1024 + 1),
   });
   await expect(
-    page.getByText("Choose a JPEG, PNG, or WebP image up to 2 MB.", {
+    page.getByText("Choose a JPEG, PNG, or WebP image up to 10 MB.", {
       exact: true,
     }),
   ).toBeVisible();
@@ -215,4 +219,61 @@ test("official photos reject oversized files and forged image contents", async (
   await expect(page.locator(".staff-error")).toContainText(
     "This image cannot be read.",
   );
+});
+
+test("homepage shows four sorted Legislative officials and updates after editing order", async ({
+  page,
+}, info) => {
+  await login(page, "secretary");
+  const prefix = `Sorted ${info.project.name}`;
+  const editUrls: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    await page.goto(
+      `/admin/content/officials/new?office=${officeIds.legislative}`,
+    );
+    await page
+      .getByRole("combobox", { name: "Official role", exact: true })
+      .selectOption("SANGGUNIANG_BAYAN");
+    await page.getByLabel("Name", { exact: true }).fill(`${prefix} ${i}`);
+    await page
+      .getByRole("textbox", { name: "Description", exact: true })
+      .fill("Public official test");
+    await page.locator('input[name="published"]').check();
+    await page.locator('input[name="sort_order"]').fill(String(i + 1));
+    await page
+      .getByRole("button", { name: "Save record", exact: true })
+      .click();
+    await expect(page.getByRole("status")).toHaveText(
+      "Record saved successfully.",
+    );
+    await expect(
+      page.getByRole("columnheader", { name: "Sort Order", exact: true }),
+    ).toBeVisible();
+    editUrls.push(
+      (await page
+        .getByRole("row")
+        .filter({ hasText: `${prefix} ${i}` })
+        .getByRole("link", { name: "Edit", exact: true })
+        .getAttribute("href"))!,
+    );
+  }
+  await page.goto("/");
+  await expect(page.locator(".official-card h3")).toHaveText(
+    [0, 1, 2, 3].map((i) => `${prefix} ${i}`),
+  );
+  await page.goto(editUrls[4]);
+  await page.locator('input[name="sort_order"]').fill("1");
+  await page.getByRole("button", { name: "Save record", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText(
+    "Record saved successfully.",
+  );
+  await page.goto("/");
+  await expect(page.locator(".official-card h3")).toHaveText(
+    [4, 0, 1, 2].map((i) => `${prefix} ${i}`),
+  );
+  await page.goto("/legislative/members");
+  for (let i = 0; i < 5; i++)
+    await expect(
+      page.getByRole("heading", { name: `${prefix} ${i}`, exact: true }),
+    ).toBeVisible();
 });

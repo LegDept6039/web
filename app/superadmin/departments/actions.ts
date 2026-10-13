@@ -1,5 +1,7 @@
 "use server";
+import { publicationPosition, saveError } from "@/lib/admin/publication";
 import { uploadOfficialPhoto } from "@/lib/admin/photo";
+import { uploadFile } from "@/lib/admin/upload-file";
 import { requireStaff } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -9,6 +11,14 @@ export async function saveOffice(
 ): Promise<string> {
   const { client, user } = await requireStaff(true, true);
   const id = String(form.get("id") || "");
+  let position: number;
+  try {
+    position = publicationPosition(form);
+  } catch (error) {
+    return error instanceof Error
+      ? error.message
+      : "Choose a published position.";
+  }
   const row = {
     name: String(form.get("name") || "").trim(),
     short_name: String(form.get("short_name") || "").trim(),
@@ -17,7 +27,7 @@ export async function saveOffice(
     description: String(form.get("description") || "").trim(),
     active: form.get("active") === "on",
     published: form.get("published") === "on",
-    sort_order: Number(form.get("sort_order") || 0),
+    sort_order: position,
     body: String(form.get("body") || "").trim(),
     head_name: String(form.get("head_name") || "").trim() || null,
     head_title: String(form.get("head_title") || "").trim() || null,
@@ -63,8 +73,8 @@ export async function saveOffice(
       ["photo", "head_photo"],
       ["department_image", "image_url"],
     ] as const) {
-      const file = form.get(field);
-      if (file instanceof File && file.size) {
+      const file = uploadFile(form, field);
+      if (file) {
         const uploaded = await uploadOfficialPhoto(
           client,
           user.id,
@@ -91,9 +101,12 @@ export async function saveOffice(
   if ((result.error || !result.data?.length) && uploads.length)
     await client.storage.from("municipal-media").remove(uploads);
   if (result.error)
-    return result.error.code === "23505"
-      ? "That slug is already in use, or Legislative Access already exists."
-      : "Unable to save office.";
+    return (
+      saveError(result.error.code) ||
+      (result.error.code === "23505"
+        ? "That slug is already in use, or Legislative Access already exists."
+        : "Unable to save office.")
+    );
   if (!result.data?.length) return "This office changed. Reload before saving.";
   revalidatePath("/", "layout");
   redirect("/superadmin/departments");

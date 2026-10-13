@@ -113,8 +113,13 @@ test("MHO profile photo, owned news/programs, forged office rejection and public
     excerpt: "MHO information",
     content: "Public health awareness article.",
   }))
-    await page.locator(`form [name="${name}"]`).fill(value);
+    await (
+      name === "content"
+        ? page.getByRole("textbox", { name: "Content", exact: true })
+        : page.locator(`form [name="${name}"]`)
+    ).fill(value);
   await page.locator('input[name="published"]').check();
+  await page.locator('input[name="sort_order"]').fill("1");
   await page.locator('input[name="office_id"]').evaluate((el, value) => {
     (el as HTMLInputElement).value = value;
   }, menro);
@@ -131,8 +136,13 @@ test("MHO profile photo, owned news/programs, forged office rejection and public
     excerpt: "MHO information",
     content: "Public health awareness article.",
   }))
-    await page.locator(`form [name="${name}"]`).fill(value);
+    await (
+      name === "content"
+        ? page.getByRole("textbox", { name: "Content", exact: true })
+        : page.locator(`form [name="${name}"]`)
+    ).fill(value);
   await page.locator('input[name="published"]').check();
+  await page.locator('input[name="sort_order"]').fill("1");
   await page.locator('input[name="office_id"]').evaluate((el, value) => {
     (el as HTMLInputElement).value = value;
   }, mho);
@@ -150,10 +160,31 @@ test("MHO profile photo, owned news/programs, forged office rejection and public
     category: "Health",
     status: "Active",
   }))
-    await page.locator(`form [name="${name}"]`).fill(value);
+    await (
+      name === "content"
+        ? page.getByRole("textbox", { name: "Content", exact: true })
+        : page.locator(`form [name="${name}"]`)
+    ).fill(value);
+  await page
+    .getByRole("textbox", { name: "Body", exact: true })
+    .fill("MHO vaccination services");
   await page.locator('input[name="published"]').check();
+  await page.locator('input[name="sort_order"]').fill("1");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/programs\?/);
+  await page.goto("/activities");
+  await page
+    .getByRole("combobox", { name: "Department", exact: true })
+    .selectOption(mho);
+  await expect(
+    page.getByRole("heading", { name: title, exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "Department", exact: true })
+    .selectOption(menro);
+  await expect(
+    page.getByRole("heading", { name: title, exact: true }),
+  ).toHaveCount(0);
   await page.goto(`/news/${slug}`);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
   await expect(page.locator(".article .news-source a")).toHaveAttribute(
