@@ -48,9 +48,21 @@ export function DocumentDetail({
                 <dd>{d.coAuthor}</dd>
               </div>
             )}
+            {d.committeeName && (
+              <div>
+                <dt>Category</dt>
+                <dd>{d.committeeName}</dd>
+              </div>
+            )}
+            {d.sessionName && (
+              <div>
+                <dt>Session</dt>
+                <dd>{d.sessionName}</dd>
+              </div>
+            )}
           </dl>
-          <h3>Record summary</h3>
-          <p className="body-copy mt-4">{d.summary}</p>
+          <h3>Body</h3>
+          <p className="body-copy mt-4 whitespace-pre-wrap">{d.summary}</p>
           <div className="info-card my-8">
             <FileText className="mb-4" />
             <h3>Document attachment</h3>

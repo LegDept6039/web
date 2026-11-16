@@ -1,5 +1,14 @@
 "use client";
-import { DepartmentBiography } from "@/components/admin/DepartmentBiography";
+import { LegislativeFields } from "@/components/admin/LegislativeFields";
+import { PdfAttachment } from "@/components/admin/PdfAttachment";
+import { PDF_LIMIT } from "@/lib/admin/document-pdf-validation";
+import {
+  emptyOptions,
+  usesLegislativeFields,
+  isDocumentCollection,
+  type LegislativeOptions,
+} from "@/lib/legislative/config";
+import { DepartmentEditorFields } from "@/components/admin/DepartmentEditorFields";
 import dynamic from "next/dynamic";
 import { PublicationFields } from "@/components/admin/PublicationFields";
 import {
@@ -27,7 +36,9 @@ export function ContentForm({
   canDelete = false,
   superadmin = false,
   scope = "executive",
+  legislativeOptions = emptyOptions,
 }: {
+  legislativeOptions?: LegislativeOptions;
   collection: Collection;
   row?: Record<string, unknown>;
   offices: Office[];
@@ -76,6 +87,45 @@ export function ContentForm({
       }
       for (const [name, file] of Object.entries(selectedFiles.current))
         form.set(name, file);
+      const pdf = form.get("document_pdf");
+      form.delete("document_pdf");
+      if (
+        scope === "legislative" &&
+        isDocumentCollection(collection) &&
+        pdf instanceof File &&
+        pdf.size
+      ) {
+        try {
+          if (pdf.size > PDF_LIMIT || pdf.type !== "application/pdf")
+            return "Choose a PDF up to 10 MB.";
+          setUploadStatus("Uploading PDF...");
+          const response = await fetch("/admin/document-upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              collection,
+              officeId: offices.find((o) => o.department === "legislative")?.id,
+              original: form.get("original"),
+              type: pdf.type,
+              size: pdf.size,
+            }),
+          });
+          const upload = await response.json();
+          if (!response.ok)
+            throw new Error(upload.error || "Unable to prepare PDF upload.");
+          const result = await fetch(upload.signedUrl, {
+            method: "PUT",
+            headers: { "Content-Type": "application/pdf" },
+            body: pdf,
+          });
+          if (!result.ok) throw new Error("PDF upload failed. Please retry.");
+          form.set("document_upload_path", upload.path);
+          setUploadStatus("Checking PDF and saving document...");
+        } catch (error) {
+          setUploadStatus("");
+          return error instanceof Error ? error.message : "PDF upload failed.";
+        }
+      }
       const file = form.get("news_image");
       form.delete("news_image"); // Image bytes go directly to Storage, never through a Server Action.
       if (collection === "news" && file instanceof File && file.size) {
@@ -131,15 +181,10 @@ export function ContentForm({
     },
     [preview],
   );
+  const legislative =
+    scope === "legislative" && usesLegislativeFields(collection);
   const definition = definitions[collection];
-  const photoColumn = collection === "departments" ? "head_photo" : "photo_url";
-  const [departmentPreview, setDepartmentPreview] = useState<string>();
-  useEffect(
-    () => () => {
-      if (departmentPreview) URL.revokeObjectURL(departmentPreview);
-    },
-    [departmentPreview],
-  );
+  const photoColumn = "photo_url";
   const original = String(row[definition.key] || "");
   const hidden = (
     <>
@@ -156,7 +201,7 @@ export function ContentForm({
   return (
     <>
       <form
-        className="staff-form staff-card"
+        className={`staff-form staff-card${collection === "departments" ? " department-edit-form" : ""}`}
         action={action}
         onChange={(event) => {
           const input = event.target;
@@ -171,10 +216,16 @@ export function ContentForm({
       >
         {hidden}
         <fieldset disabled={!canWrite || pending}>
-          <legend>{canWrite ? "Record details" : "View only"}</legend>
+          <legend>
+            {canWrite
+              ? collection === "departments"
+                ? "Department page and head"
+                : "Record details"
+              : "View only"}
+          </legend>
           {scope === "executive" &&
-          !superadmin &&
-          (original || offices.length === 1) ? (
+          ((collection === "departments" && original) ||
+            (!superadmin && (original || offices.length === 1))) ? (
             <p>
               Owning office:{" "}
               {
@@ -212,7 +263,7 @@ export function ContentForm({
               </label>
             )
           )}
-          {["officials", "departments"].includes(collection) && (
+          {collection === "officials" && (
             <>
               {original && <p className="staff-note">Record ID: {original}</p>}
               {collection === "officials" && scope === "legislative" && (
@@ -224,11 +275,21 @@ export function ContentForm({
                     defaultValue={String(row.legislative_role || "")}
                   >
                     <option value="">Select a role...</option>
-                    {Object.entries(legislativeRoles).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
+                    {Object.entries(legislativeRoles)
+                      .filter(
+                        ([value]) =>
+                          value !== "SECRETARY_TO_THE_SANGGUNIANG_BAYAN" ||
+                          row.legislative_role === value,
+                      )
+                      .map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {value === "MUNICIPAL_VICE_MAYOR"
+                            ? "Vice-Mayor"
+                            : value === "SANGGUNIANG_BAYAN"
+                              ? "Sangguniang Bayan Member"
+                              : label}
+                        </option>
+                      ))}
                   </select>
                 </label>
               )}
@@ -291,51 +352,7 @@ export function ContentForm({
             </>
           )}
           {collection === "departments" && (
-            <label>
-              Department image (JPEG, PNG, WebP; up to 10 MB)
-              <input
-                type="file"
-                name="department_image"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  setPhotoError("");
-                  if (
-                    file &&
-                    (!file.size ||
-                      file.size > 10 * 1024 * 1024 ||
-                      !["image/jpeg", "image/png", "image/webp"].includes(
-                        file.type,
-                      ))
-                  ) {
-                    e.target.value = "";
-                    setDepartmentPreview(undefined);
-                    setPhotoError(
-                      "Choose a JPEG, PNG, or WebP department image up to 10 MB.",
-                    );
-                    return;
-                  }
-                  setDepartmentPreview(
-                    file ? URL.createObjectURL(file) : undefined,
-                  );
-                }}
-              />
-              {Boolean(departmentPreview || row.image_url) && (
-                <Image
-                  unoptimized
-                  width={240}
-                  height={160}
-                  src={departmentPreview || String(row.image_url)}
-                  alt="Department image preview"
-                />
-              )}
-              {Boolean(row.image_url) && (
-                <span>
-                  <input type="checkbox" name="remove_image" /> Remove
-                  department image
-                </span>
-              )}
-            </label>
+            <DepartmentEditorFields row={row} editable={canWrite} />
           )}
           {collection === "news" && (
             <>
@@ -374,11 +391,49 @@ export function ContentForm({
               {photoError && <p role="alert">{photoError}</p>}
             </>
           )}
+          {legislative && isDocumentCollection(collection) && (
+            <p className="staff-note">
+              Valid documents are published when saved.
+            </p>
+          )}
+          {legislative && (
+            <LegislativeFields
+              collection={collection}
+              row={row}
+              options={legislativeOptions}
+            />
+          )}
+          {legislative && isDocumentCollection(collection) && (
+            <PdfAttachment
+              url={String(
+                row[collection === "documents" ? "file_url" : "pdf_url"] || "",
+              )}
+            />
+          )}
           {Object.entries(definition.fields).map(([name, field]) => {
             if (
-              ["officeId", "contentScope", "headPhoto", "imageUrl"].includes(
-                name,
-              )
+              [
+                "reportFrequency",
+                "reportYear",
+                "annualPdfPath",
+                "q1PdfPath",
+                "q2PdfPath",
+                "q3PdfPath",
+                "q4PdfPath",
+              ].includes(name)
+            )
+              return null;
+            if (legislative) return null;
+            if (scope === "legislative" && name === "isSample") return null;
+            if (collection === "departments") return null;
+            if (
+              [
+                "officeId",
+                "contentScope",
+                "headPhoto",
+                "imageUrl",
+                "attachmentPath",
+              ].includes(name)
             )
               return null;
             if (
@@ -406,24 +461,11 @@ export function ContentForm({
                 </div>
               );
             if (
-              collection === "departments" &&
-              ["name", "acronym", "slug", "active", "isSample"].includes(name)
-            )
-              return null;
-            if (
               collection === "officials" &&
               (["id", "photoUrl", "legislativeRole", "branch"].includes(name) ||
                 (scope === "legislative" && name === "role"))
             )
               return null;
-            if (collection === "departments" && name === "headDescription")
-              return (
-                <DepartmentBiography
-                  key={name}
-                  initial={String(row.head_description || "")}
-                  label="Head Description (optional)"
-                />
-              );
             const value = row[field.column];
             const required =
               !field.optional || (collection === "programs" && name === "slug");
@@ -504,16 +546,17 @@ export function ContentForm({
               />
             </div>
           )}
-          {collection !== "departments" && (
-            <PublicationFields
-              collection={collection}
-              office={selectedOffice}
-              branch={scope}
-              original={String(row.id || "")}
-              published={row.published === true}
-              position={Number(row.sort_order || 0)}
-            />
-          )}
+          {collection !== "departments" &&
+            !(legislative && isDocumentCollection(collection)) && (
+              <PublicationFields
+                collection={collection}
+                office={selectedOffice}
+                branch={scope}
+                original={String(row.id || "")}
+                published={row.published === true}
+                position={Number(row.sort_order || 0)}
+              />
+            )}
         </fieldset>
         {error && (
           <p role="alert" className="staff-error">

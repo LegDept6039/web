@@ -157,7 +157,7 @@ test("new department becomes public, assignable and manageable without adding so
     exact: true,
   });
   await expect(
-    nav.getByRole("link", { name: "MAO", exact: true }),
+    nav.getByRole("button", { name: "MAO", exact: true }),
   ).toBeVisible();
   await expect(
     nav.getByRole("link", { name: "Users & access control", exact: true }),
@@ -207,6 +207,17 @@ test("new department becomes public, assignable and manageable without adding so
     mimeType: "image/png",
     buffer: photo,
   });
+  await expect(page.locator(".image-edit-overlay")).toHaveCount(2);
+  await expect(page.getByAltText("Profile photo preview")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: info.outputPath("department-editor.png"),
+    fullPage: true,
+  });
   await page.locator('textarea[name="body"]').fill("x".repeat(30001));
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page.locator(".staff-error")).toContainText("too long");
@@ -237,6 +248,19 @@ test("new department becomes public, assignable and manageable without adding so
   await expect(
     page.getByText("Working with local farmers.", { exact: true }),
   ).toBeVisible();
+  await expect(page.locator(".department-description")).toHaveCSS(
+    "text-align",
+    "justify",
+  );
+  await expect(page.locator(".department-biography")).toHaveCSS(
+    "text-align",
+    "justify",
+  );
+  await expect(page.locator(".department-body p").first()).toHaveCSS(
+    "text-align",
+    "justify",
+  );
+
   await expect(
     page.getByRole("heading", { name: "Agriculture Head", exact: true }),
   ).toBeVisible();

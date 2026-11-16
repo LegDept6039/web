@@ -1,3 +1,8 @@
+import { legislativeOptions } from "@/lib/legislative/server";
+import {
+  usesLegislativeFields,
+  isDocumentCollection,
+} from "@/lib/legislative/config";
 import { ContentBreadcrumb } from "@/components/admin/ContentBreadcrumb";
 import { notFound, redirect } from "next/navigation";
 import { officeContext, contentAllowed } from "@/lib/offices/server";
@@ -33,12 +38,32 @@ export default async function EditContent({
     .maybeSingle();
   if (error) return <p role="alert">Unable to load record.</p>;
   if (!data || !contentAllowed(context, collection, data, "read")) notFound();
-  const requestedOffice = (await searchParams).office;
-  if (requestedOffice && requestedOffice !== data.office_id) notFound();
-  if (legacyNewsSlug || (!requestedOffice && data.office_id))
+  if (data.content_scope === "transparency")
     redirect(
-      `/admin/content/${collection}/edit/${legacyNewsSlug ? data.id : id}${data.office_id ? `?office=${data.office_id}` : ""}`,
+      `/superadmin/transparency/${collection === "documentCategories" ? "categories" : "documents"}/${id}`,
     );
+  const requestedOffice = (await searchParams).office;
+  // The record ID is stable across renames. Office is navigation context;
+  // authorize the stored owner above before correcting a stale bookmark.
+  if (legacyNewsSlug || (requestedOffice || null) !== (data.office_id || null))
+    redirect(
+      `/admin/content/${collection}/edit/${encodeURIComponent(String(data[definition.key]))}${data.office_id ? `?office=${encodeURIComponent(data.office_id)}` : ""}`,
+    );
+  if (
+    data.content_scope === "legislative" &&
+    isDocumentCollection(collection) &&
+    !data.published
+  )
+    return (
+      <p role="status">
+        This unpublished document is preserved outside the published-document
+        workspace.
+      </p>
+    );
+  const options =
+    data.content_scope === "legislative" && usesLegislativeFields(collection)
+      ? await legislativeOptions(context, data.office_id)
+      : undefined;
   return (
     <>
       <ContentBreadcrumb
@@ -48,7 +73,7 @@ export default async function EditContent({
       />
       <h1>
         {contentAllowed(context, collection, data, "write") ? "Edit" : "View"}{" "}
-        record
+        {collection === "departments" ? "department page" : "record"}
       </h1>
       <ContentForm
         key={`${collection}:${data[definition.key]}`}
@@ -57,6 +82,7 @@ export default async function EditContent({
           data.content_scope === "legislative" ? "legislative" : "executive"
         }
         row={data}
+        legislativeOptions={options}
         offices={context.offices}
         canWrite={contentAllowed(context, collection, data, "write")}
         canDelete={contentAllowed(context, collection, data, "delete")}

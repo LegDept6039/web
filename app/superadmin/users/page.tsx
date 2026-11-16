@@ -51,7 +51,7 @@ export default async function Users({
                   "Name / User ID",
                   "Email",
                   "Role",
-                  "Assigned offices",
+                  "Assigned access",
                   "Department",
                   "Status",
                   "Created",
@@ -87,7 +87,8 @@ export default async function Users({
                           )
                         </div>
                       ))}
-                      {!assigned.length ? "None" : ""}
+                      {u.transparency_access && <div>Transparency</div>}
+                      {!assigned.length && !u.transparency_access ? "None" : ""}
                     </td>
                     <td>
                       {[...new Set(assigned.map((o) => o.department))].join(

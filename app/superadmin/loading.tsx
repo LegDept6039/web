@@ -1,1 +1,1 @@
-export { SectionLoading as default } from "@/components/shared/SectionLoading";
+export { AdminSkeleton as default } from "@/components/shared/PageSkeleton";

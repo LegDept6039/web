@@ -15,6 +15,7 @@ async function load<K extends Collection>(
   if (config.source === "mock") {
     const names: Record<string, string> = {
       office_id: "officeId",
+      category_id: "categoryId",
       content_scope: "contentScope",
     };
     const rows = readMockCollection(collection).filter((row) =>

@@ -11,6 +11,12 @@ export interface Official extends ContentRecord {
   description: string;
 }
 export interface LegislativeDocument extends ContentRecord {
+  authorId?: string;
+  coAuthorId?: string;
+  committeeId?: string;
+  sessionId?: string;
+  committeeName?: string;
+  sessionName?: string;
   id: string;
   number: string;
   title: string;
@@ -39,6 +45,7 @@ export interface NewsArticle extends ContentRecord {
   content: string[];
 }
 export interface Session extends ContentRecord {
+  name?: string;
   id: string;
   number: string;
   type: "Regular session" | "Special session" | "Caucus meeting";
@@ -85,6 +92,12 @@ export interface Program extends ContentRecord {
   status: string;
 }
 export interface Committee extends ContentRecord {
+  chairId?: string;
+  viceChairId?: string;
+  member1Id?: string;
+  member2Id?: string;
+  member3Id?: string;
+  member4Id?: string;
   id: string;
   name: string;
   responsibility: string;
@@ -101,18 +114,30 @@ export interface Hearing extends ContentRecord {
 }
 
 export interface DocumentCategory extends ContentRecord {
+  contentScope?: "executive" | "legislative" | "transparency";
   id: string;
   name: string;
   description: string;
   href?: string;
 }
 export interface MunicipalDocument extends ContentRecord {
+  reportFrequency?: "annual" | "quarterly";
+  reportYear?: number;
+  annualPdfPath?: string;
+  q1PdfPath?: string;
+  q2PdfPath?: string;
+  q3PdfPath?: string;
+  q4PdfPath?: string;
+  contentScope?: "executive" | "legislative" | "transparency";
+  attachmentPath?: string;
+  documentType?: "agenda" | "minutes" | "executive-order";
+  sessionId?: string;
   id: string;
-  categoryId: string;
+  categoryId?: string;
   title: string;
   description: string;
   date: string;
-  fileUrl: string;
+  fileUrl?: string;
 }
 
 export interface DepartmentContact extends ContentRecord {

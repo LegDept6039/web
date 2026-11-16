@@ -36,3 +36,11 @@ Browser workflows use the isolated Supabase transport fixture; they do not write
 ### 3:4 portrait update
 
 Changed both public portrait containers to 3:4. Production build passed. The focused portrait browser scenario passed at 1440px, 768px and 390px; desktop/mobile screenshots were reviewed. The test server required interruption during Windows teardown after the assertion pass.
+
+### Department page editor
+
+The admin Department Page editor now follows the public detail layout: department identity, a 3:4 head portrait beside title/name/description/biography, then the About body. Department card imagery has a separate labeled area. Both image previews have keyboard-accessible Add/Change image overlays, immediate replacement previews, and removal controls. Existing JPEG/PNG/WebP 10 MB validation, upload retry handling, authorization, and save actions are retained.
+
+Public department descriptions, head biographies, and body paragraphs use justified text. The editor stacks on smaller screens. This presentation change requires no database migration.
+
+Editor verification: TypeScript, lint and production build passed. The complete dynamic-department workflow passed on desktop and mobile, including image selection, retry after a validation error, saves, public justified text, and ownership restrictions. Both editor screenshots were reviewed and no horizontal overflow was found. The Windows test-server teardown was interrupted after both scenarios reported success, so the test command exited 1 despite passing assertions. Tests used the isolated fixture, not live Supabase.

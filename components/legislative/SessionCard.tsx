@@ -15,9 +15,7 @@ export function SessionCard({ session }: { session: Session }) {
       </div>
       <div className="p-6">
         <span className="eyebrow">{session.type}</span>
-        <h2>
-          {session.number} {session.type}
-        </h2>
+        <h2>{session.name || `${session.number} ${session.type}`}</h2>
         <p className="meta">
           Sangguniang Bayan{session.isSample ? " \u00b7 Sample record" : ""}
         </p>
@@ -26,17 +24,19 @@ export function SessionCard({ session }: { session: Session }) {
           {formatDate(session.date)}
         </p>
         <p className="body-copy mt-3">{session.description}</p>
-        <details className="agenda">
-          <summary>
-            <FileText size={16} />
-            {session.isSample ? "View sample agenda" : "View agenda"}
-          </summary>
-          <ol>
-            {session.agenda.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
-        </details>
+        {session.agenda.length > 0 && (
+          <details className="agenda">
+            <summary>
+              <FileText size={16} />
+              {session.isSample ? "View sample agenda" : "View agenda"}
+            </summary>
+            <ol>
+              {session.agenda.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </details>
+        )}
       </div>
     </article>
   );

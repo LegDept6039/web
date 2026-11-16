@@ -1,1 +1,1 @@
-export { SectionLoading as default } from "@/components/shared/SectionLoading";
+export { PublicPageSkeleton as default } from "@/components/shared/PageSkeleton";

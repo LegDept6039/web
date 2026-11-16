@@ -40,7 +40,14 @@ type Field = {
 type Definition<T> = {
   table: string;
   key: string;
-  fields: { [P in keyof Omit<T, "source" | "richBody">]-?: Field };
+  fields: {
+    [
+      P in keyof Omit<
+        T,
+        "source" | "richBody" | "committeeName" | "sessionName"
+      >
+    ]-?: Field;
+  };
 };
 const text = (column: string): Field => ({ column, kind: "text" });
 const url = (column: string, optional = false): Field => ({
@@ -52,6 +59,10 @@ const date = (column: string): Field => ({ column, kind: "date" });
 const list = (column: string): Field => ({ column, kind: "list" });
 const sample: Field = { column: "is_sample", kind: "boolean" };
 const documentFields = {
+  authorId: { ...text("author_id"), optional: true },
+  coAuthorId: { ...text("co_author_id"), optional: true },
+  committeeId: { ...text("committee_id"), optional: true },
+  sessionId: { ...text("session_id"), optional: true },
   id: text("id"),
   number: text("number"),
   title: text("title"),
@@ -129,6 +140,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "sessions",
     key: "id",
     fields: {
+      name: { ...text("name"), optional: true },
       id: text("id"),
       number: text("number"),
       type: {
@@ -204,6 +216,12 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "committees",
     key: "id",
     fields: {
+      chairId: { ...text("chair_id"), optional: true },
+      viceChairId: { ...text("vice_chair_id"), optional: true },
+      member1Id: { ...text("member_1_id"), optional: true },
+      member2Id: { ...text("member_2_id"), optional: true },
+      member3Id: { ...text("member_3_id"), optional: true },
+      member4Id: { ...text("member_4_id"), optional: true },
       id: text("id"),
       name: text("name"),
       responsibility: text("responsibility"),
@@ -229,6 +247,11 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "document_categories",
     key: "id",
     fields: {
+      contentScope: {
+        ...text("content_scope"),
+        optional: true,
+        values: ["executive", "legislative", "transparency"],
+      },
       id: text("id"),
       name: text("name"),
       description: text("description"),
@@ -240,12 +263,35 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "municipal_documents",
     key: "id",
     fields: {
+      contentScope: {
+        ...text("content_scope"),
+        optional: true,
+        values: ["executive", "legislative", "transparency"],
+      },
+      attachmentPath: { ...text("attachment_path"), optional: true },
+      reportFrequency: {
+        ...text("report_frequency"),
+        optional: true,
+        values: ["annual", "quarterly"],
+      },
+      reportYear: { column: "report_year", kind: "integer", optional: true },
+      annualPdfPath: { ...text("annual_pdf_path"), optional: true },
+      q1PdfPath: { ...text("q1_pdf_path"), optional: true },
+      q2PdfPath: { ...text("q2_pdf_path"), optional: true },
+      q3PdfPath: { ...text("q3_pdf_path"), optional: true },
+      q4PdfPath: { ...text("q4_pdf_path"), optional: true },
       id: text("id"),
-      categoryId: text("category_id"),
+      categoryId: { ...text("category_id"), optional: true },
+      documentType: {
+        ...text("document_type"),
+        optional: true,
+        values: ["agenda", "minutes", "executive-order"],
+      },
+      sessionId: { ...text("session_id"), optional: true },
       title: text("title"),
       description: text("description"),
       date: date("date"),
-      fileUrl: url("file_url"),
+      fileUrl: url("file_url", true),
       isSample: sample,
     },
   },
@@ -266,7 +312,16 @@ export function decodeRecord<K extends Collection>(
 ): Collections[K] {
   if (!input || typeof input !== "object" || Array.isArray(input))
     throw new Error(`Invalid ${collection} record.`);
-  const row = input as Record<string, unknown>;
+  const row = { ...input } as Record<string, unknown>;
+  for (const [fk, join, target] of [
+    ["author_id", "author_record", "author"],
+    ["co_author_id", "co_author_record", "co_author"],
+    ["chair_id", "chair_record", "chair"],
+  ]) {
+    if (row[fk])
+      row[target] = (row[join] as { name?: string } | null)?.name || "";
+  }
+  if (row.author_id && !row.co_author_id) row.co_author = null;
   const output: Record<string, unknown> = {};
   for (const [name, field] of Object.entries(
     definitions[collection].fields,
@@ -326,6 +381,13 @@ export function decodeRecord<K extends Collection>(
   }
   if (["news", "programs"].includes(collection) && row.rich_body != null)
     output.richBody = validateRichText(row.rich_body);
+  for (const [join, key] of [
+    ["committee_record", "committeeName"],
+    ["session_record", "sessionName"],
+  ]) {
+    const relation = row[join] as { name?: string; number?: string } | null;
+    if (relation) output[key] = relation.name || relation.number;
+  }
   // Every domain field was validated against its collection's typed definition above.
   return output as unknown as Collections[K];
 }

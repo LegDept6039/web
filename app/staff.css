@@ -476,3 +476,73 @@ html:has(.admin-shell) {
 .offices-nav > .admin-nav-label {
   display: block;
 }
+
+/* Department editing follows the public profile, with in-place image controls. */
+.department-edit-form { padding: clamp(16px, 3vw, 32px); }
+.department-edit-form fieldset { min-width: 0; }
+.department-page-editor { min-width: 0; }
+.department-editor-hero { background: #f4f7f9; padding: clamp(20px, 3vw, 36px); margin: 16px 0 32px; }
+.department-editor-hero h2 { font-family: Georgia, serif; font-size: clamp(26px, 3vw, 40px); font-weight: 400; overflow-wrap: anywhere; }
+.department-editor-profile { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.department-editor-fields { display: grid; gap: 20px; min-width: 0; }
+.department-editor-fields .department-editor-name { font-size: 24px; font-family: Georgia, serif; }
+.department-page-editor textarea { text-align: justify; line-height: 1.8; font-weight: 400; }
+.department-editor-about { margin-top: 40px; }
+.department-editor-about h2, .department-editor-image h2 { font-family: Georgia, serif; font-weight: 400; font-size: 26px; margin-bottom: 16px; }
+.department-editor-about textarea { min-height: 260px; }
+.department-editor-image { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,240px); align-items: start; gap: 24px; border-top: 1px solid var(--line); padding-top: 28px; margin-top: 36px; }
+.image-edit-control { min-width: 0; }
+.image-edit-frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 8px; background: #edf2f5; border: 1px solid var(--line); }
+.image-edit-portrait { aspect-ratio: 3 / 4; }
+.image-edit-frame img { object-fit: contain; }
+.image-edit-portrait img { object-fit: cover; object-position: center top; }
+.image-edit-placeholder { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; color: #61758a; padding: 16px; }
+.staff-form .image-edit-overlay { position: absolute; inset: auto 0 0; display: flex; align-items: center; justify-content: center; gap: 10px; background: #102a43ed; color: white; padding: 14px; cursor: pointer; }
+.staff-form .image-edit-input { position: absolute; inset: 0; opacity: 0; height: 100%; width: 100%; cursor: pointer; }
+.image-edit-overlay:focus-within { outline: 3px solid #d2af60; outline-offset: -3px; }
+.image-edit-overlay:hover { background: #17476b; }
+.image-edit-overlay:has(input:disabled) { opacity: .65; cursor: default; }
+.image-edit-control .staff-note { margin-top: 10px; font-size: 12px; }
+.image-edit-control .image-edit-remove { font-size: 13px; margin-top: 12px; }
+@media(max-width: 1000px) {
+ .department-editor-profile { grid-template-columns: minmax(0,1fr); }
+ .department-editor-profile > .image-edit-control { width: min(100%,300px); justify-self: center; }
+}
+@media(max-width: 600px) {
+ .department-editor-image { grid-template-columns: minmax(0,1fr); }
+ .department-editor-image > .image-edit-control { width: min(100%,240px); }
+}
+.office-section-label { display: block; padding: 16px 12px 6px; color: var(--gold); font-size: 11px; letter-spacing: .08em; font-weight: 700; }
+.legislative-count { font-size: 32px; font-weight: 700; margin-top: 12px; }
+.legislative-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-bottom: 24px; }
+.legislative-filters label { flex: 1 1 200px; }
+.legislative-record-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+.transparency-admin-section { margin-top: 24px; }
+.transparency-workspace { min-width:0; }
+.transparency-workspace h1 { font-size:28px; }
+.transparency-workspace .admin-toolbar { margin-top:0; }
+.transparency-workspace .admin-toolbar p:not(.eyebrow) { font-size:14px; color:var(--muted); }
+.transparency-workspace .transparency-filters { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px; font-size:13px; }
+.transparency-table { font-size:13px; }
+.transparency-table th,.transparency-table td { padding:12px; }
+.transparency-table td:first-child { min-width:180px; max-width:360px; overflow-wrap:anywhere; }
+.transparency-table td:nth-child(2) { max-width:320px; overflow-wrap:anywhere; }
+.transparency-row-actions { display:flex; flex-wrap:wrap; gap:10px; align-items:start; }
+.transparency-row-actions a,.transparency-delete summary { font-size:13px; color:var(--blue); cursor:pointer; }
+.transparency-delete form { display:grid; gap:12px; width:230px; padding:12px 0; }
+.transparency-delete label { display:flex; align-items:center; gap:8px; }
+.transparency-status { display:inline-block; padding:3px 8px; background:#edf0f3; border-radius:4px; font-size:12px; }
+.transparency-status.is-published { background:#e6f1fc; color:#174c82; }
+.transparency-missing { color:var(--muted); font-size:12px; white-space:nowrap; padding:6px; }
+.transparency-empty { padding:24px; color:var(--muted); }
+.transparency-form { max-width:960px; padding:24px; }
+.transparency-form fieldset { border:0; padding:0; gap:16px; }
+.transparency-form legend { margin-bottom:16px; padding:0; }
+.transparency-form h2 { font:600 16px/1.4 Arial,sans-serif; letter-spacing:normal; }
+.transparency-form-grid,.transparency-uploads { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.transparency-upload { display:grid; gap:10px; padding:14px; border:1px solid var(--line); border-radius:6px; background:#f8fafc; min-width:0; }
+.transparency-upload a { font-size:13px; color:var(--blue); }
+@media(max-width:600px) { .transparency-form { padding:18px; } .transparency-form-grid,.transparency-uploads { grid-template-columns:minmax(0,1fr); } }
+.transparency-upload { align-content:start; }
+.transparency-module-excerpt { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.transparency-row-actions a,.transparency-delete summary { position:relative; }

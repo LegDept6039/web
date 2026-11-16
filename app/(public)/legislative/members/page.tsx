@@ -23,7 +23,7 @@ export default async function Page() {
             the SB Secretariat.
           </PreviewNote>
         )}
-        <OfficialGrid officials={officials} />
+        <OfficialGrid officials={officials} directory />
       </section>
     </>
   );

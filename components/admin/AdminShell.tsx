@@ -1,11 +1,13 @@
+import { legislativeNavigation } from "@/lib/legislative/navigation";
+import { StaffSessionBoundary } from "./StaffSessionBoundary";
 import { OfficesNav } from "./OfficesNav";
 import { definitions, type Collection } from "@/lib/content/schema";
 import { label } from "@/lib/admin/content";
-import { OfficeLink } from "./OfficeLink";
 import { SidebarNav } from "./SidebarNav";
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
 import { officeContext, available } from "@/lib/offices/server";
+import { transparencyAccess } from "@/lib/transparency/permissions";
 import "@/app/staff.css";
 export async function AdminShell({
   children,
@@ -17,103 +19,110 @@ export async function AdminShell({
   const context = await officeContext();
   const base = context.profile.role === "superadmin" ? "/superadmin" : "/admin";
   return (
-    <div className="admin-shell">
-      <aside className="admin-sidebar">
-        <Link href={base} className="admin-brand">
-          PINAMUNGAJAN<span>Municipal administration</span>
-        </Link>
-        <SidebarNav>
-          <Link href={base}>Dashboard</Link>
-          <Link href="/admin/content">Content management</Link>
-          {context.profile.role === "superadmin" && (
-            <>
-              <Link href="/superadmin/departments">Departments</Link>
-              <Link href="/superadmin/users">Users & access control</Link>
-              <Link href="/superadmin/audit">Audit log</Link>
-            </>
-          )}
-          {context.profile.role === "superadmin" ? (
+    <StaffSessionBoundary>
+      <div className="admin-shell">
+        <aside className="admin-sidebar">
+          <Link href={base} className="admin-brand">
+            PINAMUNGAJAN<span>Municipal administration</span>
+          </Link>
+          <SidebarNav>
+            <Link href={base}>Dashboard</Link>
+            <Link href="/admin/content">Content management</Link>
+            {context.profile.role === "superadmin" && (
+              <>
+                <Link href="/superadmin/departments">Departments</Link>
+                <Link href="/superadmin/users">Users & access control</Link>
+                <Link href="/superadmin/audit">Audit log</Link>
+              </>
+            )}
             <OfficesNav
-              offices={context.offices
-                .filter((o) => o.active)
-                .map((o) => ({
-                  id: o.id,
-                  name: o.short_name || o.name,
-                  modules: (Object.keys(definitions) as Collection[])
-                    .filter((c) => available(context, c, o.id))
-                    .map((c) => ({
-                      key: c,
-                      label:
-                        c === "departments"
-                          ? "Department Page & Head"
-                          : label(c),
-                      href:
-                        c === "departments"
-                          ? `/admin/content/departments/edit/${o.id}?office=${o.id}`
-                          : `/admin/content/${c}?office=${o.id}`,
-                    })),
-                }))}
+              label={
+                context.profile.role === "superadmin"
+                  ? "Offices"
+                  : "Your offices"
+              }
+              offices={[
+                ...context.offices
+                  .filter((o) => o.active)
+                  .map((o) => ({
+                    id: o.id,
+                    name: o.short_name || o.name,
+                    modules:
+                      o.department === "legislative"
+                        ? legislativeNavigation(context, o.id)
+                        : [
+                            {
+                              key: "overview",
+                              label: "Office overview",
+                              href: `/admin/content?office=${o.id}`,
+                            },
+                            ...(Object.keys(definitions) as Collection[])
+                              .filter((c) => available(context, c, o.id))
+                              .map((c) => ({
+                                key: c,
+                                label:
+                                  c === "departments"
+                                    ? "Department Page & Head"
+                                    : label(c),
+                                href:
+                                  c === "departments"
+                                    ? `/admin/content/departments/edit/${o.id}?office=${o.id}`
+                                    : `/admin/content/${c}?office=${o.id}`,
+                              })),
+                          ],
+                  })),
+                ...(transparencyAccess(context.profile)
+                  ? [
+                      {
+                        id: "transparency",
+                        name: "Transparency",
+                        routePrefix: "/admin/transparency",
+                        modules: [
+                          {
+                            key: "reports",
+                            label: "Reports",
+                            href: "/admin/transparency",
+                          },
+                          {
+                            key: "modules",
+                            label: "Modules",
+                            href: "/admin/transparency/modules",
+                          },
+                        ],
+                      },
+                    ]
+                  : []),
+              ]}
             />
-          ) : (
-            <>
-              <span className="admin-nav-label">Your offices</span>
-              {context.offices
-                .filter((o) => o.active)
-                .map((o) => (
-                  <div key={o.id}>
-                    <OfficeLink office={o.id} name={o.short_name || o.name} />
-                    {o.department === "executive" &&
-                      context.profile.role !== "superadmin" && (
-                        <div className="admin-module-links">
-                          <Link
-                            href={`/admin/content/departments/edit/${o.id}?office=${o.id}`}
-                          >
-                            Department Page & Head
-                          </Link>
-                          {(["news", "programs", "contacts"] as const)
-                            .filter((c) => available(context, c, o.id))
-                            .map((c) => (
-                              <Link
-                                key={c}
-                                href={`/admin/content/${c}?office=${o.id}`}
-                              >
-                                {c.charAt(0).toUpperCase() + c.slice(1)}
-                              </Link>
-                            ))}
-                        </div>
-                      )}
-                  </div>
-                ))}
-            </>
-          )}
-          <Link href="/account">Profile</Link>
-          <Link href="/">Public website</Link>
-        </SidebarNav>
-        <form action={logout}>
-          <button className="button">Sign out</button>
-        </form>
-      </aside>
-      <div className="admin-main">
-        <header className="admin-topbar">
-          <strong>
-            {superadmin ? "Super Admin" : "Office administration"}
-          </strong>
-          <span>
-            {context.profile.display_name || context.profile.email} —{" "}
-            {context.profile.role}
-          </span>
-        </header>
-        <main id="main" className="admin-content">
-          <p className="staff-note">
-            Fields marked{" "}
-            <span className="required-star" aria-hidden="true">
-              *
-            </span>{" "}
-            are required.
-          </p>
-          {children}
-        </main>
+            <Link href="/account">Profile</Link>
+            <Link href="/">Public website</Link>
+          </SidebarNav>
+          <form action={logout}>
+            <button className="button">Sign out</button>
+          </form>
+        </aside>
+        <div className="admin-main">
+          <header className="admin-topbar">
+            <strong>
+              {superadmin ? "Super Admin" : "Office administration"}
+            </strong>
+            <span>
+              {context.profile.display_name || context.profile.email} —{" "}
+              {context.profile.role}
+            </span>
+          </header>
+          <main id="main" className="admin-content">
+            <p className="staff-note">
+              Fields marked{" "}
+              <span className="required-star" aria-hidden="true">
+                *
+              </span>{" "}
+              are required.
+            </p>
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </StaffSessionBoundary>
   );
 }

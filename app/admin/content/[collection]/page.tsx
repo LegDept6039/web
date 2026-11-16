@@ -1,3 +1,5 @@
+import { LegislativeDocuments } from "@/components/admin/LegislativeDocuments";
+import { isDocumentCollection } from "@/lib/legislative/config";
 import { ContentBreadcrumb } from "@/components/admin/ContentBreadcrumb";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,7 +17,14 @@ export default async function ContentPage({
   searchParams,
 }: {
   params: Promise<{ collection: string }>;
-  searchParams: Promise<{ page?: string; office?: string; saved?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    office?: string;
+    saved?: string;
+    type?: string;
+    q?: string;
+    sort?: string;
+  }>;
 }) {
   const context = await officeContext();
   const collection = collectionName((await params).collection);
@@ -30,6 +39,21 @@ export default async function ContentPage({
     return <p role="alert">No access to this office.</p>;
   if (!available(context, collection, office)) notFound();
   const scope = workflow(context, office);
+  if (scope === "legislative" && isDocumentCollection(collection))
+    return (
+      <>
+        <ContentBreadcrumb
+          context={context}
+          office={office}
+          collection={collection}
+        />
+        <LegislativeDocuments
+          context={context}
+          collection={collection}
+          params={await searchParams}
+        />
+      </>
+    );
   const { table, key } = definitions[collection];
   let query = context.client
     .from(table)
@@ -105,7 +129,7 @@ export default async function ContentPage({
                     <td>{row.sort_order}</td>
                     <td>
                       <Link
-                        href={`/admin/content/${collection}/edit/${encodeURIComponent(row[key])}${office ? `?office=${office}` : ""}`}
+                        href={`/admin/content/${collection}/edit/${encodeURIComponent(row[key])}${row.office_id ? `?office=${encodeURIComponent(row.office_id)}` : ""}`}
                       >
                         {contentAllowed(context, collection, row, "write")
                           ? "Edit"

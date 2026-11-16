@@ -36,7 +36,7 @@ export default async function Page({
         title={d.name}
         eyebrow={d.acronym || "MUNICIPAL DEPARTMENT"}
       />
-      <section className="container section">
+      <section className="container section department-detail">
         <Link className="text-link" href="/departments">
           All departments
         </Link>
@@ -56,7 +56,9 @@ export default async function Page({
               <p className="department-head-title">{d.headTitle}</p>
             )}
             {d.headName && <h2>{d.headName}</h2>}
-            {d.description && <p>{d.description}</p>}
+            {d.description && (
+              <p className="department-description">{d.description}</p>
+            )}
             {d.headDescription && (
               <p className="department-biography">{d.headDescription}</p>
             )}

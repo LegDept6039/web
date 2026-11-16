@@ -11,6 +11,7 @@ async function login(page: Page, name: string) {
   await expect(page).toHaveURL(
     name === "superadmin" ? /\/superadmin$/ : /\/admin$/,
   );
+  await expect(page.locator("#admin-navigation")).toBeAttached();
 }
 const png = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAACXBIWXMAAAPoAAAD6AG1e1JrAAAA10lEQVR4nO3XUQ1EQQhDUQyNp5F2pa6HTSZ8vJMgAFpoy5zbp2rWOzBwGM5K54YjWlFptnS2TVLwSNJKtEyWzvOQb+nuGwZb6gUEsw45hnsKwaxDjuEwnJXODUe0otJs6XygZr0DA4fhrHRuOKIVlWZLZ9skBY8krUTLZOk8D/mW7r5hsKVeQDDrkGO4pxDMOuQYDsNZ6dxwRCsqzZbOB2rWOzBwGM5K54YjWlFptnS2TVLwSNJKtEyWzvOQb+nuGwZb6gUEsw45hnsKwaxDjuEwnJXubwh+NsdmtOodwt8AAAAASUVORK5CYII=",
@@ -55,16 +56,42 @@ test("one Legislative office assigns all features without module checkboxes", as
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await login(page, `legislative-${info.project.name}`);
   await page.goto(`/admin/content?office=${officeIds.legislative}`);
+  if (info.project.name === "mobile")
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+  const nav = page.getByRole("navigation", { name: "Administration" });
+  const toggle = nav.locator(".office-toggle");
+  await expect(toggle).toHaveCount(1);
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    nav.getByRole("link", { name: "Ordinances", exact: true }),
+  ).toBeVisible();
+  await expect(
+    nav.getByRole("link", { name: "Users & access control" }),
+  ).toHaveCount(0);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(
+    nav.getByRole("link", { name: "Ordinances", exact: true }),
+  ).toHaveCount(0);
+  await toggle.focus();
+  await page.keyboard.press("Enter");
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await page.screenshot({
+    path: info.outputPath("legislative-office-menu.png"),
+    fullPage: true,
+  });
+  await nav.getByRole("link", { name: "Ordinances", exact: true }).click();
+  await expect(page).toHaveURL(
+    `/admin/content/ordinances?office=${officeIds.legislative}`,
+  );
+  await page.goto(`/admin/content?office=${officeIds.legislative}`);
+
   for (const name of [
     "Officials",
     "Ordinances",
     "Resolutions",
-    "News",
     "Sessions",
-    "Committee Hearings",
-    "Document Categories",
     "Documents",
-    "Department Page",
     "Committees",
   ])
     await expect(
@@ -75,8 +102,36 @@ test("one Legislative office assigns all features without module checkboxes", as
     page.getByRole("button", { name: "Save record", exact: true }),
   ).toBeVisible();
 });
-test("Executive user cannot forge Legislative access", async ({ page }) => {
+test("Executive navigation stays scoped and user cannot forge Legislative access", async ({
+  page,
+}, info) => {
   await login(page, "restricted");
+  if (info.project.name === "mobile")
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+  const nav = page.getByRole("navigation", { name: "Administration" });
+  await nav.locator(".office-toggle").click();
+  await expect(nav.locator(".admin-module-links a")).toHaveText([
+    "Office overview",
+    "Contacts",
+    "News",
+    "Department Page & Head",
+    "Programs",
+  ]);
+  await expect(nav.locator(".office-section-label")).toHaveCount(0);
+  const uploadStatus = await page.evaluate(async (officeId) => {
+    const response = await fetch("/admin/document-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        officeId,
+        collection: "documents",
+        type: "application/pdf",
+        size: 100,
+      }),
+    });
+    return response.status;
+  }, officeIds.legislative);
+  expect(uploadStatus).toBe(403);
   await page.goto(
     `/admin/content/officials/new?office=${officeIds.legislative}`,
   );

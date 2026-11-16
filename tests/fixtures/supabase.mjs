@@ -1,6 +1,7 @@
 // Test-process transport only. Never imported by application code.
 if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
   const realFetch = globalThis.fetch;
+  const staffSessions = new Map();
   const officeIds = {
     mpdc: "10000000-0000-4000-8000-000000000001",
     assessor: "10000000-0000-4000-8000-000000000002",
@@ -158,11 +159,35 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       sort_order: 0,
     },
   ];
+  const sessions = [],
+    committees = [],
+    ordinances = [],
+    resolutions = [],
+    municipal_documents = [];
   const programs = [];
+  const document_categories = [
+    {
+      id: "fixture-bids",
+      name: "Bidding documents",
+      description: "Procurement notices",
+      content_scope: "transparency",
+      office_id: null,
+      is_sample: false,
+      published: true,
+      sort_order: 1,
+      updated_at: now,
+    },
+  ];
   const department_contacts = [];
   for (const [i, d] of departments.filter((d) => d.published).entries())
     d.sort_order = i + 1;
   const collections = {
+    sessions,
+    committees,
+    ordinances,
+    resolutions,
+    municipal_documents,
+    document_categories,
     officials,
     news,
     programs,
@@ -265,11 +290,45 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     } catch {}
     const actor = users.find((u) => u.user_id === subject);
     if (
+      url.pathname.startsWith("/rest/v1/rpc/") &&
+      [
+        "start_staff_session",
+        "staff_session_deadline",
+        "end_staff_session",
+      ].includes(url.pathname.split("/").pop())
+    ) {
+      const name = url.pathname.split("/").pop();
+      const key = `${subject}:${body.p_hash}`;
+      if (name === "end_staff_session") {
+        staffSessions.delete(key);
+        return response(null);
+      }
+      if (!actor?.active || actor.deleted_at) return response(null);
+      if (name === "start_staff_session") {
+        staffSessions.set(key, Date.now() + 3600000);
+        return response(true);
+      }
+      const expiry = staffSessions.get(key) || 0;
+      if (expiry <= Date.now()) return response(0);
+      if (body.p_touch) staffSessions.set(key, Date.now() + 3600000);
+      return response(staffSessions.get(key) - Date.now());
+    }
+
+    if (
       url.pathname.startsWith("/storage/v1/object/upload/sign/") &&
       method === "POST"
     )
       return response({
         url: url.pathname.replace("/storage/v1", "") + "?token=fixture-upload",
+      });
+    if (
+      url.pathname.startsWith(
+        "/storage/v1/object/municipal-document-staging/",
+      ) &&
+      method === "GET"
+    )
+      return new Response("%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF\n", {
+        headers: { "Content-Type": "application/pdf" },
       });
     if (
       (url.pathname.startsWith("/storage/v1/object/municipal-news-staging/") ||
@@ -287,6 +346,14 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         { headers: { "Content-Type": "image/png" } },
       );
     }
+    if (
+      url.pathname.startsWith("/storage/v1/object/sign/") &&
+      method === "POST"
+    )
+      return response({
+        signedURL:
+          url.pathname.replace("/storage/v1", "") + "?token=fixture-download",
+      });
     if (url.pathname.startsWith("/storage/v1/object/"))
       return response({
         Key: "municipal-media/" + url.pathname.split("/municipal-media/")[1],
@@ -364,6 +431,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         role: body.p_role,
         active: body.p_active && !body.p_delete,
         deleted_at: body.p_delete ? now : null,
+        transparency_access:
+          !body.p_delete && body.p_transparency_access === true,
       });
       access = access
         .filter((a) => a.user_id !== target.user_id)
@@ -374,6 +443,16 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       return response(null);
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.split("/").pop();
+      // Opt-in latency for loading UI tests; ordinary fixture suites stay fast.
+      if (
+        process.env.PORTAL_TEST_CONTENT_DELAY_MS &&
+        method === "GET" &&
+        ["departments", "news", "department_contacts"].includes(table)
+      ) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, Number(process.env.PORTAL_TEST_CONTENT_DELAY_MS)),
+        );
+      }
       if (
         (table === "staff_accounts" && actor?.scenario === "profile-error") ||
         (table === "user_office_access" &&
@@ -391,6 +470,12 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           "programs",
           "departments",
           "department_contacts",
+          "sessions",
+          "committees",
+          "ordinances",
+          "resolutions",
+          "municipal_documents",
+          "document_categories",
         ].includes(table)
       ) {
         const row = {
@@ -419,9 +504,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             head_description: body.head_description ?? "",
           });
         reorder(table, null, row);
-        ({ officials, news, programs, departments, department_contacts })[
-          table
-        ].push(row);
+        collections[table].push(row);
         return response([row]);
       }
       let rows =
@@ -436,6 +519,30 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
                 : table === "departments"
                   ? departments
                   : [];
+      if (collections[table]) rows = collections[table];
+      if (table === "legislative_documents")
+        rows = [
+          ...ordinances.map((r) => ({
+            ...r,
+            collection: "ordinances",
+            document_type: "ordinance",
+            date: r.date_approved,
+            body: r.summary,
+          })),
+          ...resolutions.map((r) => ({
+            ...r,
+            collection: "resolutions",
+            document_type: "resolution",
+            date: r.date_approved,
+            body: r.summary,
+          })),
+          ...municipal_documents.map((r) => ({
+            ...r,
+            collection: "documents",
+            document_type: r.document_type || "legacy",
+            body: r.description,
+          })),
+        ].filter((r) => r.content_scope === "legislative");
       if (table === "department_contacts") rows = department_contacts;
       if (table === "news") rows = news;
       if (table === "programs") rows = programs;
@@ -483,7 +590,14 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             (d) => d.published || assigned.includes(d.office_id),
           );
       }
+      if (!actor) rows = rows.filter((r) => r.published);
       for (const [key, val] of url.searchParams) {
+        if (val.startsWith("ilike."))
+          rows = rows.filter((r) =>
+            String(r[key] || "")
+              .toLowerCase()
+              .includes(val.slice(6).replaceAll("%", "").toLowerCase()),
+          );
         if (val.startsWith("eq."))
           rows = rows.filter((r) => String(r[key]) === val.slice(3));
         if (val.startsWith("neq."))
@@ -530,6 +644,14 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       const offset = Number(url.searchParams.get("offset") || 0),
         limit = Number(url.searchParams.get("limit") || 1000);
       rows = rows.slice(offset, offset + limit);
+      rows = rows.map((r) => ({
+        ...r,
+        author_record: officials.find((o) => o.id === r.author_id),
+        co_author_record: officials.find((o) => o.id === r.co_author_id),
+        chair_record: officials.find((o) => o.id === r.chair_id),
+        committee_record: committees.find((o) => o.id === r.committee_id),
+        session_record: sessions.find((o) => o.id === r.session_id),
+      }));
       const result = headers.get("accept")?.includes("vnd.pgrst.object")
         ? rows[0] || null
         : rows;

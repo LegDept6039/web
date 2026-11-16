@@ -1,7 +1,17 @@
+import { LegislativeOverview } from "@/components/admin/LegislativeOverview";
 import Link from "next/link";
 import { officeContext } from "@/lib/offices/server";
+import { transparencyAccess } from "@/lib/transparency/permissions";
 export default async function Dashboard() {
-  const { profile, offices, access } = await officeContext();
+  const context = await officeContext();
+  const { profile, offices, access } = context;
+  if (
+    profile.role !== "superadmin" &&
+    !transparencyAccess(profile) &&
+    offices.length === 1 &&
+    offices[0].department === "legislative"
+  )
+    return <LegislativeOverview context={context} office={offices[0].id} />;
   return (
     <>
       <p className="eyebrow">Staff portal</p>
@@ -14,6 +24,18 @@ export default async function Dashboard() {
         <Link className="button button-blue" href="/superadmin">
           Super Admin dashboard
         </Link>
+      )}
+      {transparencyAccess(profile) && (
+        <div className="staff-grid">
+          <Link className="staff-card" href="/admin/transparency">
+            <h2>Transparency reports</h2>
+            <p>Annual and quarterly reports and PDFs.</p>
+          </Link>
+          <Link className="staff-card" href="/admin/transparency/modules">
+            <h2>Transparency modules</h2>
+            <p>Report categories and document counts.</p>
+          </Link>
+        </div>
       )}
       <h2>Your offices</h2>
       <div className="staff-grid">
@@ -37,7 +59,11 @@ export default async function Dashboard() {
           ))}
       </div>
       {!offices.length && (
-        <p>No offices have been assigned. Contact your Super Admin.</p>
+        <p>
+          {transparencyAccess(profile)
+            ? "Your assigned workspace is Transparency."
+            : "No offices have been assigned. Contact your Super Admin."}
+        </p>
       )}
     </>
   );

@@ -1,8 +1,24 @@
 "use client";
 import { useActionState } from "react";
+import { STAFF_TAB_KEY } from "@/lib/auth/session-policy";
 import { login } from "./actions";
 export function LoginForm({ enabled }: { enabled: boolean }) {
-  const [error, action, pending] = useActionState(login, "");
+  const [error, action, pending] = useActionState(
+    async (previous: string, form: FormData) => {
+      try {
+        const token = Array.from(
+          crypto.getRandomValues(new Uint8Array(32)),
+          (b) => b.toString(16).padStart(2, "0"),
+        ).join("");
+        sessionStorage.setItem(STAFF_TAB_KEY, token);
+        form.set("tab_token", token);
+      } catch {
+        return "Allow browser session storage to sign in securely.";
+      }
+      return login(previous, form);
+    },
+    "",
+  );
   return (
     <form action={action} className="staff-form">
       <label>

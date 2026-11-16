@@ -1,4 +1,6 @@
 "use server";
+import { sessionHash, staffCookieOptions } from "@/lib/auth/staff-session";
+import { STAFF_SESSION_COOKIE, validTabToken } from "@/lib/auth/session-policy";
 import { redirect } from "next/navigation";
 import { authClient } from "@/lib/auth/server";
 import { cookies } from "next/headers";
@@ -14,6 +16,9 @@ export async function login(
   _previous: string,
   form: FormData,
 ): Promise<string> {
+  const tabToken = String(form.get("tab_token") || "");
+  if (!validTabToken(tabToken))
+    return "Enable browser storage and JavaScript, then try signing in again.";
   const email = String(form.get("email") ?? "").trim();
   const password = String(form.get("password") ?? "");
   if (!email || email.length > 254 || !password || password.length > 1024)
@@ -51,6 +56,15 @@ export async function login(
       }
       return resolved.message;
     }
+    const { data: started, error: sessionError } = await client.rpc(
+      "start_staff_session",
+      { p_hash: sessionHash(tabToken) },
+    );
+    if (sessionError || started !== true) {
+      await client.auth.signOut({ scope: "local" });
+      return "Staff session protection is unavailable. Ask your administrator to verify migration 013.";
+    }
+    (await cookies()).set(STAFF_SESSION_COOKIE, tabToken, staffCookieOptions);
     destination =
       resolved.profile.role === "superadmin" ? "/superadmin" : "/admin";
   } catch (error) {
@@ -67,10 +81,17 @@ export async function logout() {
   const config = authConfig();
   try {
     const client = await authClient(true);
+    const token = (await cookies()).get(STAFF_SESSION_COOKIE)?.value || "";
+    if (client && validTabToken(token))
+      await client.rpc("end_staff_session", { p_hash: sessionHash(token) });
     await client?.auth.signOut({ scope: "local" });
   } catch {
     // Clear this browser's session even when the Auth service is unreachable.
   } finally {
+    (await cookies()).set(STAFF_SESSION_COOKIE, "", {
+      ...staffCookieOptions,
+      maxAge: 0,
+    });
     if (config) {
       const prefix = `sb-${new URL(config.url).hostname.split(".")[0]}-auth-token`;
       const jar = await cookies();

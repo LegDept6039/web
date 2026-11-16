@@ -11,8 +11,10 @@ for (const [user, destination] of [
     await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${destination}$`));
+    await expect(page.locator("main h1")).toBeVisible();
     await page.reload();
     await expect(page).toHaveURL(new RegExp(`${destination}$`));
+    await expect(page.locator("main h1")).toBeVisible();
     if (user === "legislative-editor") {
       await page.goto("/admin/content/ordinances");
       await expect(

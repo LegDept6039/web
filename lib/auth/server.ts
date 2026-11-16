@@ -1,4 +1,5 @@
 import "server-only";
+import { staffSession } from "./staff-session";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -46,6 +47,7 @@ export async function currentStaff(writable = false) {
       });
     return null;
   }
+  if (!(await staffSession(client))) return null;
   const resolved = await resolveStaff(client, user.id);
   if (!resolved.ok) return null;
   return { client, user, profile: resolved.profile };

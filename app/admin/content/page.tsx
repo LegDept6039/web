@@ -1,3 +1,4 @@
+import { LegislativeOverview } from "@/components/admin/LegislativeOverview";
 import { ContentBreadcrumb } from "@/components/admin/ContentBreadcrumb";
 import Link from "next/link";
 import { officeContext, available } from "@/lib/offices/server";
@@ -17,6 +18,13 @@ export default async function ContentDashboard({
     );
   if (context.profile.role !== "superadmin" && !context.offices.length)
     return <p>No office access assigned.</p>;
+  if (selected?.department === "legislative")
+    return (
+      <>
+        <ContentBreadcrumb context={context} office={office} />
+        <LegislativeOverview context={context} office={selected.id} />
+      </>
+    );
   return (
     <>
       <ContentBreadcrumb context={context} office={office} />

@@ -54,6 +54,7 @@ export async function saveUser(
       p_display_name: values.name,
       p_access: values.access,
       p_delete: deleting,
+      p_transparency_access: values.transparencyAccess,
     });
     failed = Boolean(error);
   } catch {
@@ -72,6 +73,7 @@ export async function saveUser(
     return "Could not save access. Check office assignments and your permissions. You cannot remove your own Super Admin access.";
   }
   revalidatePath("/superadmin", "layout");
+  revalidatePath("/admin", "layout");
   redirect("/superadmin/users");
 }
 export async function resetPassword(

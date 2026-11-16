@@ -111,3 +111,12 @@ After applying the migration and deploying, verify with real test accounts:
 7. Repeat on the Vercel Production domain, including a refresh/session persistence check. No authenticated hosted test was performed automatically.
 
 See `docs/ADMIN-IMPLEMENTATION.md` for the file inventory and architecture notes.
+
+
+## Staff inactivity and tab sessions
+
+See [STAFF-SESSIONS.md](STAFF-SESSIONS.md) for migration 013, the 60-minute inactivity deadline, tab behavior and deployment steps. Apply migration 013 before deploying the updated authentication flow.
+
+## Transparency assignments
+
+Migration 018 adds an explicit Transparency assignment to the existing staff account. Apply it after 017 before running this application version. Superadmin assigns it through Users & access control by selecting Transparency in Office Access. Assigned Editors/Admins manage modules and reports; assigned Viewers are read-only. These users may sign in without an office membership, and other office access remains independent. See [TRANSPARENCY.md](TRANSPARENCY.md) for setup, revocation and verification details.

@@ -10,6 +10,7 @@ export interface Account {
   active: boolean;
   deleted_at: string | null;
   created_at: string;
+  transparency_access?: boolean;
 }
 export function UserForm({
   account,
@@ -100,6 +101,7 @@ export function UserForm({
         <p>
           Choose the office this user can manage. The selected role determines
           access. Legislative Access covers the entire Legislative branch.
+          Transparency covers all Transparency modules, reports and PDFs.
         </p>
         <label>
           Office Access
@@ -108,10 +110,14 @@ export function UserForm({
             multiple
             size={Math.min(
               8,
-              Math.max(3, offices.filter((o) => o.active).length),
+              Math.max(3, offices.filter((o) => o.active).length + 1),
             )}
-            defaultValue={access.map((a) => a.office_id)}
+            defaultValue={[
+              ...access.map((a) => a.office_id),
+              ...(account?.transparency_access ? ["transparency"] : []),
+            ]}
           >
+            <option value="transparency">Transparency</option>
             {offices
               .filter((o) => o.active)
               .map((o) => (
@@ -124,7 +130,9 @@ export function UserForm({
         </label>
         <p className="staff-note">
           Select an office. Ctrl/Cmd-click selects multiple offices for staff
-          who need them. Superadmins do not need an office assignment.
+          who need them. Superadmins do not need an office assignment. For
+          Transparency, Editors and Admins can manage modules and reports;
+          Viewers can only read records and preview PDFs.
         </p>
         {access.some((a) =>
           offices.some((o) => o.id === a.office_id && !o.active),

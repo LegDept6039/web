@@ -9,6 +9,7 @@ type Profile = {
   role: Role;
   active: boolean;
   deleted_at: string | null;
+  transparency_access?: boolean;
 };
 type Resolution =
   { ok: true; profile: Profile } | { ok: false; message: string };
@@ -24,7 +25,9 @@ export async function resolveStaff(
     status,
   } = await client
     .from("staff_accounts")
-    .select("user_id,email,display_name,role,active,deleted_at")
+    .select(
+      "user_id,email,display_name,role,active,deleted_at,transparency_access",
+    )
     .eq("user_id", userId)
     .maybeSingle();
   if (error) {
@@ -80,8 +83,8 @@ export async function resolveStaff(
         "Your staff role is not recognized. Ask your administrator to check the account configuration.",
     };
   }
-  // System administrators do not need department memberships.
-  if (profile.role === "superadmin")
+  // Superadmins and explicitly assigned Transparency staff need no department membership.
+  if (profile.role === "superadmin" || profile.transparency_access === true)
     return { ok: true, profile: profile as Profile };
   const ids: string[] = [];
   for (let offset = 0; ; offset += 200) {

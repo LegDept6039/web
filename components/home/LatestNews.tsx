@@ -4,7 +4,7 @@ import type { NewsArticle } from "@/types";
 export function LatestNews({ news }: { news: NewsArticle[] }) {
   return (
     <>
-      <section className="light-section section">
+      <section className="light-section section home-news">
         <div className="container">
           <SectionHeader
             eyebrow="AROUND THE MUNICIPALITY"
@@ -12,7 +12,7 @@ export function LatestNews({ news }: { news: NewsArticle[] }) {
             href="/news"
             linkText="All news & updates"
           />
-          <NewsGrid articles={news.slice(0, 3)} />
+          <NewsGrid articles={news.slice(0, 3)} uniform />
         </div>
       </section>
     </>

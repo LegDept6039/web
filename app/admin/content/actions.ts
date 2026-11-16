@@ -9,6 +9,12 @@ import { uploadOfficialPhoto } from "@/lib/admin/photo";
 import { uploadNewsImage } from "@/lib/admin/news-image";
 import { uploadFile } from "@/lib/admin/upload-file";
 import { legislativeRoles, isLegislativeRole } from "@/lib/officials/roles";
+import { parseLegislative } from "@/lib/legislative/validation";
+import {
+  usesLegislativeFields,
+  isDocumentCollection,
+} from "@/lib/legislative/config";
+import { uploadDocumentPdf } from "@/lib/admin/document-pdf";
 import { definitions } from "@/lib/content/schema";
 
 export async function saveContent(
@@ -97,7 +103,7 @@ export async function saveContent(
   const executiveOffices = context.offices.filter(
     (o) => o.department === "executive" && allowed(context, o.id, "write"),
   );
-  const office =
+  let office =
     scope === "legislative"
       ? context.offices.find((o) => o.department === "legislative")?.id || null
       : String(
@@ -109,9 +115,41 @@ export async function saveContent(
         ) || null;
   form.set("office_id", office || "");
   form.set("content_scope", scope);
+  let existing: Record<string, unknown> | null = null;
+  if (original) {
+    const result = await client
+      .from(definition.table)
+      .select("*")
+      .eq(definition.key, original)
+      .maybeSingle();
+    existing = result.data;
+    if (existing?.content_scope === "transparency")
+      return "Manage this record in Superadmin Transparency.";
+    if (
+      result.error ||
+      !existing ||
+      !contentAllowed(context, collection, existing, "write")
+    )
+      return "This record is unavailable or you do not have editing access.";
+    // Editing Legislative content must retain its stored owner, even if
+    // another Legislative office sorts first in the navigation list.
+    if (scope === "legislative" && existing.content_scope === "legislative") {
+      office =
+        typeof existing.office_id === "string" ? existing.office_id : null;
+      form.set("office_id", office || "");
+    }
+    if (
+      context.profile.role !== "superadmin" &&
+      (existing.content_scope !== scope || existing.office_id !== office)
+    )
+      return "Only a Super Admin can transfer content scope.";
+  }
   let row: Record<string, unknown>;
   try {
-    row = parseContent(collection, form);
+    row =
+      scope === "legislative" && usesLegislativeFields(collection)
+        ? parseLegislative(collection, form, existing)
+        : parseContent(collection, form);
     if (["news", "programs"].includes(collection) && form.has("rich_body")) {
       const raw = String(form.get("rich_body"));
       if (raw.length > 200000) return "Content is too long.";
@@ -137,32 +175,47 @@ export async function saveContent(
         return "Use a local image path or an image from the municipal-media bucket.";
     }
   }
-  let existing: Record<string, unknown> | null = null;
-  if (original) {
-    const result = await client
-      .from(definition.table)
-      .select("*")
-      .eq(definition.key, original)
-      .maybeSingle();
-    existing = result.data;
-    if (
-      result.error ||
-      !existing ||
-      !contentAllowed(context, collection, existing, "write")
-    )
-      return "This record is unavailable or you do not have editing access.";
-    if (
-      context.profile.role !== "superadmin" &&
-      (existing.content_scope !== scope || existing.office_id !== office)
-    )
-      return "Only a Super Admin can transfer content scope.";
-  }
   row.office_id = office;
   row.content_scope = scope;
   if (!contentAllowed(context, collection, row, "write"))
     return "You do not have permission to manage content in this office.";
   if (["news", "programs", "departments"].includes(collection) && !office)
     return "Choose an owning office for this content.";
+  if (scope === "legislative" && usesLegislativeFields(collection)) {
+    for (const column of [
+      "author_id",
+      "co_author_id",
+      "chair_id",
+      "vice_chair_id",
+      "member_1_id",
+      "member_2_id",
+      "member_3_id",
+      "member_4_id",
+      "committee_id",
+      "session_id",
+    ]) {
+      if (!row[column]) continue;
+      const relatedCollection =
+        column === "committee_id"
+          ? "committees"
+          : column === "session_id"
+            ? "sessions"
+            : "officials";
+      const related = await client
+        .from(relatedCollection)
+        .select("*")
+        .eq("id", row[column])
+        .maybeSingle();
+      if (
+        related.error ||
+        !related.data ||
+        related.data.content_scope !== "legislative" ||
+        related.data.office_id !== office ||
+        !contentAllowed(context, relatedCollection, related.data, "read")
+      )
+        return "Choose an existing related record from your Legislative office.";
+    }
+  }
   const photoColumn = collection === "departments" ? "head_photo" : "photo_url";
   if (["officials", "departments"].includes(collection))
     row[photoColumn] =
@@ -244,6 +297,28 @@ export async function saveContent(
     row.head_description ||= "";
     row.short_name ||= "";
   }
+  let documentPdf: Awaited<ReturnType<typeof uploadDocumentPdf>> | undefined;
+  if (scope === "legislative" && isDocumentCollection(collection)) {
+    const column = collection === "documents" ? "file_url" : "pdf_url";
+    row[column] =
+      existing?.[column] || (collection === "documents" ? "" : null);
+    const stagedPath = String(form.get("document_upload_path") || "");
+    if (stagedPath) {
+      if (!office) return "Choose a Legislative office.";
+      try {
+        documentPdf = await uploadDocumentPdf(
+          client,
+          context.user.id,
+          office,
+          collection,
+          stagedPath,
+        );
+        row[column] = documentPdf.url;
+      } catch (error) {
+        return error instanceof Error ? error.message : "PDF upload failed.";
+      }
+    }
+  }
   const result = original
     ? await client
         .from(definition.table)
@@ -252,6 +327,8 @@ export async function saveContent(
         .eq("updated_at", String(form.get("updated_at")))
         .select(definition.key)
     : await client.from(definition.table).insert(row).select(definition.key);
+  if ((result.error || !result.data?.length) && documentPdf)
+    await client.storage.from("municipal-media").remove([documentPdf.path]);
   if ((result.error || !result.data?.length) && uploaded) {
     await client.storage.from("municipal-media").remove([uploaded.path]);
   }
@@ -291,6 +368,8 @@ export async function deleteContent(
     .select("*")
     .eq(definition.key, String(form.get("original")))
     .maybeSingle();
+  if (existing?.content_scope === "transparency")
+    return "Unpublish this record in Superadmin Transparency to preserve its files.";
   if (
     readError ||
     !existing ||

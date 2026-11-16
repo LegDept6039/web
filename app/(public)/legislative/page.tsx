@@ -30,6 +30,7 @@ export default async function Page() {
             ["Sessions", "sessions"],
             ["Ordinances", "ordinances"],
             ["Resolutions", "resolutions"],
+            ["Documents", "documents"],
             ["Committees", "committees"],
             ["Public hearings", "public-hearings"],
           ].map(([n, h]) => (

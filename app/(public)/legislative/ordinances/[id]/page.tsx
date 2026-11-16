@@ -1,12 +1,6 @@
-import { readContentConfig } from "@/lib/content/config";
-export const dynamicParams = true;
 import { notFound } from "next/navigation";
 import { getOrdinances } from "@/lib/api";
 import { DocumentDetail } from "@/components/legislative/DocumentDetail";
-export async function generateStaticParams() {
-  if (readContentConfig(process.env).source === "supabase") return [];
-  return (await getOrdinances()).map((d) => ({ id: d.id }));
-}
 export async function generateMetadata({
   params,
 }: {

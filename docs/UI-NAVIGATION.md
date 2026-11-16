@@ -44,3 +44,56 @@ Tests use isolated fixtures/PGlite; no hosted Supabase/Vercel verification or de
 ## Mayor profile layout
 
 The mayor information section now uses a portrait-left, details-right profile: database name, Municipal Mayor title, database description and two spaced navigation links. Mobile stacks the portrait above the details. The standalone official card and duplicate introduction were removed. Existing data lookup, missing-image fallback and both mayor routes remain. Build/TypeScript and component lint passed; local sample-content browser checks verified both routes, desktop/mobile layout, links and no horizontal overflow.
+
+
+## Skeleton loading states
+
+Public/root route fallbacks use `PublicPageSkeleton`; homepage Suspense sections reuse `SectionLoading` with structured card placeholders. Admin, Superadmin and account routes use `AdminSkeleton` for content, and their layouts wrap the existing guarded layout in Suspense with a full-shell skeleton. `StaffSessionBoundary` uses the same shell only while checking the session; expiry/failure messages remain visible text. No authorization checks were removed or deferred until after protected content is shown.
+
+The shared CSS includes responsive cards, status announcements, decorative aria-hidden placeholders and reduced-motion support. These are real loading boundaries with no artificial delay. Fast cached responses may show little or no skeleton. No new migration or dependencies are required.
+
+Validation: build (including TypeScript) and lint passed; six existing desktop/mobile login/access browser scenarios passed. Rendered public/admin skeleton previews at 1440px and 390px were reviewed and checked for overflow, a single accessible status and disabled animation under reduced motion. Windows browser-test teardown was interrupted after all six assertions passed.
+
+### Shared admin office dropdowns
+
+Transparency now appears as one expandable entry under Offices/Your offices, with Reports and Modules nested inside. The existing Transparency access check controls visibility. The group expands automatically for its routes, and only the matching section is highlighted, including edit/new pages. Admin and Superadmin share this navigation. Desktop/mobile checks passed for grouping, collapse/expand, keyboard activation, navigation, active state and overflow; screenshots were reviewed. Build/TypeScript and targeted lint passed. No database migration is required.
+
+Admin and Superadmin now reuse OfficesNav for expandable office navigation. Assigned active offices and available modules are still resolved through the existing server-side access helpers. Office overview preserves access to each office dashboard; the selected office expands automatically, with active module highlighting and keyboard-operable toggles.
+
+Validation: production build (including TypeScript) and lint passed. Legislative dropdown navigation passed on desktop and mobile, including collapse/expand, keyboard activation, module navigation, and absence of Superadmin-only links. Screenshots were reviewed. The fixture test server hung during Windows teardown and was interrupted after both scenarios passed; the command exited 1 during cleanup. No live data or permissions were changed.
+
+### Legislative member cards
+
+`/legislative/members` uses the shared OfficialGrid directory variant with clearer name/role hierarchy, a divider before descriptions, and compact four/two/one-column layouts. Portraits are 160px tall, with tighter card padding and readable 14px descriptions. CMS description line breaks are preserved with `white-space: pre-wrap`; committee assignments stay left-aligned for readability. Other OfficialGrid descriptions also preserve line breaks. No content migration is required.
+
+Validation: TypeScript and targeted lint passed. The live local directory was checked at 1440px and 390px, confirming preserved newlines and no horizontal overflow; both screenshots were reviewed.
+
+### Admin route skeletons
+
+Admin content navigation now has nested loading boundaries for office content, collection lists, new records, edit records, module shortcuts, and users. They reuse dashboard, table, and form variants in `components/shared/PageSkeleton.tsx`. The existing protected-layout/session-check skeleton remains in place, and the sidebar stays interactive while page data streams. Cached pages can render immediately; there is no minimum loading timer or production delay.
+
+The UI skill in `.agents/skills/municipality-ui-admin/SKILL.md` documents these patterns for future admin pages. Skeletons announce one loading status, hide decorative shapes from screen readers, and disable animation for reduced-motion preferences.
+
+Run the isolated slow-response checks with `npx playwright test --config playwright.loading.config.ts` after building. That configuration uses port 3013 and opt-in fixture-only database latency; ordinary tests and live Supabase requests are unaffected.
+
+Loading verification: production build, TypeScript and lint passed. Desktop and mobile slow-navigation scenarios passed for list, create and edit pages, including skeleton replacement, reduced motion and mobile overflow; screenshots were reviewed. The mobile test locator was corrected to wait for the collapsed navigation by its DOM ID before opening it. Windows fixture teardown required interruption after successful assertions (command exit 1 during cleanup). Skill frontmatter was parsed and checked with js-yaml; the bundled Python skill validator could not run because PyYAML is not installed.
+
+### Compact committee directory
+
+`/legislative/committees` uses searchable expandable rows for larger committee lists. Each summary shows the committee name and chairperson; opening it displays responsibilities, vice-chairperson and all four supported CMS member slots that resolve to published officials. Search covers committee names, responsibilities and member names. Existing CMS order is retained. Descriptions preserve line breaks, missing assignments have clear empty states, and the sample notice appears only when sample committees are present.
+
+The page reuses existing committee/official data adapters and CMS assignments. No migration is required. TypeScript and targeted lint passed. Desktop (1440px) and mobile (390px) checks verified keyboard expansion, displayed membership, search/clear behavior and no horizontal overflow; screenshots were reviewed against the four currently published committee records.
+
+### Committee description editing
+
+The committee create/edit form now exposes the existing `responsibility` field as **Committee description (optional)**, with a 500-character limit and a live character counter. The save handler validates the limit and supports replacing or clearing existing sample text. The public Responsibilities section reads the saved value, preserves newlines, wraps long words and hides when empty. Existing descriptions are not truncated automatically; no SQL migration is needed.
+
+Validation: TypeScript and the focused parser test passed, covering create, edit, clear, the 500-character boundary and rejection of 501 characters.
+
+### Stable committee edit links
+
+Committee routes use the stored primary key, never the editable title. Historical seed IDs such as `finance` remain valid immutable identifiers; newly created committees receive server-generated UUIDs. Renaming does not re-key records or break related documents.
+
+Admin edit links now use each record's stored owning office. After verifying record access, the edit route redirects stale office query parameters to the canonical owner instead of returning 404. Legislative updates retain the existing record's office instead of selecting the first Legislative office. Missing and unauthorized records still return not-found.
+
+Four focused tests passed for description validation, rename/UUID stability, stale-office redirects and denied/missing records. A live Supabase read could not complete (fetch failed), so the reported live 404's exact cause was not confirmed. No data migration or live record changes were performed.

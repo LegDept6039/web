@@ -7,7 +7,14 @@ import {
 import type { SupabaseConfig } from "./config";
 export type ContentFilters = Partial<
   Record<
-    "slug" | "id" | "office_id" | "branch" | "content_scope" | "role",
+    | "slug"
+    | "id"
+    | "office_id"
+    | "branch"
+    | "content_scope"
+    | "role"
+    | "document_type"
+    | "category_id",
     string
   >
 >;
@@ -34,7 +41,13 @@ export async function readSupabaseCollection<K extends Collection>(
     const params = new URLSearchParams({
       select:
         columns +
-        (["news", "programs"].includes(collection) ? ",source,rich_body" : ""),
+        (["news", "programs"].includes(collection) ? ",source,rich_body" : "") +
+        (["ordinances", "resolutions"].includes(collection)
+          ? ",author_record:officials!author_id(name),co_author_record:officials!co_author_id(name),committee_record:committees!committee_id(name),session_record:sessions!session_id(name,number)"
+          : "") +
+        (collection === "committees"
+          ? ",chair_record:officials!chair_id(name)"
+          : ""),
       published: "eq.true",
       order: `sort_order.asc,${definition.key}.asc`,
       limit: String(
@@ -44,6 +57,8 @@ export async function readSupabaseCollection<K extends Collection>(
     });
     if (collection === "officials" && filters.branch === "legislative")
       params.set("legislative_role", "not.is.null");
+    if (["documentCategories", "documents"].includes(collection))
+      params.set("deleted_at", "is.null");
     if (collection === "departments") {
       params.set("active", "eq.true");
       params.set("archived_at", "is.null");

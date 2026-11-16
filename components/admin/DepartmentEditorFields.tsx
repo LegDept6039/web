@@ -1,0 +1,102 @@
+"use client";
+import Link from "next/link";
+import { DepartmentBiography } from "./DepartmentBiography";
+import { ImageEditOverlay } from "./ImageEditOverlay";
+export function DepartmentEditorFields({
+  row,
+  editable,
+}: {
+  row: Record<string, unknown>;
+  editable: boolean;
+}) {
+  const value = (key: string) => String(row[key] || "");
+  return (
+    <div className="department-page-editor">
+      <input type="hidden" name="id" value={value("id")} />
+      <header className="department-editor-hero">
+        <span className="eyebrow">
+          {value("short_name") || "MUNICIPAL DEPARTMENT"}
+        </span>
+        <h2>{value("name")}</h2>
+        <p className="staff-note">
+          Edit the information in the same order it appears on your department
+          page.
+        </p>
+        {row.published === true && row.active !== false && row.slug ? (
+          <Link className="text-link" href={`/departments/${value("slug")}`}>
+            View published department page
+          </Link>
+        ) : null}
+      </header>
+      <section
+        className="department-editor-profile"
+        aria-label="Department head and overview"
+      >
+        <ImageEditOverlay
+          name="photo"
+          removeName="remove_photo"
+          current={value("head_photo")}
+          label="Profile photo"
+          portrait
+          editable={editable}
+        />
+        <div className="department-editor-fields">
+          <label>
+            Head Title (optional)
+            <input name="head_title" defaultValue={value("head_title")} />
+          </label>
+          <label>
+            Head Name (optional)
+            <input
+              className="department-editor-name"
+              name="head_name"
+              defaultValue={value("head_name")}
+            />
+          </label>
+          <label>
+            Description
+            <textarea
+              name="description"
+              defaultValue={value("description")}
+              required
+              rows={4}
+            />
+          </label>
+          <DepartmentBiography
+            initial={value("head_description")}
+            label="Head Description (optional)"
+          />
+        </div>
+      </section>
+      <section
+        className="department-editor-about"
+        aria-labelledby="department-about-label"
+      >
+        <h2 id="department-about-label">About the Department</h2>
+        <label>
+          Body (optional)
+          <textarea name="body" defaultValue={value("body")} rows={10} />
+        </label>
+      </section>
+      <section
+        className="department-editor-image"
+        aria-label="Department card image"
+      >
+        <div>
+          <h2>Department image</h2>
+          <p className="staff-note">
+            Shown on the homepage department cards. The department page uses the
+            head portrait above.
+          </p>
+        </div>
+        <ImageEditOverlay
+          name="department_image"
+          removeName="remove_image"
+          current={value("image_url")}
+          label="Department image"
+          editable={editable}
+        />
+      </section>
+    </div>
+  );
+}
