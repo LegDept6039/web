@@ -2,8 +2,10 @@ import { legislativeOptions } from "@/lib/legislative/server";
 import {
   usesLegislativeFields,
   isDocumentType,
+  isDocumentCollection,
 } from "@/lib/legislative/config";
 import { DocumentTypeSelector } from "@/components/admin/DocumentTypeSelector";
+import { DocumentTransferControls } from "@/components/admin/DocumentTransferControls";
 import { ContentBreadcrumb } from "@/components/admin/ContentBreadcrumb";
 import { notFound } from "next/navigation";
 import {
@@ -19,7 +21,12 @@ export default async function NewContent({
   searchParams,
 }: {
   params: Promise<{ collection: string }>;
-  searchParams: Promise<{ office?: string; type?: string }>;
+  searchParams: Promise<{
+    office?: string;
+    type?: string;
+    master?: string;
+    term?: string;
+  }>;
 }) {
   const context = await officeContext();
   const collection = collectionName((await params).collection);
@@ -36,6 +43,33 @@ export default async function NewContent({
   if (office && !available(context, collection, office, "write"))
     return <p role="alert">You cannot create content in this office.</p>;
   const type = (await searchParams).type;
+  const transferControls =
+    scope === "legislative" && isDocumentCollection(collection) ? (
+      <DocumentTransferControls
+        office={office}
+        type={
+          collection === "ordinances"
+            ? "ordinance"
+            : collection === "resolutions"
+              ? "resolution"
+              : type && isDocumentType(type)
+                ? type
+                : undefined
+        }
+        offices={context.offices
+          .filter(
+            (o) =>
+              o.active &&
+              o.department === "legislative" &&
+              allowed(context, o.id, "read"),
+          )
+          .map((o) => ({
+            id: o.id,
+            name: o.name,
+            writable: allowed(context, o.id, "write"),
+          }))}
+      />
+    ) : null;
   if (
     scope === "legislative" &&
     collection === "documents" &&
@@ -50,14 +84,31 @@ export default async function NewContent({
           office={office}
           collection={collection}
         />
-        <h1>Add Document</h1>
+        <div className="admin-toolbar">
+          <h1>Add Document</h1>
+          {transferControls}
+        </div>
         <DocumentTypeSelector office={office} />
       </>
     );
   const options =
-    scope === "legislative" && usesLegislativeFields(collection)
-      ? await legislativeOptions(context, office)
+    scope === "legislative" &&
+    (usesLegislativeFields(collection) || collection === "officials")
+      ? await legislativeOptions(context, office, collection === "committees")
       : undefined;
+  const { master, term } = await searchParams;
+  if (
+    collection === "committees" &&
+    master &&
+    !options?.masters?.some((m) => m.id === master)
+  )
+    notFound();
+  if (
+    collection === "committees" &&
+    term &&
+    !options?.terms?.some((t) => t.id === term)
+  )
+    notFound();
   return (
     <>
       <ContentBreadcrumb
@@ -65,7 +116,14 @@ export default async function NewContent({
         office={office}
         collection={collection}
       />
-      <h1>Add {label(collection).toLowerCase()} record</h1>
+      {transferControls ? (
+        <div className="admin-toolbar">
+          <h1>Add {label(collection).toLowerCase()} record</h1>
+          {transferControls}
+        </div>
+      ) : (
+        <h1>Add {label(collection).toLowerCase()} record</h1>
+      )}
       <ContentForm
         key={`${collection}:${office || scope}`}
         collection={collection}
@@ -77,6 +135,9 @@ export default async function NewContent({
           office_id: office || "",
           document_type: type || "",
           published: collection === "contacts",
+          ...(collection === "committees"
+            ? { master_id: master || "", term_id: term || "" }
+            : {}),
         }}
       />
     </>

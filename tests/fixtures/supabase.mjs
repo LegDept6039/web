@@ -181,7 +181,16 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
   const department_contacts = [];
   for (const [i, d] of departments.filter((d) => d.published).entries())
     d.sort_order = i + 1;
+  const legislative_terms = [
+    { id: '20000000-0000-4000-8000-000000000001', name: 'Current Council', start_date: '2025-07-01', end_date: '2028-06-30', updated_at: now },
+    { id: '20000000-0000-4000-8000-000000000002', name: 'Previous Council', start_date: '2022-07-01', end_date: '2025-06-30', updated_at: now },
+  ];
+  const committee_master = ['Current Committee', 'Committee desktop', 'Committee mobile'].map((name, i) => ({id: `30000000-0000-4000-8000-00000000000${i+1}`,name,sort_order:i,updated_at:now}));
+  if (process.env.PORTAL_COMMITTEE_MASTER_TEST_FIXTURE === "1")
+    for (let index=4; index<=25; index++) committee_master.push({id:`30000000-0000-4000-8000-${String(index).padStart(12,'0')}`, name:index === 4 ? 'Committee for Long Catalog Names, Community Organizations, Public Participation and Administrative Coordination' : `Additional Standing Committee ${index}`,sort_order:index,updated_at:now});
   const collections = {
+    committee_master,
+    legislative_terms,
     sessions,
     committees,
     ordinances,
@@ -194,11 +203,97 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     departments,
     department_contacts,
   };
+  if (process.env.PORTAL_TERM_TEST_FIXTURE === '1') {
+    const currentTerm = legislative_terms[0].id, previousTerm = legislative_terms[1].id;
+    const base = { office_id: officeIds.sb, content_scope: 'legislative', published: true, is_sample: false, sort_order: 1, updated_at: now, created_at: now };
+    for (const [id, name, term_id, published] of [['term-current-a','Current Member A',currentTerm,true],['term-current-b','Current Member B',currentTerm,true],['term-previous-a','Previous Member',previousTerm,true],['term-draft','Draft Member',currentTerm,false],['term-unassigned','Unassigned Member',null,true],['committees','Legacy Member desktop',null,true],['finance','Legacy Member mobile',null,true]])
+      officials.push({...base,id,name,term_id,published,branch:'legislative',legislative_role:'SANGGUNIANG_BAYAN',role:'Council member',description:'Member description',photo_url:null});
+    committees.push({...base,id:'term-committee',name:'Current Committee',term_id:currentTerm,responsibility:'Current responsibilities',chair:'',chair_id:'term-current-a',vice_chair_id:'term-current-b'});
+    sessions.push({...base,id:'term-session',name:'Current Session',term_id:currentTerm,number:'1',date:'2026-11-16',type:'Regular session',description:'Session description',agenda:[],image:'/images/department-placeholder.svg'});
+    sessions.push({...base,id:'term-old-session',name:'Previous Session',term_id:previousTerm,number:'1',date:'2024-11-16',type:'Regular session',description:'Session description',agenda:[],image:'/images/department-placeholder.svg'});
+  }
+  if (process.env.PORTAL_TRANSFER_TEST_FIXTURE === "1") {
+    officials.push({id:'transfer-vice-mayor',name:'Vice Mayor',office_id:officeIds.sb,content_scope:'legislative',branch:'legislative',legislative_role:'MUNICIPAL_VICE_MAYOR',term_id:legislative_terms[0].id,published:true,is_sample:false,sort_order:1,description:'Vice Mayor',role:'Vice Mayor',updated_at:now});
+    officials.push({
+      id: "transfer-executive-official",
+      name: "Executive Office Official",
+      office_id: officeIds.mpdc,
+      content_scope: "executive",
+      branch: "executive",
+      role: "Department head",
+      term_id: null,
+      description: "An official outside the Legislative office",
+      published: true,
+      is_sample: false,
+      sort_order: 1,
+      updated_at: now,
+    });
+    for (const [index, title] of ["Pagination first record", "Pagination duplicate target"].entries())
+      municipal_documents.push({
+        id: `00000000-0000-4000-8000-00000000010${index}`,
+        title,
+        date: "2026-11-17",
+        description: "Existing report for capped pagination checks.",
+        office_id: officeIds.sb,
+        content_scope: "legislative",
+        document_type: "executive-order",
+        term_id: legislative_terms[0].id,
+        published: true,
+        is_sample: false,
+        sort_order: index + 1,
+        file_url: "",
+        deleted_at: null,
+        updated_at: now,
+      });
+  }
+  if (process.env.PORTAL_DOCUMENT_SESSION_TEST_FIXTURE === "1") {
+    const base = sessions.find(s => s.id === 'term-session');
+    for (const [id,name,date] of [['sixth-session','6th Regular Session','2025-08-08'],['seventh-session','7th Regular Session','2025-08-09'],['special-session','Special Session','2025-08-09']])
+      sessions.push({...base,id,name,date});
+    officials.push({...officials.find(o => o.id === 'term-current-a'),id:'vice-mayor-session-test',name:'Vice Mayor Test',legislative_role:'MUNICIPAL_VICE_MAYOR'});
+  }
+  for (const committee of committees) {
+    committee.master_id = committee_master.find(m => m.name === committee.name)?.id || null;
+  }
+  if (process.env.PORTAL_COMMITTEE_MASTER_TEST_FIXTURE === "1")
+    for (const device of ['desktop','mobile']) committees.push({id:`legacy-${device}`,name:`Historical Committee ${device}`,master_id:null,term_id:null,chair:'',responsibility:'Historical description',office_id:officeIds.sb,content_scope:'legislative',published:true,is_sample:false,sort_order:1,created_at:now,updated_at:now});
+  if (process.env.PORTAL_PAGINATION_TEST_FIXTURE === "1") {
+    const currentTerm = legislative_terms[0].id;
+    const previousTerm = legislative_terms[1].id;
+    const base = { office_id: officeIds.sb, content_scope: "legislative", published: true, is_sample: false, term_id: currentTerm, created_at: now, updated_at: now };
+    const sequence = (value) => String(value).padStart(2, "0");
+    for (const rows of [officials, sessions, committees, committee_master, municipal_documents, document_categories]) rows.length = 0;
+    for (let index = 1; index <= 31; index++) {
+      const suffix = sequence(index);
+      const masterId = `51000000-0000-4000-8000-${String(index).padStart(12, "0")}`;
+      const moduleId = `pagination-module-${suffix}`;
+      officials.push({ ...base, id: `pagination-official-${suffix}`, name: `Pagination Official ${suffix}`, description: "Fixture council member", branch: "legislative", legislative_role: "SANGGUNIANG_BAYAN", role: "Council Member", sort_order: index });
+      sessions.push({ ...base, id: `pagination-session-${suffix}`, name: `Pagination Session ${suffix}`, number: suffix, date: "2026-11-17", type: "Regular session", description: "Fixture session", agenda: [], image: "/images/department-placeholder.svg", sort_order: index });
+      committee_master.push({ id: masterId, name: `Pagination Committee ${suffix}`, sort_order: index, updated_at: now });
+      committees.push({ ...base, id: `pagination-committee-${suffix}`, master_id: masterId, name: `Pagination Committee ${suffix}`, chair: "", chair_id: "pagination-official-01", vice_chair_id: "pagination-official-02", responsibility: "Fixture committee", sort_order: index });
+      municipal_documents.push({ ...base, id: `pagination-document-${suffix}`, title: `Pagination Report ${suffix}`, date: "2026-11-17", description: "Fixture Executive Order", document_type: "executive-order", session_id: null, file_url: "", deleted_at: null, sort_order: index });
+      document_categories.push({ id: moduleId, name: `Pagination Module ${suffix}`, description: "Fixture Transparency module", content_scope: "transparency", office_id: null, published: true, deleted_at: null, is_sample: false, sort_order: index, updated_at: now });
+      municipal_documents.push({ id: `pagination-transparency-${suffix}`, title: `Quarterly Budget ${suffix}`, date: "2026-11-17", description: "Fixture Transparency report", report_frequency: "quarterly", report_year: 2026, category_id: "pagination-module-01", q1_pdf_path: "transparency/00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-000000000002.pdf", content_scope: "transparency", office_id: null, published: true, deleted_at: null, is_sample: false, sort_order: index, updated_at: now });
+      users.push({ user_id: `52000000-0000-4000-8000-${String(index).padStart(12, "0")}`, email: `pagination${suffix}@example.test`, display_name: `Pagination Staff ${suffix}`, role: "viewer", active: true, deleted_at: null, created_at: "2026-01-01T00:00:00Z", updated_at: now });
+      const departmentId = `53000000-0000-4000-8000-${String(index).padStart(12, "0")}`;
+      departments.push({ id: departmentId, office_id: departmentId, name: `Pagination Department ${suffix}`, short_name: `PD${suffix}`, slug: `pagination-department-${suffix}`, department: "executive", content_scope: "executive", active: true, published: true, archived_at: null, is_sample: false, sort_order: index + 10, description: "Fixture department", body: "", head_description: "", created_at: now, updated_at: now });
+    }
+    officials.push({ ...officials[0], id: "pagination-previous-official", name: "Previous Term Official", term_id: previousTerm, sort_order: 1 });
+    officials.push({ ...officials[0], id: "pagination-foreign-official", name: "Foreign Office Official", office_id: officeIds.mpdc, content_scope: "executive", branch: "executive", legislative_role: null, term_id: null });
+    sessions.push({ ...sessions[0], id: "pagination-previous-session", name: "Previous Term Session", date: "2024-11-17", term_id: previousTerm });
+    municipal_documents.push({ ...municipal_documents[0], id: "pagination-agenda", title: "Agenda Outside EO Filter", document_type: "agenda", session_id: sessions[0].id });
+    municipal_documents.push({ ...municipal_documents[0], id: "pagination-previous-document", title: "Previous Term Report", date: "2024-11-17", term_id: previousTerm });
+    municipal_documents.push({ ...municipal_documents[1], id: "pagination-transparency-old", title: "Previous Year Budget", category_id: "pagination-module-02", report_year: 2025 });
+    for (let index = 1; index <= 27; index++) committees.push({ ...base, id: `pagination-historical-${sequence(index)}`, name: `Preserved Committee ${sequence(index)}`, master_id: null, chair: "", chair_id: "pagination-official-01", vice_chair_id: "pagination-official-02", responsibility: "Existing unlinked composition", sort_order: index + 31 });
+    for (let index = 1; index <= 29; index++) legislative_terms.push({ id: `54000000-0000-4000-8000-${String(index).padStart(12, "0")}`, name: `Historical Term ${sequence(index)}`, start_date: `${1900 + index}-01-01`, end_date: `${1900 + index}-12-31`, updated_at: now });
+    collections.audit_logs = Array.from({ length: 55 }, (_, index) => ({ id: `pagination-audit-${sequence(index + 1)}`, user_id: users[0].user_id, action: "fixture_review", entity_type: "pagination_fixture", entity_id: String(index + 1), office_id: officeIds.sb, description: `Pagination Audit ${sequence(index + 1)}`, created_at: new Date(Date.UTC(2026, 0, index + 1)).toISOString() }));
+  }
   const scope = (table, row) =>
     table === "departments"
       ? row.department
       : `${row.content_scope}:${row.office_id || "unassigned"}`;
   function reorder(table, old, next) {
+    if (table === "committee_master") return;
     const all = collections[table];
     if (!all) return;
     if (
@@ -465,6 +560,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       if (
         method === "POST" &&
         [
+          "committee_master",
+          "legislative_terms",
           "officials",
           "news",
           "programs",
@@ -478,34 +575,39 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           "document_categories",
         ].includes(table)
       ) {
-        const row = {
-          ...body,
-          ...([
-            "officials",
-            "department_contacts",
-            "departments",
-            "programs",
-          ].includes(table)
-            ? { id: crypto.randomUUID() }
-            : {}),
-          created_by: actor?.user_id,
-          updated_at: new Date().toISOString(),
-        };
-        if (table === "departments")
-          Object.assign(row, {
-            office_id: row.id,
-            content_scope: row.department,
-            published: body.published ?? true,
-            is_sample: false,
-            sort_order: body.sort_order ?? 0,
-            active: body.active ?? true,
-            archived_at: null,
-            body: body.body ?? "",
-            head_description: body.head_description ?? "",
-          });
-        reorder(table, null, row);
-        collections[table].push(row);
-        return response([row]);
+        const inserted = (Array.isArray(body) ? body : [body]).map((record) => {
+          const row = {
+            ...record,
+            ...([
+              "committee_master",
+              "legislative_terms",
+              "officials",
+              "department_contacts",
+              "departments",
+              "programs",
+            ].includes(table)
+              ? { id: crypto.randomUUID() }
+              : {}),
+            created_by: actor?.user_id,
+            updated_at: new Date().toISOString(),
+          };
+          if (table === "departments")
+            Object.assign(row, {
+              office_id: row.id,
+              content_scope: row.department,
+              published: record.published ?? true,
+              is_sample: false,
+              sort_order: record.sort_order ?? 0,
+              active: record.active ?? true,
+              archived_at: null,
+              body: record.body ?? "",
+              head_description: record.head_description ?? "",
+            });
+          reorder(table, null, row);
+          collections[table].push(row);
+          return row;
+        });
+        return response(inserted);
       }
       let rows =
         table === "officials"
@@ -590,7 +692,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             (d) => d.published || assigned.includes(d.office_id),
           );
       }
-      if (!actor) rows = rows.filter((r) => r.published);
+      if (!actor && table !== "legislative_terms") rows = rows.filter((r) => r.published);
       for (const [key, val] of url.searchParams) {
         if (val.startsWith("ilike."))
           rows = rows.filter((r) =>
@@ -641,8 +743,14 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         return 0;
       });
       const count = rows.length;
-      const offset = Number(url.searchParams.get("offset") || 0),
-        limit = Number(url.searchParams.get("limit") || 1000);
+      const offset = Number(url.searchParams.get("offset") || 0);
+      let limit = Number(url.searchParams.get("limit") || 1000);
+      if (
+        process.env.PORTAL_TRANSFER_TEST_FIXTURE === "1" &&
+        [200, 500].includes(limit) &&
+        url.searchParams.get("select") !== "*" &&
+        ["officials", "committees", "sessions", "ordinances", "resolutions", "municipal_documents"].includes(table)
+      ) limit = 1;
       rows = rows.slice(offset, offset + limit);
       rows = rows.map((r) => ({
         ...r,

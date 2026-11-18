@@ -2,7 +2,12 @@ import { LegislativeOverview } from "@/components/admin/LegislativeOverview";
 import Link from "next/link";
 import { officeContext } from "@/lib/offices/server";
 import { transparencyAccess } from "@/lib/transparency/permissions";
-export default async function Dashboard() {
+export default async function Dashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ term?: string }>;
+}) {
+  const { term } = await searchParams;
   const context = await officeContext();
   const { profile, offices, access } = context;
   if (
@@ -11,7 +16,13 @@ export default async function Dashboard() {
     offices.length === 1 &&
     offices[0].department === "legislative"
   )
-    return <LegislativeOverview context={context} office={offices[0].id} />;
+    return (
+      <LegislativeOverview
+        context={context}
+        office={offices[0].id}
+        term={term}
+      />
+    );
   return (
     <>
       <p className="eyebrow">Staff portal</p>

@@ -1,4 +1,5 @@
 "use server";
+import { assignRecordTerm } from "@/lib/legislative/term-assignment";
 import { validateRichText, richTextPlain } from "@/lib/content/rich-text";
 import { saveError } from "@/lib/admin/publication";
 import { redirect } from "next/navigation";
@@ -179,9 +180,29 @@ export async function saveContent(
   row.content_scope = scope;
   if (!contentAllowed(context, collection, row, "write"))
     return "You do not have permission to manage content in this office.";
+  if (scope === "legislative" && collection === "committees") {
+    const master = await client
+      .from("committee_master")
+      .select("id,name")
+      .eq("id", row.master_id)
+      .maybeSingle();
+    if (master.error || !master.data)
+      return "Choose an existing Master Committee.";
+    row.name = existing ? existing.name : master.data.name;
+  }
   if (["news", "programs", "departments"].includes(collection) && !office)
     return "Choose an owning office for this content.";
-  if (scope === "legislative" && usesLegislativeFields(collection)) {
+  if (
+    scope === "legislative" &&
+    (usesLegislativeFields(collection) || collection === "officials")
+  ) {
+    try {
+      await assignRecordTerm(client, collection, row, form);
+    } catch (error) {
+      return error instanceof Error
+        ? error.message
+        : "Check the assigned term.";
+    }
     for (const column of [
       "author_id",
       "co_author_id",
@@ -211,9 +232,15 @@ export async function saveContent(
         !related.data ||
         related.data.content_scope !== "legislative" ||
         related.data.office_id !== office ||
+        related.data.term_id !== row.term_id ||
         !contentAllowed(context, relatedCollection, related.data, "read")
       )
-        return "Choose an existing related record from your Legislative office.";
+        return "Choose a related record from the same Legislative office and term.";
+      if (
+        ["author_id", "co_author_id"].includes(column) &&
+        related.data.legislative_role !== "SANGGUNIANG_BAYAN"
+      )
+        return "Authors and co-authors must be Sangguniang Bayan members.";
     }
   }
   const photoColumn = collection === "departments" ? "head_photo" : "photo_url";
@@ -336,6 +363,19 @@ export async function saveContent(
     await client.storage.from("municipal-media").remove([newsImage.path]);
   if ((result.error || !result.data?.length) && departmentImage)
     await client.storage.from("municipal-media").remove([departmentImage.path]);
+  if (
+    result.error?.code === "23514" &&
+    [
+      "No Legislative Term covers this date.",
+      "Related records must belong to the same Legislative Term",
+      "Assign the selected session to a Legislative Term first",
+      "This record is referenced by records in another term.",
+      "Choose a Legislative Term",
+    ].some((message) => result.error!.message.startsWith(message))
+  )
+    return result.error.message;
+  if (result.error?.code === "23505" && collection === "committees")
+    return "This master committee already has a composition for that term. Open the existing record from Committees.";
   if (result.error)
     return (
       saveError(result.error.code) ||
@@ -349,7 +389,7 @@ export async function saveContent(
     return "This record changed or your access was removed. Reload before saving.";
   revalidatePath("/", "layout");
   redirect(
-    `/admin/content/${collection}?saved=${encodeURIComponent(String((result.data[0] as unknown as Record<string, unknown>)[definition.key]))}${office ? `&office=${office}` : ""}`,
+    `/admin/content/${collection}?saved=${encodeURIComponent(String((result.data[0] as unknown as Record<string, unknown>)[definition.key]))}${office ? `&office=${office}` : ""}${collection === "committees" && row.term_id ? `&term=${encodeURIComponent(String(row.term_id))}` : ""}`,
   );
 }
 

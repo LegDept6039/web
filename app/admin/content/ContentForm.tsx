@@ -1,4 +1,5 @@
 "use client";
+import { termForDate } from "@/lib/legislative/terms";
 import { LegislativeFields } from "@/components/admin/LegislativeFields";
 import { PdfAttachment } from "@/components/admin/PdfAttachment";
 import { PDF_LIMIT } from "@/lib/admin/document-pdf-validation";
@@ -396,6 +397,32 @@ export function ContentForm({
               Valid documents are published when saved.
             </p>
           )}
+          {scope === "legislative" && collection === "officials" && (
+            <label>
+              Legislative Term
+              <select
+                name="term_id"
+                required
+                defaultValue={String(
+                  row.term_id ||
+                    (row.id
+                      ? ""
+                      : termForDate(
+                          legislativeOptions.terms || [],
+                          legislativeOptions.today || "",
+                        )?.id) ||
+                    "",
+                )}
+              >
+                <option value="">Select a term</option>
+                {(legislativeOptions.terms || []).map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           {legislative && (
             <LegislativeFields
               collection={collection}
@@ -423,6 +450,7 @@ export function ContentForm({
               ].includes(name)
             )
               return null;
+            if (name === "termId") return null;
             if (legislative) return null;
             if (scope === "legislative" && name === "isSample") return null;
             if (collection === "departments") return null;

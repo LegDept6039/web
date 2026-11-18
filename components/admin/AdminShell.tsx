@@ -30,6 +30,12 @@ export async function AdminShell({
             <Link href="/admin/content">Content management</Link>
             {context.profile.role === "superadmin" && (
               <>
+                <Link href="/superadmin/legislative-terms">
+                  Legislative Terms
+                </Link>
+                <Link href="/superadmin/master-committees">
+                  Master Committees
+                </Link>
                 <Link href="/superadmin/departments">Departments</Link>
                 <Link href="/superadmin/users">Users & access control</Link>
                 <Link href="/superadmin/audit">Audit log</Link>

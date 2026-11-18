@@ -25,9 +25,10 @@ export function PublicationFields({
     error?: string;
   }>();
   const key = `${collection}:${office}:${branch}:${original}`;
+  const dateOrdered = branch === "legislative" && collection === "sessions";
   useEffect(() => {
     let live = true;
-    if (published)
+    if (published && !dateOrdered)
       positionLimit(collection, office, branch, original)
         .then((r) => {
           if (live) setResult({ key, ...r });
@@ -42,7 +43,7 @@ export function PublicationFields({
     return () => {
       live = false;
     };
-  }, [collection, office, branch, original, published, key]);
+  }, [collection, office, branch, original, published, key, dateOrdered]);
   const current = result?.key === key ? result : undefined;
   return (
     <div className="publication-fields">
@@ -55,7 +56,18 @@ export function PublicationFields({
         />{" "}
         Published
       </label>
-      {published ? (
+      {dateOrdered ? (
+        <>
+          <input
+            type="hidden"
+            name="sort_order"
+            value={published ? position || 1 : 0}
+          />
+          <p className="staff-note">
+            Sessions are listed by session date, newest first.
+          </p>
+        </>
+      ) : published ? (
         <>
           <label>
             {collection === "departments" ? "Display Order" : "Sort order"}

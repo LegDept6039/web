@@ -77,6 +77,49 @@
 .staff-nav form {
   margin-left: auto;
 }
+.admin-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.admin-pagination-summary { margin: 0; color: var(--ink); }
+.admin-pagination-summary > span { display: block; color: var(--muted); font-size: 12px; }
+.admin-pagination-controls, .admin-pagination-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.admin-pagination-controls { flex-wrap: wrap; }
+.admin-pagination-controls a,
+.admin-pagination-controls [aria-current],
+.admin-pagination-controls [aria-disabled] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--blue);
+  background: white;
+  text-decoration: none;
+  font-weight: 600;
+}
+.admin-pagination-controls a:hover { background: #e6f1fc; border-color: var(--blue); }
+.admin-pagination-controls a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.admin-pagination-controls [aria-current] { background: var(--navy); border-color: var(--navy); color: white; }
+.admin-pagination-controls [aria-disabled] { color: var(--muted); background: var(--light); }
+.admin-pagination-gap { color: var(--muted); padding: 0 3px; }
+@media (max-width: 600px) {
+  .admin-pagination { align-items: flex-start; flex-direction: column; }
+  .admin-pagination-controls { row-gap: 8px; }
+}
 .staff-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
@@ -181,6 +224,93 @@
   align-items: center;
   justify-content: space-between;
   margin: 20px 0;
+}
+.document-transfer-controls,
+.document-transfer-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.document-transfer-button {
+  gap: 8px;
+  border: 1px solid #b6c6d6;
+  background: white;
+  color: var(--navy);
+}
+.document-transfer-button:hover {
+  background: #eaf0f5;
+  color: var(--navy);
+}
+.document-transfer-dialog {
+  margin: auto;
+  width: min(640px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+  color: var(--ink);
+  box-shadow: 0 20px 70px #102a4340;
+}
+.document-transfer-dialog::backdrop {
+  background: #102a4380;
+}
+.document-transfer-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  background: white;
+}
+.document-transfer-heading h2 {
+  font: 700 22px/1.35 var(--font-sans), sans-serif;
+  color: var(--navy);
+}
+.document-transfer-close {
+  display: grid;
+  flex: 0 0 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  color: var(--navy);
+  cursor: pointer;
+}
+.document-transfer-links {
+  column-gap: 20px;
+  font-size: 14px;
+}
+.document-transfer-links a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.document-transfer-result {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f1f6fb;
+  overflow-wrap: anywhere;
+}
+.document-transfer-result[role="alert"] {
+  border-color: #e4c5c5;
+  color: #8a2424;
+  background: #fff7f7;
+}
+.document-transfer-result ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+.document-transfer-result p + p {
+  margin-top: 8px;
 }
 .admin-table-wrap {
   overflow-x: auto;
@@ -546,3 +676,8 @@ html:has(.admin-shell) {
 .transparency-upload { align-content:start; }
 .transparency-module-excerpt { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .transparency-row-actions a,.transparency-delete summary { position:relative; }
+/* Compact term-specific committee compositions, shared across the catalog. */
+.committee-composition-table { min-width: 780px; }
+.committee-composition-table td { max-width: 24rem; white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.committee-composition-table .staff-note { display: block; margin-top: .35rem; }
+.committee-composition-members { margin: 0; padding-left: 1rem; }

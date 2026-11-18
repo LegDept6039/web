@@ -1,19 +1,22 @@
-import Link from "next/link";
 import { requireStaff } from "@/lib/auth/server";
+import { loadAdminPage } from "@/lib/admin/pagination";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 export default async function Audit({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
   const { client } = await requireStaff(true);
-  const raw = Number((await searchParams).page || 1);
-  const page = Number.isInteger(raw) && raw > 0 ? raw : 1;
-  const { data, error, count } = await client
-    .from("audit_logs")
-    .select("*", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false })
-    .range((page - 1) * 50, page * 50 - 1);
+  const params = await searchParams;
+  const { data, error, pagination } = await loadAdminPage(
+    client
+      .from("audit_logs")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false }),
+    params.page,
+    50,
+  );
   return (
     <>
       <h1>Audit log</h1>
@@ -58,13 +61,13 @@ export default async function Audit({
           </table>
         </div>
       )}
-      <nav className="staff-nav" aria-label="Audit pages">
-        {page > 1 && <Link href={`?page=${page - 1}`}>Previous</Link>}
-        <span>Page {page}</span>
-        {page * 50 < (count || 0) && (
-          <Link href={`?page=${page + 1}`}>Next</Link>
-        )}
-      </nav>
+      {!error && (
+        <AdminPagination
+          pagination={pagination}
+          params={params}
+          label="Audit pages"
+        />
+      )}
     </>
   );
 }

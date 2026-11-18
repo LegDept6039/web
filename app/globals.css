@@ -90,6 +90,11 @@ svg {
   width: min(1200px, calc(100% - 80px));
   margin-inline: auto;
 }
+h1,
+.breadcrumb,
+.admin-breadcrumb {
+  text-transform: capitalize;
+}
 .section {
   padding-block: 72px;
 }
@@ -2595,4 +2600,31 @@ footer {
   .committee-entry h3 { grid-column:1/-1; font-size:15px; }
   .committee-details { grid-template-columns:minmax(0,1fr); gap:20px; padding:16px; }
   .committee-membership dl > div { grid-template-columns:minmax(0,1fr); gap:2px; }
+}
+.term-selector { display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; margin:0 0 24px; padding:16px; border:1px solid var(--line); border-radius:8px; background:#f0f5fa; }
+.term-selector label { display:grid; gap:6px; font-size:13px; font-weight:600; max-width:100%; }
+.term-selector select { max-width:100%; padding:10px; background:white; border:1px solid #bac8d3; border-radius:4px; color:var(--navy); }
+.term-selector p { font-size:13px; color:var(--muted); }
+
+/* Keep the public council roster close to its heading and filters. */
+.council-page .page-hero { padding: 20px 0 28px; }
+.council-page .breadcrumb { margin-bottom: 20px; }
+.council-page .page-hero h1 { font-size: clamp(30px, 3vw, 40px); line-height: 1.2; margin-top: 8px; }
+.council-page .page-hero p { margin-top: 12px; max-width: 760px; }
+.council-content { padding-block: 28px 56px; }
+.council-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px 32px; flex-wrap: wrap; padding-bottom: 20px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+.council-directory-heading h2 { font: 700 20px/1.4 Arial, sans-serif; }
+.council-directory-heading p { margin-top: 4px; color: var(--muted); font-size: 13px; }
+.term-selector.term-selector-compact { margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; display: grid; gap: 6px; min-width: 0; max-width: 100%; flex: 0 1 310px; }
+.term-selector-compact label { grid-template-columns: minmax(0, 1fr); gap: 5px; font-size: 12px; }
+.term-selector-compact select { width: 100%; min-width: 0; min-height: 44px; padding: 9px 12px; font-size: 14px; font-weight: 600; }
+.term-selector-compact select:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.term-selector-compact p { margin: 0; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.council-empty { padding: 24px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+@media (max-width: 640px) {
+  .council-page .page-hero { padding-block: 16px 24px; }
+  .council-page .breadcrumb { margin-bottom: 16px; }
+  .council-content { padding-block: 24px 40px; }
+  .council-toolbar { align-items: stretch; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+  .term-selector.term-selector-compact { flex: auto; width: 100%; }
 }

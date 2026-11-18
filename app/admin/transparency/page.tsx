@@ -7,6 +7,8 @@ import { slotsFor, slotLabel } from "@/lib/transparency/config";
 import { ReportFilters } from "@/components/transparency/ReportFilters";
 import { TransparencyDelete } from "@/components/admin/TransparencyDelete";
 import { transparencyAccess } from "@/lib/transparency/permissions";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { pageDetails } from "@/lib/admin/pagination";
 export default async function Page({
   searchParams,
 }: {
@@ -36,6 +38,8 @@ export default async function Page({
         Number(b.report_year) - Number(a.report_year) ||
         String(a.title).localeCompare(String(b.title)),
     );
+  const pagination = pageDetails(filtered.length, params.page);
+  const visibleReports = filtered.slice(pagination.from, pagination.to + 1);
   return (
     <div className="transparency-workspace">
       <div className="admin-toolbar">
@@ -93,7 +97,7 @@ export default async function Page({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((r) => (
+            {visibleReports.map((r) => (
               <tr key={String(r.id)}>
                 <td>
                   {canEdit ? (
@@ -175,6 +179,11 @@ export default async function Page({
           </p>
         )}
       </div>
+      <AdminPagination
+        pagination={pagination}
+        params={params}
+        label="Transparency reports pagination"
+      />
     </div>
   );
 }

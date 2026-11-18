@@ -15,6 +15,37 @@ const config = {
   url: "https://example.supabase.co",
   key: "sb_publishable_test",
 };
+test("dated Legislative collections request newest dates before pagination", async () => {
+  for (const collection of [
+    "ordinances",
+    "resolutions",
+    "sessions",
+    "documents",
+  ] as const) {
+    await readSupabaseCollection(
+      collection,
+      config,
+      async (url) => {
+        expect(new URL(url).searchParams.get("order")).toBe(
+          `${["ordinances", "resolutions"].includes(collection) ? "date_approved" : "date"}.desc,id.asc`,
+        );
+        return Response.json([]);
+      },
+      { content_scope: "legislative" },
+    );
+  }
+  await readSupabaseCollection(
+    "documents",
+    config,
+    async (url) => {
+      expect(new URL(url).searchParams.get("order")).toBe(
+        "sort_order.asc,id.asc",
+      );
+      return Response.json([]);
+    },
+    { content_scope: "transparency" },
+  );
+});
 const row = {
   id: "office",
   name: "Administration",

@@ -67,7 +67,8 @@ export function parseLegislative(
         image: "/images/department-placeholder.svg",
       });
   } else if (collection === "committees") {
-    row.name = text("name");
+    row.name = existing?.name || ""; // New names are resolved from the catalog on the server.
+    row.master_id = existing?.master_id || text("master_id");
     if (form.has("responsibility") || !existing) {
       const description = text("responsibility", false);
       if (description.length > COMMITTEE_DESCRIPTION_MAX_LENGTH)
@@ -84,8 +85,7 @@ export function parseLegislative(
       "member_3_id",
       "member_4_id",
     ])
-      row[key] =
-        text(key, key === "chair_id" || key === "vice_chair_id") || null;
+      row[key] = text(key, false) || null;
     const members = [
       "chair_id",
       "vice_chair_id",
@@ -111,7 +111,7 @@ export function parseLegislative(
         author_id: text("author_id"),
         co_author_id: text("co_author_id", false) || null,
         committee_id: text("committee_id"),
-        session_id: text("session_id"),
+        session_id: text("session_id", false) || null,
         summary: text("summary"),
       });
       if (
@@ -138,7 +138,8 @@ export function parseLegislative(
         document_type: type,
         date: date("date"),
         description: text("description"),
-        session_id: type === "executive-order" ? null : text("session_id"),
+        session_id:
+          type === "executive-order" ? null : text("session_id", false) || null,
       });
       if (!existing) Object.assign(row, { category_id: null, file_url: "" });
     }

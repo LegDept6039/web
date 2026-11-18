@@ -168,3 +168,15 @@ The header, hero, vision/mission, contact details, mayor introduction, and gener
 - https://supabase.com/docs/guides/getting-started/api-keys
 - https://supabase.com/docs/guides/database/postgres/row-level-security
 - https://supabase.com/docs/guides/storage/buckets/creating-buckets
+
+## Legislative Terms (019)
+
+After migration 018, apply the contents of `supabase/migrations/202611160019_legislative_terms.sql` before deploying the terms-enabled application. Create verified term date ranges in `/superadmin/legislative-terms`; existing Legislative records are preserved as unassigned until deliberately edited. See `docs/LEGISLATIVE-TERMS.md` for setup order, permissions, date assignment and historical browsing. No hosted migration is run automatically.
+
+## Master Committees (020)
+
+After 019, apply the contents of `supabase/migrations/202611180020_committee_master.sql`. This creates the editable catalog, seeds the 25 supplied standing committee names and adds a nullable master relationship to preserved term-specific committee records. Uncertain historical associations need manual review. See [MASTER-COMMITTEES.md](MASTER-COMMITTEES.md) for setup and the Superadmin workflow.
+
+## Document Sessions and Authors (021)
+
+After 020, apply the contents of `supabase/migrations/202611180021_document_session_authors.sql`. New/edited Legislative documents require Sangguniang Bayan authors/co-authors and a session matching the document date, office and term. A unique same-date session is assigned automatically; ambiguous dates require a choice. Executive Orders remain session-free. Existing records and files are not rewritten. See [LEGISLATIVE-TERMS.md](LEGISLATIVE-TERMS.md).

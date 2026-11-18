@@ -1,12 +1,25 @@
 import { test, expect, type Page } from "@playwright/test";
 const office = "10000000-0000-4000-8000-000000000004";
+async function session(page: Page, name: string) {
+  const choices = page.locator('select[name="session_id"]');
+  if (await choices.count()) await choices.selectOption({ label: name });
+  else
+    await expect(
+      page.getByRole("textbox", { name: "Session", exact: true }),
+    ).toHaveValue(name);
+}
 async function save(page: Page, collection: string, publish = false) {
   if (publish) {
     await page.getByLabel("Published", { exact: true }).check();
-    await page.getByLabel("Sort order", { exact: true }).fill("1");
+    if (collection !== "sessions")
+      await page.getByLabel("Sort order", { exact: true }).fill("1");
   }
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/admin/content/${collection}\\?`));
+  await expect(
+    page.getByRole("status").filter({ hasText: "Record saved successfully." }),
+  ).toBeVisible();
+  await expect(page.locator("main .admin-table")).toBeVisible();
 }
 test("Legislative relationships and all five document types use the existing CMS", async ({
   page,
@@ -100,8 +113,8 @@ test("Legislative relationships and all five document types use the existing CMS
   await save(page, "sessions");
   await page.goto(`/admin/content/committees/new?office=${office}`);
   await page
-    .getByLabel("Committee Name", { exact: true })
-    .fill(`Committee ${suffix}`);
+    .getByRole("combobox", { name: "Master Committee", exact: true })
+    .selectOption({ label: `Committee ${suffix}` });
   await page
     .getByLabel("Chairperson", { exact: true })
     .selectOption({ label: `Member 1 ${suffix}` });
@@ -143,10 +156,7 @@ test("Legislative relationships and all five document types use the existing CMS
         .getByLabel("Category", { exact: true })
         .selectOption({ label: `Committee ${suffix}` });
     }
-    if (type !== "executive-order")
-      await page
-        .getByLabel("Session", { exact: true })
-        .selectOption({ label: `Session ${suffix}` });
+    if (type !== "executive-order") await session(page, `Session ${suffix}`);
     await page
       .getByLabel("Body", { exact: true })
       .fill(`Published body for ${type}.`);
@@ -184,9 +194,7 @@ test("Legislative relationships and all five document types use the existing CMS
       await page
         .getByLabel("Category", { exact: true })
         .selectOption({ label: `Committee ${suffix}` });
-      await page
-        .getByLabel("Session", { exact: true })
-        .selectOption({ label: `Session ${suffix}` });
+      await session(page, `Session ${suffix}`);
       await page
         .getByLabel("Body", { exact: true })
         .fill(`Published body for ${type}.`);

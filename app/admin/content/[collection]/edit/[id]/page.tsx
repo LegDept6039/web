@@ -8,6 +8,7 @@ import { notFound, redirect } from "next/navigation";
 import { officeContext, contentAllowed } from "@/lib/offices/server";
 import { collectionName } from "@/lib/admin/content";
 import { definitions } from "@/lib/content/schema";
+import { authDiagnostic, errorCode } from "@/lib/auth/diagnostics";
 import { ContentForm } from "../../../ContentForm";
 export default async function EditContent({
   params,
@@ -36,8 +37,23 @@ export default async function EditContent({
       id,
     )
     .maybeSingle();
-  if (error) return <p role="alert">Unable to load record.</p>;
-  if (!data || !contentAllowed(context, collection, data, "read")) notFound();
+  if (error) {
+    authDiagnostic(`content_edit:${collection}`, {
+      outcome: "query_error",
+      code: errorCode(error),
+    });
+    return <p role="alert">Unable to load record.</p>;
+  }
+  if (!data || !contentAllowed(context, collection, data, "read")) {
+    // Distinguish a hidden/missing row from an application access denial without
+    // exposing records, account details or credentials in the browser or logs.
+    authDiagnostic(`content_edit:${collection}`, {
+      outcome: data ? "access_denied" : "missing_or_not_visible",
+      role: context.profile.role,
+      membershipCount: context.access.length,
+    });
+    notFound();
+  }
   if (data.content_scope === "transparency")
     redirect(
       `/superadmin/transparency/${collection === "documentCategories" ? "categories" : "documents"}/${id}`,
@@ -61,8 +77,13 @@ export default async function EditContent({
       </p>
     );
   const options =
-    data.content_scope === "legislative" && usesLegislativeFields(collection)
-      ? await legislativeOptions(context, data.office_id)
+    data.content_scope === "legislative" &&
+    (usesLegislativeFields(collection) || collection === "officials")
+      ? await legislativeOptions(
+          context,
+          data.office_id,
+          collection === "committees",
+        )
       : undefined;
   return (
     <>

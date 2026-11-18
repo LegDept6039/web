@@ -1,3 +1,7 @@
+import { getTerms } from "@/lib/legislative/terms-server";
+import { CommitteeWorkspace } from "@/components/admin/CommitteeWorkspace";
+import { selectedTerm, philippineDate } from "@/lib/legislative/terms";
+import { TermSelector } from "@/components/legislative/TermSelector";
 import { LegislativeDocuments } from "@/components/admin/LegislativeDocuments";
 import { isDocumentCollection } from "@/lib/legislative/config";
 import { ContentBreadcrumb } from "@/components/admin/ContentBreadcrumb";
@@ -12,6 +16,8 @@ import {
 } from "@/lib/offices/server";
 import { collectionName, label } from "@/lib/admin/content";
 import { definitions } from "@/lib/content/schema";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { loadAdminPage } from "@/lib/admin/pagination";
 export default async function ContentPage({
   params,
   searchParams,
@@ -19,7 +25,9 @@ export default async function ContentPage({
   params: Promise<{ collection: string }>;
   searchParams: Promise<{
     page?: string;
+    historicalPage?: string;
     office?: string;
+    term?: string;
     saved?: string;
     type?: string;
     q?: string;
@@ -29,16 +37,23 @@ export default async function ContentPage({
   const context = await officeContext();
   const collection = collectionName((await params).collection);
   if (!collection) notFound();
-  const { page: raw, office, saved } = await searchParams;
-  const requested = Number(raw || 1);
-  const page =
-    Number.isSafeInteger(requested) && requested > 0
-      ? Math.min(requested, 100000)
-      : 1;
+  const filters = await searchParams;
+  const { page: raw, office, saved, term } = filters;
   if (office && !allowed(context, office, "read"))
     return <p role="alert">No access to this office.</p>;
   if (!available(context, collection, office)) notFound();
   const scope = workflow(context, office);
+  if (scope === "legislative" && collection === "committees")
+    return (
+      <CommitteeWorkspace
+        context={context}
+        office={office}
+        term={term}
+        saved={saved}
+        page={raw}
+        historicalPage={filters.historicalPage}
+      />
+    );
   if (scope === "legislative" && isDocumentCollection(collection))
     return (
       <>
@@ -50,15 +65,21 @@ export default async function ContentPage({
         <LegislativeDocuments
           context={context}
           collection={collection}
-          params={await searchParams}
+          params={filters}
         />
       </>
     );
+  const termEnabled =
+    scope === "legislative" &&
+    ["officials", "committees", "sessions"].includes(collection);
+  const terms = termEnabled ? await getTerms(context.client) : [];
+  const selected = selectedTerm(terms, term);
   const { table, key } = definitions[collection];
+  const dateOrdered = scope === "legislative" && collection === "sessions";
   let query = context.client
     .from(table)
     .select("*", { count: "exact" })
-    .order("sort_order")
+    .order(dateOrdered ? "date" : "sort_order", { ascending: !dateOrdered })
     .order(key);
   if (office) query = query.eq("content_scope", scope).eq("office_id", office);
   else if (context.profile.role !== "superadmin")
@@ -68,14 +89,20 @@ export default async function ContentPage({
         .filter((o) => o.department === scope && allowed(context, o.id, "read"))
         .map((o) => o.id),
     );
-  const { data, error, count } = await query.range(
-    (page - 1) * 25,
-    page * 25 - 1,
-  );
+  if (termEnabled)
+    query =
+      selected === "unassigned"
+        ? query.is("term_id", null)
+        : query.eq(
+            "term_id",
+            selected === "none"
+              ? "00000000-0000-0000-0000-000000000000"
+              : selected,
+          );
+  const { data, error, pagination } = await loadAdminPage(query, raw);
   const canCreate =
     collection !== "departments" &&
     available(context, collection, office, "write");
-  const suffix = office ? `&office=${office}` : "";
   return (
     <>
       <ContentBreadcrumb
@@ -84,6 +111,13 @@ export default async function ContentPage({
         collection={collection}
       />
       <h1>{label(collection)}</h1>
+      {termEnabled && (
+        <TermSelector
+          terms={terms}
+          selected={selected}
+          today={philippineDate()}
+        />
+      )}
       {saved && <p role="status">Record saved successfully.</p>}
       <div className="admin-toolbar">
         <Link href="/admin/content">All collections</Link>
@@ -107,7 +141,7 @@ export default async function ContentPage({
                   <th>Record</th>
                   <th>Office</th>
                   <th>Status</th>
-                  <th>Sort Order</th>
+                  <th>{dateOrdered ? "Session Date" : "Sort Order"}</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -126,7 +160,7 @@ export default async function ContentPage({
                             ?.short_name || "Unassigned"}
                     </td>
                     <td>{row.published ? "Published" : "Draft"}</td>
-                    <td>{row.sort_order}</td>
+                    <td>{dateOrdered ? row.date : row.sort_order}</td>
                     <td>
                       <Link
                         href={`/admin/content/${collection}/edit/${encodeURIComponent(row[key])}${row.office_id ? `?office=${encodeURIComponent(row.office_id)}` : ""}`}
@@ -142,15 +176,11 @@ export default async function ContentPage({
             </table>
           </div>
           {!data?.length && <p>No records found in your authorized offices.</p>}
-          <nav className="staff-nav" aria-label="Content pages">
-            {page > 1 && (
-              <Link href={`?page=${page - 1}${suffix}`}>Previous</Link>
-            )}
-            <span>Page {page}</span>
-            {page * 25 < (count || 0) && (
-              <Link href={`?page=${page + 1}${suffix}`}>Next</Link>
-            )}
-          </nav>
+          <AdminPagination
+            pagination={pagination}
+            params={{ ...filters, ...(termEnabled ? { term: selected } : {}) }}
+            label="Content pagination"
+          />
         </>
       )}
     </>

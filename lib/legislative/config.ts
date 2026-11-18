@@ -1,3 +1,4 @@
+import type { LegislativeTerm } from "./terms";
 import type { Collection } from "@/lib/content/schema";
 export const documentTypes = {
   ordinance: "Ordinance",
@@ -22,10 +23,16 @@ export const usesLegislativeFields = (collection: Collection) =>
     collection,
   );
 export interface RelationOption {
+  termId?: string;
+  legislativeRole?: string;
+  date?: string;
   id: string;
   name: string;
 }
 export interface LegislativeOptions {
+  masters?: RelationOption[];
+  terms?: LegislativeTerm[];
+  today?: string;
   officials: RelationOption[];
   committees: RelationOption[];
   sessions: RelationOption[];

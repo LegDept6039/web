@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { officeContext, readOfficeAccess } from "@/lib/offices/server";
 import { requireStaff } from "@/lib/auth/server";
+import { loadAdminPage } from "@/lib/admin/pagination";
+import { AdminPagination } from "@/components/admin/AdminPagination";
 export default async function Users({
   searchParams,
 }: {
@@ -8,18 +10,20 @@ export default async function Users({
 }) {
   await requireStaff(true);
   const { client, offices } = await officeContext();
-  const raw = Number((await searchParams).page || 1);
-  const page = Number.isInteger(raw) && raw > 0 ? raw : 1;
+  const params = await searchParams;
   const {
     data: users,
     error,
     count,
-  } = await client
-    .from("staff_accounts")
-    .select("*", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .order("user_id")
-    .range((page - 1) * 25, page * 25 - 1);
+    pagination,
+  } = await loadAdminPage(
+    client
+      .from("staff_accounts")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .order("user_id"),
+    params.page,
+  );
   const access = (
     await Promise.all(
       (users || []).map(async (user) =>
@@ -117,13 +121,13 @@ export default async function Users({
           </table>
         </div>
       )}
-      <nav className="staff-nav" aria-label="Users pagination">
-        {page > 1 && <Link href={`?page=${page - 1}`}>Previous</Link>}
-        <span>Page {page}</span>
-        {page * 25 < (count || 0) && (
-          <Link href={`?page=${page + 1}`}>Next</Link>
-        )}
-      </nav>
+      {!error && (
+        <AdminPagination
+          pagination={pagination}
+          params={params}
+          label="Users pagination"
+        />
+      )}
     </>
   );
 }

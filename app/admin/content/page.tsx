@@ -7,10 +7,10 @@ import { label } from "@/lib/admin/content";
 export default async function ContentDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ office?: string }>;
+  searchParams: Promise<{ office?: string; term?: string }>;
 }) {
   const context = await officeContext();
-  const { office } = await searchParams;
+  const { office, term } = await searchParams;
   const selected = context.offices.find((o) => o.id === office);
   if (office && !selected)
     return (
@@ -22,7 +22,11 @@ export default async function ContentDashboard({
     return (
       <>
         <ContentBreadcrumb context={context} office={office} />
-        <LegislativeOverview context={context} office={selected.id} />
+        <LegislativeOverview
+          context={context}
+          office={selected.id}
+          term={term}
+        />
       </>
     );
   return (

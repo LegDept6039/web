@@ -33,6 +33,12 @@ export async function readSupabaseCollection<K extends Collection>(
   if (limit !== undefined && (!Number.isSafeInteger(limit) || limit < 1))
     throw new Error("Invalid content limit.");
   const definition = definitions[collection];
+  const dateColumn = ["ordinances", "resolutions"].includes(collection)
+    ? "date_approved"
+    : collection === "sessions" ||
+        (collection === "documents" && filters.content_scope === "legislative")
+      ? "date"
+      : undefined;
   const results: Collections[K][] = [];
   const columns = Object.values(definition.fields)
     .map((f) => f.column)
@@ -49,7 +55,7 @@ export async function readSupabaseCollection<K extends Collection>(
           ? ",chair_record:officials!chair_id(name)"
           : ""),
       published: "eq.true",
-      order: `sort_order.asc,${definition.key}.asc`,
+      order: `${dateColumn ? `${dateColumn}.desc` : "sort_order.asc"},${definition.key}.asc`,
       limit: String(
         Math.min(500, limit === undefined ? 500 : limit - results.length),
       ),

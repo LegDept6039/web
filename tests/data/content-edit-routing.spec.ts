@@ -24,6 +24,7 @@ async function openRecord(authorized: boolean, office: string, exists = true) {
     "react/jsx-runtime": { jsx: () => null, jsxs: () => null },
     "@/lib/legislative/server": {},
     "@/lib/legislative/config": {},
+    "@/lib/auth/diagnostics": { authDiagnostic: () => undefined },
     "@/components/admin/ContentBreadcrumb": {},
     "next/navigation": {
       notFound: () => {
@@ -34,7 +35,11 @@ async function openRecord(authorized: boolean, office: string, exists = true) {
       },
     },
     "@/lib/offices/server": {
-      officeContext: async () => ({ client: { from: () => query } }),
+      officeContext: async () => ({
+        client: { from: () => query },
+        profile: { role: "editor" },
+        access: [],
+      }),
       contentAllowed: () => authorized,
     },
     "@/lib/admin/content": { collectionName: () => "committees" },

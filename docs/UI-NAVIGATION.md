@@ -97,3 +97,35 @@ Committee routes use the stored primary key, never the editable title. Historica
 Admin edit links now use each record's stored owning office. After verifying record access, the edit route redirects stale office query parameters to the canonical owner instead of returning 404. Legislative updates retain the existing record's office instead of selecting the first Legislative office. Missing and unauthorized records still return not-found.
 
 Four focused tests passed for description validation, rename/UUID stability, stale-office redirects and denied/missing records. A live Supabase read could not complete (fetch failed), so the reported live 404's exact cause was not confirmed. No data migration or live record changes were performed.
+
+### Legislative Terms
+
+Legislative public directories and the admin overview now offer a compact term selector, defaulting to the current Philippine-date term. Superadmin manages dates and names under `/superadmin/legislative-terms`. Officials/Committees select a term; dated records display a derived read-only term and filter their relationships accordingly. See `docs/LEGISLATIVE-TERMS.md` for migration 019 and deliberate adoption of historical records.
+
+### Council directory spacing
+
+Page titles (`h1`) and public/admin breadcrumb labels use Proper Case through the shared stylesheet, for example **Council Sessions** and **Your Municipal Council**. This presentation rule preserves existing acronyms and CMS content; descriptions, form values, URLs and stored titles are unchanged.
+
+`/legislative/members` uses a shorter hero and a compact directory toolbar with the published official count and term selector. Dates use readable month names. On mobile the selector stacks below the directory heading and fills the available width. The existing four/two/one-column official cards, CMS descriptions and term filtering are preserved; empty selections show an explanatory message. These styles are scoped to the council page and the selector's opt-in compact variant.
+
+Build and lint passed. The existing public term-filtering scenarios passed on desktop/mobile, and both council screenshots were reviewed. The Windows browser test server was interrupted after both scenarios passed because teardown remained running.
+
+### Legislative CSV controls
+
+The Legislative document toolbar and Add Document screens include compact **Import CSV** and **Export CSV** buttons. Accessible dialogs provide a document-type selector, template/reference-ID downloads, file validation feedback and an import progress state. Controls wrap on small screens; the dialog scrolls within the viewport. Import visibility follows existing write access and export follows read access, with the same checks repeated on the server. See [LEGISLATIVE-IMPORT-EXPORT.md](LEGISLATIVE-IMPORT-EXPORT.md) for the CSV columns, term relationships, limits and attachment behavior.
+
+### Master Committee Catalog
+
+`/superadmin/master-committees` manages the shared database catalog and display order. Legislative Access > Committees now shows a compact per-term table with chairperson, vice-chairperson, members, publication status and composition actions. Unsaved templates are explicitly unassigned; historical records requiring association remain editable in a separate review table. The existing form supports empty official positions and term-filtered choices. Both routes reuse the admin loading skeleton. Public committee directories still show saved, published records only. See [MASTER-COMMITTEES.md](MASTER-COMMITTEES.md) for migration 020 and historical-name preservation.
+
+### Admin Table Pagination
+
+Admin content lists, Legislative documents and committee compositions, Transparency reports/modules, and Superadmin users, departments, master committees and terms use shared `AdminPagination` controls. Tables display 25 records per page; the audit log retains 50. The footer shows the visible range and total, with numbered pages and Previous/Next controls when more than one page exists. Controls wrap on small screens and identify the current page for assistive technology.
+
+Page links retain office, term, search, type, sort, module and year filters. Applying new filters resets the page. The committee catalog and preserved historical compositions paginate independently, with both resetting when the term changes. Inline master/term edit forms retain their selected record when paging the table. Invalid page values use page one; pages beyond the last record clamp to the last available page.
+
+Existing database-paginated tables apply authorization and filters before counting/ranging. Committee and Transparency views paginate their existing authorized, filtered lists after composing their catalog/count information; dropdown choices and module document counts still use the full permitted dataset. Content, storage, permissions and database migrations are unchanged.
+
+Verification: `npx playwright test --config playwright.pagination.config.ts` uses an isolated fixture containing multiple pages of records, including foreign-office controls. Focused range/query checks are in `tests/data/admin-pagination.spec.ts`.
+
+Validation: type check, full lint, production build and seven focused pagination tests passed. All eight desktop/mobile browser scenarios passed, covering record counts, ordering, office/term/filter preservation, independent committee tables, empty results, out-of-range pages and responsive controls. Desktop/mobile screenshots were reviewed. Windows test-server teardown was interrupted after all browser assertions passed (cleanup exit 1). These are local fixture checks; no hosted data or deployment was changed.

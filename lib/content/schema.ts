@@ -59,6 +59,7 @@ const date = (column: string): Field => ({ column, kind: "date" });
 const list = (column: string): Field => ({ column, kind: "list" });
 const sample: Field = { column: "is_sample", kind: "boolean" };
 const documentFields = {
+  termId: { ...text("term_id"), optional: true },
   authorId: { ...text("author_id"), optional: true },
   coAuthorId: { ...text("co_author_id"), optional: true },
   committeeId: { ...text("committee_id"), optional: true },
@@ -99,6 +100,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "officials",
     key: "id",
     fields: {
+      termId: { ...text("term_id"), optional: true },
       id: text("id"),
       name: text("name"),
       legislativeRole: {
@@ -140,6 +142,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "sessions",
     key: "id",
     fields: {
+      termId: { ...text("term_id"), optional: true },
       name: { ...text("name"), optional: true },
       id: text("id"),
       number: text("number"),
@@ -216,6 +219,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "committees",
     key: "id",
     fields: {
+      termId: { ...text("term_id"), optional: true },
       chairId: { ...text("chair_id"), optional: true },
       viceChairId: { ...text("vice_chair_id"), optional: true },
       member1Id: { ...text("member_1_id"), optional: true },
@@ -263,6 +267,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "municipal_documents",
     key: "id",
     fields: {
+      termId: { ...text("term_id"), optional: true },
       contentScope: {
         ...text("content_scope"),
         optional: true,

@@ -1,3 +1,6 @@
+import { publicTerm } from "@/lib/legislative/terms-server";
+import { inTerm, philippineDate } from "@/lib/legislative/terms";
+import { TermSelector } from "@/components/legislative/TermSelector";
 import { isLegislativeRole } from "@/lib/officials/roles";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,7 +13,12 @@ export const metadata: Metadata = {
   description:
     "Municipal council members, sessions, ordinances, resolutions, committees, and public hearings.",
 };
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ term?: string }>;
+}) {
+  const { terms, selected } = await publicTerm((await searchParams).term);
   const [officials, sessions] = await Promise.all([
     getOfficials(),
     getSessions(),
@@ -23,6 +31,11 @@ export default async function Page() {
         description="Representing the people through responsive legislation, public deliberation, and accountable local governance."
       />
       <section className="container section">
+        <TermSelector
+          terms={terms}
+          selected={selected}
+          today={philippineDate()}
+        />
         <PreviewNote />
         <nav className="branch-links" aria-label="Legislative pages">
           {[
@@ -34,7 +47,7 @@ export default async function Page() {
             ["Committees", "committees"],
             ["Public hearings", "public-hearings"],
           ].map(([n, h]) => (
-            <Link key={h} href={`/legislative/${h}`}>
+            <Link key={h} href={`/legislative/${h}?term=${selected}`}>
               {n}
             </Link>
           ))}
@@ -42,24 +55,27 @@ export default async function Page() {
         <SectionHeader
           eyebrow="YOUR MUNICIPAL COUNCIL"
           title="A voice for every community"
-          href="/legislative/members"
+          href={`/legislative/members?term=${selected}`}
           linkText="Council directory"
         />
         <OfficialGrid
-          officials={officials.filter((o) =>
-            isLegislativeRole(o.legislativeRole),
+          officials={officials.filter(
+            (o) => isLegislativeRole(o.legislativeRole) && inTerm(o, selected),
           )}
         />
         <div className="mt-16">
           <SectionHeader
             eyebrow="LEGISLATIVE ACTIVITY"
             title="Recent council sessions"
-            href="/legislative/sessions"
+            href={`/legislative/sessions?term=${selected}`}
           />
           <div className="grid gap-6 md:grid-cols-2">
-            {sessions.slice(0, 2).map((s) => (
-              <SessionCard key={s.id} session={s} />
-            ))}
+            {sessions
+              .filter((s) => inTerm(s, selected))
+              .slice(0, 2)
+              .map((s) => (
+                <SessionCard key={s.id} session={s} />
+              ))}
           </div>
         </div>
       </section>

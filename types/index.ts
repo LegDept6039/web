@@ -2,6 +2,7 @@ export interface ContentRecord {
   isSample?: boolean;
 }
 export interface Official extends ContentRecord {
+  termId?: string;
   legislativeRole?: import("@/lib/officials/roles").LegislativeRole;
   id: string;
   name: string;
@@ -11,6 +12,7 @@ export interface Official extends ContentRecord {
   description: string;
 }
 export interface LegislativeDocument extends ContentRecord {
+  termId?: string;
   authorId?: string;
   coAuthorId?: string;
   committeeId?: string;
@@ -45,6 +47,7 @@ export interface NewsArticle extends ContentRecord {
   content: string[];
 }
 export interface Session extends ContentRecord {
+  termId?: string;
   name?: string;
   id: string;
   number: string;
@@ -92,6 +95,7 @@ export interface Program extends ContentRecord {
   status: string;
 }
 export interface Committee extends ContentRecord {
+  termId?: string;
   chairId?: string;
   viceChairId?: string;
   member1Id?: string;
@@ -121,6 +125,7 @@ export interface DocumentCategory extends ContentRecord {
   href?: string;
 }
 export interface MunicipalDocument extends ContentRecord {
+  termId?: string;
   reportFrequency?: "annual" | "quarterly";
   reportYear?: number;
   annualPdfPath?: string;

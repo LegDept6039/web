@@ -1,4 +1,6 @@
 "use client";
+import { termForDate } from "@/lib/legislative/terms";
+
 import { useState } from "react";
 import { COMMITTEE_DESCRIPTION_MAX_LENGTH } from "@/lib/legislative/config";
 import type { Collection } from "@/lib/content/schema";
@@ -21,6 +23,117 @@ export function LegislativeFields({
   const [committeeDescription, setCommitteeDescription] = useState(
     String(row.responsibility || ""),
   );
+  const [masterId, setMasterId] = useState(String(row.master_id || ""));
+  const masterName = options.masters?.find(
+    (master) => master.id === masterId,
+  )?.name;
+  const terms = options.terms || [];
+  const [manualTerm, setManualTerm] = useState(
+    String(
+      row.term_id ||
+        (row.id ? "" : termForDate(terms, options.today || "")?.id) ||
+        "",
+    ),
+  );
+  const [recordDate, setRecordDate] = useState(
+    String(row.date_approved || row.date || ""),
+  );
+  const [sessionId, setSessionId] = useState(String(row.session_id || ""));
+  const termId =
+    collection === "committees"
+      ? manualTerm
+      : termForDate(terms, recordDate)?.id;
+  const matchingSessions = options.sessions.filter(
+    (session) =>
+      Boolean(termId) &&
+      session.termId === termId &&
+      session.date === recordDate,
+  );
+  const matchedSessionId =
+    matchingSessions.length === 1
+      ? matchingSessions[0].id
+      : matchingSessions.some((session) => session.id === sessionId)
+        ? sessionId
+        : "";
+  const authors = options.officials.filter(
+    (official) => official.legislativeRole === "SANGGUNIANG_BAYAN",
+  );
+  const sessionControl =
+    matchingSessions.length > 1 ? (
+      <label>
+        Session
+        <select
+          name="session_id"
+        aria-label="Session"
+          required
+          value={matchedSessionId}
+          onChange={(event) => setSessionId(event.target.value)}
+        >
+          <option value="">Select the session held on this date</option>
+          {matchingSessions.map((session) => (
+            <option key={session.id} value={session.id}>
+              {session.name}
+            </option>
+          ))}
+        </select>
+        <span className="staff-note">
+          Multiple sessions were held on this date. Choose the correct session.
+        </span>
+      </label>
+    ) : (
+      <label>
+        Session
+        <input type="hidden" name="session_id" value={matchedSessionId} />
+        <input
+          readOnly
+        aria-label="Session"
+          value={
+            matchingSessions[0]?.name ||
+            (recordDate
+              ? "No matching session"
+              : "Enter the document date first")
+          }
+        />
+        <span className="staff-note">
+          {matchingSessions.length
+            ? "Automatically matched to the document date."
+            : "Create a session for this date in the same Legislative office and term before saving."}
+        </span>
+      </label>
+    );
+  const termControl =
+    collection === "committees" ? (
+      <label>
+        Legislative Term
+        <select
+          name="term_id"
+          required
+          value={manualTerm}
+          onChange={(e) => setManualTerm(e.target.value)}
+        >
+          <option value="">Select a term</option>
+          {terms.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
+          ))}
+        </select>
+      </label>
+    ) : (
+      <label>
+        Assigned Legislative Term
+        <input
+          readOnly
+          value={terms.find((t) => t.id === termId)?.name || "No matching term"}
+        />
+        <span className="staff-note">
+          Determined by the record date.{" "}
+          {termId
+            ? ""
+            : "Choose a covered date or assigned session. Ask Superadmin to create missing terms."}
+        </span>
+      </label>
+    );
   const input = (
     name: string,
     label: string,
@@ -35,6 +148,9 @@ export function LegislativeFields({
         type={type}
         required={required}
         defaultValue={String(row[name] || "")}
+        onChange={
+          type === "date" ? (e) => setRecordDate(e.target.value) : undefined
+        }
       />
     </label>
   );
@@ -44,7 +160,7 @@ export function LegislativeFields({
     items: RelationOption[],
     required = true,
   ) => (
-    <label key={name}>
+    <label key={`${name}:${termId || "unassigned"}`}>
       {label}
       <select
         aria-label={label}
@@ -53,11 +169,13 @@ export function LegislativeFields({
         defaultValue={String(row[name] || "")}
       >
         <option value="">{required ? "Select..." : "N/A"}</option>
-        {items.map((o) => (
-          <option value={o.id} key={o.id}>
-            {o.name}
-          </option>
-        ))}
+        {items
+          .filter((o) => Boolean(termId) && o.termId === termId)
+          .map((o) => (
+            <option value={o.id} key={o.id}>
+              {o.name}
+            </option>
+          ))}
       </select>
     </label>
   );
@@ -76,8 +194,9 @@ export function LegislativeFields({
   if (collection === "sessions")
     return (
       <>
-        {input("name", "Name")}
         {input("date", "Date", "date")}
+        {termControl}
+        {input("name", "Name")}
         {input("number", "No. (Session Number)")}
         <label>
           Type
@@ -98,7 +217,43 @@ export function LegislativeFields({
   if (collection === "committees")
     return (
       <>
-        {input("name", "Committee Name")}
+        {termControl}
+        {row.id && row.master_id ? (
+          <label>
+            Master Committee
+            <input type="hidden" name="master_id" value={masterId} />
+            <input readOnly value={masterName || String(row.name || "")} />
+          </label>
+        ) : (
+          <label>
+            Master Committee
+            <select
+              name="master_id"
+              required
+              value={masterId}
+              onChange={(event) => setMasterId(event.target.value)}
+            >
+              <option value="">Select a master committee</option>
+              {(options.masters || []).map((master) => (
+                <option key={master.id} value={master.id}>
+                  {master.name}
+                </option>
+              ))}
+            </select>
+            {Boolean(row.id) && (
+              <span className="staff-note">
+                Review this historical record before associating it. Its saved
+                name and ID will be preserved.
+              </span>
+            )}
+          </label>
+        )}
+        {Boolean(row.id && row.name && row.name !== masterName) && (
+          <p className="staff-note">
+            Saved historical name: {String(row.name)}. This name is preserved
+            for this term.
+          </p>
+        )}
         <label>
           Committee description (optional)
           <textarea
@@ -116,8 +271,8 @@ export function LegislativeFields({
             appear on the public page.
           </span>
         </label>
-        {select("chair_id", "Chairperson", options.officials)}
-        {select("vice_chair_id", "Vice-Chairperson", options.officials)}
+        {select("chair_id", "Chairperson", options.officials, false)}
+        {select("vice_chair_id", "Vice-Chairperson", options.officials, false)}
         {[1, 2, 3, 4].map((n) =>
           select(`member_${n}_id`, `Member ${n}`, options.officials, false),
         )}
@@ -132,20 +287,21 @@ export function LegislativeFields({
   if (collection === "ordinances" || collection === "resolutions")
     return (
       <>
+        {input("date_approved", "Date", "date")}
+        {termControl}
         {input("title", "Title")}
         {input("number", "Document Number")}
-        {select("author_id", "Author", options.officials)}
-        {select("co_author_id", "Co-author", options.officials, false)}
+        {select("author_id", "Author", authors)}
+        {select("co_author_id", "Co-author", authors, false)}
         {Boolean(row.author && !row.author_id) && (
           <p className="staff-note">
             Existing author: {String(row.author)}. Select the matching official.
           </p>
         )}
         {input("year", "Year", "number")}
-        {input("date_approved", "Date", "date")}
         {select("committee_id", "Category", options.committees)}
         {body("summary")}
-        {select("session_id", "Session", options.sessions)}
+        {sessionControl}
       </>
     );
   return (
@@ -171,10 +327,10 @@ export function LegislativeFields({
           </select>
         </label>
       )}
-      {input("title", "Title")}
       {input("date", "Date", "date")}
-      {documentType !== "executive-order" &&
-        select("session_id", "Session", options.sessions)}
+      {documentType !== "executive-order" && sessionControl}
+      {termControl}
+      {input("title", "Title")}
       {body("description")}
     </>
   );

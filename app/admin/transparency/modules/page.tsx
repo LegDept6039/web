@@ -3,13 +3,22 @@ import { requireTransparency } from "@/lib/transparency/server";
 import { transparencyRows } from "@/lib/transparency/server";
 import { TransparencyDelete } from "@/components/admin/TransparencyDelete";
 import { transparencyAccess } from "@/lib/transparency/permissions";
-export default async function Page() {
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { pageDetails } from "@/lib/admin/pagination";
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { client, profile } = await requireTransparency();
   const canEdit = transparencyAccess(profile, true);
-  const [modules, reports] = await Promise.all([
+  const [modules, reports, params] = await Promise.all([
     transparencyRows(client, "document_categories"),
     transparencyRows(client, "municipal_documents"),
+    searchParams,
   ]);
+  const pagination = pageDetails(modules.length, params.page);
+  const visibleModules = modules.slice(pagination.from, pagination.to + 1);
   return (
     <div className="transparency-workspace">
       <div className="admin-toolbar">
@@ -48,7 +57,7 @@ export default async function Page() {
             </tr>
           </thead>
           <tbody>
-            {modules.map((m) => (
+            {visibleModules.map((m) => (
               <tr key={String(m.id)}>
                 <td>{String(m.name)}</td>
                 <td>
@@ -84,6 +93,11 @@ export default async function Page() {
           </p>
         )}
       </div>
+      <AdminPagination
+        pagination={pagination}
+        params={params}
+        label="Transparency modules pagination"
+      />
     </div>
   );
 }

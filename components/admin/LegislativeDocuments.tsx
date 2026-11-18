@@ -1,9 +1,15 @@
+import { getTerms } from "@/lib/legislative/terms-server";
+import { selectedTerm, termStatus } from "@/lib/legislative/terms";
 import Link from "next/link";
+import { DocumentTransferControls } from "@/components/admin/DocumentTransferControls";
 import type { OfficeContext } from "@/lib/offices/server";
 import { allowed, available } from "@/lib/offices/server";
 import { documentTypes, isDocumentType } from "@/lib/legislative/config";
 import type { Collection } from "@/lib/content/schema";
+import { AdminPagination } from "./AdminPagination";
+import { loadAdminPage } from "@/lib/admin/pagination";
 export interface DocumentQuery {
+  term?: string;
   office?: string;
   type?: string;
   q?: string;
@@ -20,6 +26,8 @@ export async function LegislativeDocuments({
   collection: Collection;
   params: DocumentQuery;
 }) {
+  const terms = await getTerms(context.client);
+  const selected = selectedTerm(terms, params.term);
   const type =
     collection === "ordinances"
       ? "ordinance"
@@ -40,11 +48,7 @@ export async function LegislativeDocuments({
     params.sort || "",
   )
     ? params.sort!
-    : "created_at";
-  const page = Math.max(
-    1,
-    Math.min(100000, parseInt(params.page || "1", 10) || 1),
-  );
+    : "date";
   const q = (params.q || "").trim().slice(0, 150);
   let query = context.client
     .from("legislative_documents")
@@ -62,16 +66,25 @@ export async function LegislativeDocuments({
         )
         .map((o) => o.id),
     );
+  query =
+    selected === "unassigned"
+      ? query.is("term_id", null)
+      : query.eq(
+          "term_id",
+          selected === "none"
+            ? "00000000-0000-0000-0000-000000000000"
+            : selected,
+        );
   if (type) query = query.eq("document_type", type);
   if (q) query = query.ilike("title", `%${q.replace(/[\\%_]/g, "\\$&")}%`);
-  const { data, error, count } = await query
-    .order(sort, { ascending: sort === "title" || sort === "number" })
-    .order("id")
-    .order("collection")
-    .range((page - 1) * 25, page * 25 - 1);
+  const { data, error, pagination } = await loadAdminPage(
+    query
+      .order(sort, { ascending: sort === "title" || sort === "number" })
+      .order("id")
+      .order("collection"),
+    params.page,
+  );
   const office = params.office ? `office=${params.office}` : "";
-  const href = (p: number) =>
-    `?${new URLSearchParams({ ...params, page: String(p) })}`;
   return (
     <>
       <h1>{heading}</h1>
@@ -85,10 +98,40 @@ export async function LegislativeDocuments({
             Add Document
           </Link>
         )}
+        <DocumentTransferControls
+          office={params.office}
+          type={type && isDocumentType(type) ? type : undefined}
+          offices={context.offices
+            .filter(
+              (o) =>
+                o.active &&
+                o.department === "legislative" &&
+                allowed(context, o.id, "read"),
+            )
+            .map((o) => ({
+              id: o.id,
+              name: o.name,
+              writable: allowed(context, o.id, "write"),
+            }))}
+        />
       </div>
       <form className="staff-form legislative-filters" method="get">
         <input type="hidden" name="office" value={params.office || ""} />
         {type && <input type="hidden" name="type" value={type} />}
+        <label>
+          Legislative Term
+          <select name="term" defaultValue={selected}>
+            <option value="none" disabled>
+              No current term
+            </option>
+            {terms.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} - {termStatus(t)}
+              </option>
+            ))}
+            <option value="unassigned">Unassigned historical records</option>
+          </select>
+        </label>
         <label>
           Search title
           <input name="q" defaultValue={q} />
@@ -96,8 +139,8 @@ export async function LegislativeDocuments({
         <label>
           Sort by
           <select aria-label="Sort by" name="sort" defaultValue={sort}>
-            <option value="created_at">Newest added</option>
             <option value="date">Document date (newest)</option>
+            <option value="created_at">Newest added</option>
             <option value="title">Title (A-Z)</option>
             <option value="number">Document number</option>
           </select>
@@ -163,13 +206,11 @@ export async function LegislativeDocuments({
             </table>
           </div>
           {!data?.length && <p>No published documents found.</p>}
-          <nav className="staff-nav" aria-label="Document pages">
-            {page > 1 && <Link href={href(page - 1)}>Previous</Link>}
-            <span>Page {page}</span>
-            {page * 25 < (count || 0) && (
-              <Link href={href(page + 1)}>Next</Link>
-            )}
-          </nav>
+          <AdminPagination
+            pagination={pagination}
+            params={{ ...params, term: selected, type, q, sort }}
+            label="Documents pagination"
+          />
         </>
       )}
     </>
