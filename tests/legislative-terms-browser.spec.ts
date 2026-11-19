@@ -26,6 +26,9 @@ test("legacy official opens from the historical list and keeps its ID after term
   ).toBeVisible();
   await expect(page.getByLabel("Name", { exact: true })).toHaveValue(name);
   await page.locator('select[name="term_id"]').selectOption(current);
+  await expect(page.locator('select[name="term_id"] option:checked')).toHaveText(
+    "Current Council 2025-Current",
+  );
   await page
     .getByLabel("Name", { exact: true })
     .fill("Renamed Historical Member");
@@ -54,6 +57,9 @@ test("public terms show the current roster, historical roster and committee memb
   page,
 }, info) => {
   await page.goto("/legislative/members");
+  await expect(
+    page.getByLabel("Legislative Term", { exact: true }).locator("option:checked"),
+  ).toHaveText("Current Council 2025-Current");
   await expect(page.locator(".official-card")).toHaveCount(2);
   await expect(
     page.getByText("Current Member A", { exact: true }),
@@ -66,6 +72,9 @@ test("public terms show the current roster, historical roster and committee memb
   await page
     .getByLabel("Legislative Term", { exact: true })
     .selectOption(previous);
+  await expect(
+    page.getByLabel("Legislative Term", { exact: true }).locator("option:checked"),
+  ).toHaveText("Previous Council 2022-2025");
   await expect(page.locator(".official-card")).toHaveCount(1);
   await expect(
     page.getByText("Previous Member", { exact: true }),
@@ -110,6 +119,9 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   ).toHaveText("1");
   await page.goto(`/admin/content/committees/new?office=${office}`);
   await expect(page.locator('select[name="term_id"]')).toHaveValue(current);
+  await expect(page.locator('select[name="term_id"] option:checked')).toHaveText(
+    "Current Council 2025-Current",
+  );
   await expect(page.locator('select[name="chair_id"]')).not.toContainText(
     "Previous Member",
   );
@@ -128,8 +140,8 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   ).toHaveAttribute("name", "date_approved");
   await page.getByLabel("Date", { exact: true }).fill("2024-11-16");
   await expect(
-    page.getByLabel("Assigned Legislative Term", { exact: false }),
-  ).toHaveValue("Previous Council");
+    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+  ).toHaveText("Previous Council 2022-2025");
   await expect(page.locator('select[name="author_id"]')).toContainText(
     "Previous Member",
   );
@@ -139,8 +151,8 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   );
   await page.getByLabel("Date", { exact: true }).fill("2040-11-16");
   await expect(
-    page.getByLabel("Assigned Legislative Term", { exact: false }),
-  ).toHaveValue("No matching term");
+    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+  ).toHaveText("No matching term");
   await page.goto(`/admin/content/documents/new?office=${office}&type=agenda`);
   await expect(
     page
@@ -149,8 +161,8 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   ).toHaveAttribute("name", "date");
   await page.getByLabel("Date", { exact: true }).fill("2024-11-16");
   await expect(
-    page.getByLabel("Assigned Legislative Term", { exact: false }),
-  ).toHaveValue("Previous Council");
+    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+  ).toHaveText("Previous Council 2022-2025");
   await expect(page.locator('input[name="session_id"]')).toHaveValue(
     "term-old-session",
   );
@@ -238,17 +250,17 @@ test("dated records save the actual-date term and recalculate when edited", asyn
   await page
     .getByLabel("Type", { exact: true })
     .selectOption("Regular session");
-  await expect(page.getByLabel("Assigned Legislative Term")).toHaveValue(
-    "Previous Council",
-  );
+  await expect(
+    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+  ).toHaveText("Previous Council 2022-2025");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/sessions\?saved=/);
   const id = new URL(page.url()).searchParams.get("saved");
   await expect(page.locator(".admin-table")).toBeVisible();
   await page.goto(`/admin/content/sessions/edit/${id}?office=${office}`);
-  await expect(page.getByLabel("Assigned Legislative Term")).toHaveValue(
-    "Previous Council",
-  );
+  await expect(
+    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+  ).toHaveText("Previous Council 2022-2025");
   await page.getByLabel("Date", { exact: true }).fill("2026-03-01");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/sessions\?saved=/);
@@ -259,9 +271,9 @@ test("dated records save the actual-date term and recalculate when edited", asyn
   expect(dates.length).toBeGreaterThan(1);
   expect(dates).toEqual([...dates].sort().reverse());
   await page.goto(`/admin/content/sessions/edit/${id}?office=${office}`);
-  await expect(page.getByLabel("Assigned Legislative Term")).toHaveValue(
-    "Current Council",
-  );
+  await expect(
+    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+  ).toHaveText("Current Council 2025-Current");
   await page.screenshot({
     path: info.outputPath("session-date-first.png"),
     fullPage: true,
@@ -271,9 +283,9 @@ test("dated records save the actual-date term and recalculate when edited", asyn
       `/admin/content/documents/new?office=${office}&type=executive-order`,
     );
     await page.getByLabel("Date", { exact: true }).fill(date);
-    await expect(page.getByLabel("Assigned Legislative Term")).toHaveValue(
-      "Current Council",
-    );
+    await expect(
+      page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    ).toHaveText("Current Council 2025-Current");
     await page
       .getByLabel("Title", { exact: true })
       .fill(`Date-order ${info.project.name} ${date}`);

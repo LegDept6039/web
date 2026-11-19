@@ -25,6 +25,14 @@ export function termStatus(term: LegislativeTerm, today = philippineDate()) {
       ? "Previous"
       : "Current";
 }
+export function termDisplayName(term: LegislativeTerm, today = philippineDate()) {
+  const startYear = term.start_date.slice(0, 4);
+  const endYear =
+    termStatus(term, today) === "Current"
+      ? "Current"
+      : term.end_date.slice(0, 4);
+  return `${term.name} ${startYear}-${endYear}`;
+}
 export function selectedTerm(
   terms: LegislativeTerm[],
   requested?: string,

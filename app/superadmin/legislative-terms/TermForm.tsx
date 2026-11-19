@@ -32,8 +32,8 @@ export function TermForm({ term }: { term?: LegislativeTerm }) {
         />
       </label>
       <p className="staff-note">
-        Status follows Philippine time automatically. Dates cannot overlap
-        another term.
+        Displayed years are added automatically from the dates. Status follows
+        Philippine time automatically. Dates cannot overlap another term.
       </p>
       {message && <p role="alert">{message}</p>}
       <button className="button button-blue" disabled={pending}>

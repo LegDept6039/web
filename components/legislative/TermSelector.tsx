@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type LegislativeTerm, termStatus } from "@/lib/legislative/terms";
+import { type LegislativeTerm, termDisplayName } from "@/lib/legislative/terms";
 export function TermSelector({
   terms,
   selected,
@@ -36,7 +36,7 @@ export function TermSelector({
           </option>
           {terms.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.name} - {termStatus(t, today)}
+              {termDisplayName(t, today)}
             </option>
           ))}
           <option value="unassigned">Unassigned historical records</option>

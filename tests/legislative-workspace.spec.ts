@@ -5,8 +5,8 @@ async function session(page: Page, name: string) {
   if (await choices.count()) await choices.selectOption({ label: name });
   else
     await expect(
-      page.getByRole("textbox", { name: "Session", exact: true }),
-    ).toHaveValue(name);
+      page.getByRole("status", { name: "Session", exact: true }),
+    ).toHaveText(name);
 }
 async function save(page: Page, collection: string, publish = false) {
   if (publish) {

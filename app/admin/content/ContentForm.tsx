@@ -1,5 +1,5 @@
 "use client";
-import { termForDate } from "@/lib/legislative/terms";
+import { termDisplayName, termForDate } from "@/lib/legislative/terms";
 import { LegislativeFields } from "@/components/admin/LegislativeFields";
 import { PdfAttachment } from "@/components/admin/PdfAttachment";
 import { PDF_LIMIT } from "@/lib/admin/document-pdf-validation";
@@ -417,7 +417,7 @@ export function ContentForm({
                 <option value="">Select a term</option>
                 {(legislativeOptions.terms || []).map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.name}
+                    {termDisplayName(t, legislativeOptions.today)}
                   </option>
                 ))}
               </select>

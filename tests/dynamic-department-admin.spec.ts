@@ -102,6 +102,9 @@ test("new department becomes public, assignable and manageable without adding so
   await expect(
     page.getByRole("heading", { name: "Contact Information", exact: true }),
   ).toHaveCount(0);
+  await page.goto("/contact");
+  await expect(page.getByRole("article", { name, exact: true })).toHaveCount(0);
+  await expect(page.locator(".department-contact-card")).toHaveCount(0);
   await page.goto("/superadmin/users/new");
   await expect(
     page.locator('select[name="office"] option').filter({ hasText: name }),
@@ -228,17 +231,19 @@ test("new department becomes public, assignable and manageable without adding so
   await page.locator('input[name="head_title"]').fill("Department Officer");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/departments\?/);
-  for (const [type, value, label] of [
-    ["PHONE", "09170000000", "Office Mobile"],
-    ["PHONE", "09280000000", "Alternate"],
-    ["EMAIL", "office@example.test", "Records"],
-  ]) {
+  const draftEmail = `draft-${info.project.name}@example.test`;
+  for (const [type, value, label, published] of [
+    ["PHONE", "09170000000", "Office Mobile", true],
+    ["PHONE", "09280000000", "Alternate", true],
+    ["EMAIL", "office@example.test", "Records", true],
+    ["EMAIL", draftEmail, "Unpublished Contact", false],
+  ] as const) {
     await page.goto(`/admin/content/contacts/new?office=${id}`);
     await page.locator('select[name="type"]').selectOption(type);
     await page.locator('input[name="value"]').fill(value);
     await page.locator('input[name="label"]').fill(label);
-    await page.locator('input[name="published"]').check();
-    await page.locator('input[name="sort_order"]').fill("1");
+    await page.locator('input[name="published"]').setChecked(published);
+    if (published) await page.locator('input[name="sort_order"]').fill("1");
     await page
       .getByRole("button", { name: "Save record", exact: true })
       .click();
@@ -276,6 +281,7 @@ test("new department becomes public, assignable and manageable without adding so
   await expect(
     page.getByRole("heading", { name: "Landline", exact: true }),
   ).toHaveCount(0);
+  await expect(page.getByText(draftEmail, { exact: true })).toHaveCount(0);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -283,6 +289,38 @@ test("new department becomes public, assignable and manageable without adding so
   ).toBe(true);
   await page.screenshot({
     path: info.outputPath("dynamic-department.png"),
+    fullPage: true,
+  });
+  await page.goto("/contact");
+  const directoryCard = page.getByRole("article", { name, exact: true });
+  await expect(page.locator(".department-contact-card")).toHaveCount(1);
+  await expect(directoryCard).toBeVisible();
+  await expect(
+    directoryCard.getByRole("heading", { name, level: 3, exact: true }),
+  ).toBeVisible();
+  await expect(
+    directoryCard.getByRole("link", { name: "09170000000", exact: true }),
+  ).toHaveAttribute("href", "tel:09170000000");
+  await expect(
+    directoryCard.getByRole("link", { name: "09280000000", exact: true }),
+  ).toHaveAttribute("href", "tel:09280000000");
+  await expect(
+    directoryCard.getByRole("link", { name: "office@example.test", exact: true }),
+  ).toHaveAttribute("href", /mailto:/);
+  await expect(
+    directoryCard.locator(`a[href="/departments/${slug}"]`),
+  ).toBeVisible();
+  await expect(page.getByText(draftEmail, { exact: true })).toHaveCount(0);
+  await expect(
+    directoryCard.getByRole("heading", { name: "Landline", exact: true }),
+  ).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: info.outputPath("department-contact-directory.png"),
     fullPage: true,
   });
   await page.goto(`/admin/content/contacts?office=${id}`);
@@ -315,6 +353,9 @@ test("new department becomes public, assignable and manageable without adding so
   await expect(page).toHaveURL(/\/superadmin\/departments$/);
   await page.goto(`/departments/${slug}`);
   await expect(page.getByText("PAGE NOT FOUND", { exact: true })).toBeVisible();
+  await page.goto("/contact");
+  await expect(page.getByRole("article", { name, exact: true })).toHaveCount(0);
+  await expect(page.locator(".department-contact-card")).toHaveCount(0);
   await page.goto("/superadmin/users/new");
   await expect(
     page.locator('select[name="office"] option').filter({ hasText: name }),

@@ -1247,6 +1247,114 @@ footer {
 .record-detail dd {
   font-size: 14px;
 }
+/* Shared public ordinance/resolution detail; CMS text stays unchanged. */
+.legislative-record-page .container {
+  max-width: 1000px;
+}
+.legislative-record-page .page-hero {
+  padding-block: 24px 32px;
+}
+.legislative-record-page .breadcrumb {
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.legislative-record-page .page-hero h1 {
+  font-size: clamp(30px, 3.5vw, 42px);
+  overflow-wrap: anywhere;
+}
+.legislative-record-page .page-hero p {
+  max-width: none;
+  margin-top: 16px;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.legislative-record-content {
+  padding-block: 32px 48px;
+}
+.legislative-record-page .record-detail dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 28px;
+  margin: 0 0 28px;
+  padding: 20px 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.legislative-record-page .record-detail dl > div {
+  min-width: 0;
+}
+.legislative-record-page .record-detail dt {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.legislative-record-page .record-detail dd {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.legislative-record-page .record-detail h2 {
+  font: 600 17px/1.4 Arial, Helvetica, sans-serif;
+  letter-spacing: normal;
+}
+.record-body-copy {
+  --record-body-preview-lines: 5;
+  margin-top: 12px;
+  font-size: 16px;
+  line-height: 1.9;
+  text-align: justify;
+  text-align-last: start;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.record-body-copy--collapsed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--record-body-preview-lines);
+  overflow: hidden;
+}
+.record-body-toggle {
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+}
+.record-attachment {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-block: 28px 24px;
+  padding: 20px 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.record-attachment > svg { color: var(--blue); }
+.record-attachment > div { min-width: 0; }
+.record-attachment p {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.record-attachment .text-link { margin-top: 10px; }
+@media (max-width: 760px) {
+  .legislative-record-page .record-detail dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 18px;
+  }
+  .legislative-record-content { padding-block: 24px 36px; }
+  .record-attachment { padding: 18px; gap: 12px; }
+}
+@media (max-width: 480px) {
+  .legislative-record-page .record-detail dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .steps {
   list-style: decimal;
   padding-left: 25px;
@@ -2080,7 +2188,8 @@ footer {
   padding: 1rem 0;
   min-width: 0;
 }
-.department-contact-group h3 {
+.department-contact-group h3,
+.department-contact-group h4 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -2096,6 +2205,88 @@ footer {
 .department-contact-group a {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+.department-contact-directory {
+  padding-bottom: 40px;
+}
+.department-contact-directory .section-heading {
+  margin-bottom: 18px;
+}
+.department-contact-directory .section-heading h2 {
+  font-size: 26px;
+}
+.department-contact-directory .section-heading p {
+  margin-top: 6px;
+}
+.department-contact-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+.department-contact-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.department-contact-card > h3 {
+  font-size: 18px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.department-contact-card > .eyebrow {
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+  overflow-wrap: anywhere;
+}
+.department-contact-card > h3 a:hover {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.department-contacts--compact {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.department-contacts--compact .department-contact-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.department-contacts--compact .department-contact-group {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+}
+.department-contacts--compact .department-contact-group h4 {
+  margin: 2px 0 0;
+  color: var(--blue);
+}
+.department-contacts--compact .department-contact-group ul {
+  display: grid;
+  gap: 6px;
+}
+.department-contacts--compact .department-contact-group li {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.department-contacts--compact .department-contact-group strong {
+  font-weight: 500;
+}
+@media (max-width: 1100px) {
+  .department-contact-directory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .department-contact-directory-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .contact-details {
   gap: 16px;

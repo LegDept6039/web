@@ -118,6 +118,20 @@ The Legislative document toolbar and Add Document screens include compact **Impo
 
 `/superadmin/master-committees` manages the shared database catalog and display order. Legislative Access > Committees now shows a compact per-term table with chairperson, vice-chairperson, members, publication status and composition actions. Unsaved templates are explicitly unassigned; historical records requiring association remain editable in a separate review table. The existing form supports empty official positions and term-filtered choices. Both routes reuse the admin loading skeleton. Public committee directories still show saved, published records only. See [MASTER-COMMITTEES.md](MASTER-COMMITTEES.md) for migration 020 and historical-name preservation.
 
+### Department Contact Directory
+
+`/contact` includes a responsive Department Contacts directory below the municipal information. It uses the existing published contacts and active, published, nonarchived Executive departments, grouped by their stable Department IDs. Departments without published, nonblank contacts are omitted; the directory section is hidden when none qualify. Cards reuse the Department contact groups for phone, landline, email and location, retain contact labels/order and link to the Department page. CMS saves and deletions appear on subsequent public requests through the existing content adapter and revalidation; no migration or separate contact registry is needed.
+
+Directory cards use three desktop columns, two tablet columns and one mobile column, with smaller headings, 16px padding and compact contact rows. Contact type names remain available to screen readers beside decorative icons. A matching department name at the start of a contact label is omitted from the directory display (for example, "Mayor's Office Email" becomes "Email"); distinguishing label text and all contact values remain visible. Empty or department-name-only labels use the contact type. CMS values and the standard Department detail contact layout are unchanged. The compact layout and shortened labels passed production build/type checks and targeted lint; desktop/mobile browser screenshots using the existing local public contacts were reviewed with no horizontal overflow.
+
+Verification: type check, targeted lint and production build passed. The existing dynamic-department browser scenario passed on desktop and mobile, covering departments without contacts, published contact links, hidden draft contacts, and removal after deactivation. Both directory screenshots were reviewed with no horizontal overflow. These checks used the isolated Supabase transport fixture; no hosted data changed. Windows test-server teardown was interrupted after both scenarios passed.
+
+### User Role and Office Access
+
+The user create/edit form hides **Office Access** when **Super Admin** is selected and explains that this role has access to all offices and modules. Selecting another role restores the office selector and its selections. Hidden controls remain mounted so saving does not silently clear existing Department or Transparency assignments. New Superadmins can be created without selecting any office; authorization remains enforced by the existing server and database rules.
+
+Verification: type check, targeted lint and production build passed. The existing desktop/mobile user-management scenarios passed with role switching, promotion/save/reopen, retained office selections, demotion and password reset. Both Super Admin form screenshots were reviewed. Windows browser-test teardown was interrupted after all assertions completed.
+
 ### Admin Table Pagination
 
 Admin content lists, Legislative documents and committee compositions, Transparency reports/modules, and Superadmin users, departments, master committees and terms use shared `AdminPagination` controls. Tables display 25 records per page; the audit log retains 50. The footer shows the visible range and total, with numbered pages and Previous/Next controls when more than one page exists. Controls wrap on small screens and identify the current page for assistive technology.
@@ -129,3 +143,15 @@ Existing database-paginated tables apply authorization and filters before counti
 Verification: `npx playwright test --config playwright.pagination.config.ts` uses an isolated fixture containing multiple pages of records, including foreign-office controls. Focused range/query checks are in `tests/data/admin-pagination.spec.ts`.
 
 Validation: type check, full lint, production build and seven focused pagination tests passed. All eight desktop/mobile browser scenarios passed, covering record counts, ordering, office/term/filter preservation, independent committee tables, empty results, out-of-range pages and responsive controls. Desktop/mobile screenshots were reviewed. Windows test-server teardown was interrupted after all browser assertions passed (cleanup exit 1). These are local fixture checks; no hosted data or deployment was changed.
+
+### Legislative Record Detail Layout
+
+Public resolution and ordinance details share `DocumentDetail`. The record number and complete CMS title appear in a compact header; the duplicate oversized title is removed. Header, metadata and body use one aligned content width, with a responsive metadata grid and compact PDF attachment panel. Body text is justified, preserves CMS line breaks and wraps long words. The original text, authorship, dates, PDF links and sample notices remain database-driven and unchanged. Styles are scoped to these detail pages; no migration is needed.
+
+The detail heading and breadcrumb display the record number with its stored year, for example `Resolution No. 97-2025`. Existing numbers already ending in that year are preserved without a second suffix. This is display formatting only; stored record numbers and IDs are unchanged.
+
+Long document bodies initially show five lines with an ellipsis. **See more / See less** expands or collapses the complete CMS text in place, retaining justification and line breaks. The keyboard-accessible toggle appears only when the text exceeds the preview height and adjusts to viewport changes.
+
+Body preview verification: TypeScript, targeted lint and production build passed. Resolution and ordinance browser checks passed at 1440px and 390px, covering short/long text, keyboard expansion/collapse, accessible state, resizing and no horizontal overflow. Collapsed/expanded screenshots were reviewed using local mock data and browser-only long-text examples.
+
+Validation: TypeScript, full lint and production build passed. Both detail routes were checked at 1440px and 390px using an isolated mock server, including a single full title, justified text, preserved line breaks, PDF/back links and no horizontal overflow. Six screenshots were reviewed, including long-title and multiline-body browser-only stress cases. No hosted content was changed.

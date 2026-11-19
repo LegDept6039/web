@@ -30,11 +30,19 @@ Migration 020 adds a shared [Master Committee List](MASTER-COMMITTEES.md). Commi
 
 New Officials and Committees default to the current term. Existing unassigned records require deliberate selection. Description edits do not silently rewrite historical membership. Date-based forms show an automatically derived read-only term and fail clearly when no term covers the date.
 
+Automatically assigned terms and matched sessions appear as labeled information panels, not text inputs. They update when the record date changes and announce updates to assistive technology. When several sessions share a date, the existing session dropdown still allows staff to select the correct one.
+
+Information-panel verification: type check, targeted lint and production build passed. Existing document/session desktop and mobile scenarios passed, including automatic matching, unmatched dates, manual selection for multiple sessions, saving and reopening. Both screenshots were reviewed. Test-server teardown was interrupted after the assertions completed.
+
 Document forms ask for Date immediately after the document type is selected, before the term and related official/committee fields. Session forms also start with Date. Agenda/Minutes inherit the same-date session's term; their Date and Session fields precede the read-only term. Document lists default to document date descending, and session lists and session dropdowns use session date descending, with IDs breaking ties. Public Supabase lists use the same newest-date order. Session publication remains optional, but its form no longer asks for a manual sort position; the existing database position is retained internally for compatibility. The form/list ordering change does not itself require a migration; the session/author rules above require 021.
 
 Date-first workflow verification: typecheck, targeted lint, production build, 15 adapter/term data tests and four desktop/mobile browser scenarios passed. Browser checks cover field order, automatic term recalculation, session publication without a manual position, and date ordering when an older document is added later. Desktop/mobile form screenshots were reviewed. The test server required interruption after all assertions passed during Windows teardown; the user's development server was left running.
 
 ## Current term and browsing
+
+Public and admin term labels append years from the saved start/end dates: `16th 2022-2025`. The current term uses `17th 2025-Current`; previous and upcoming terms show their actual end year. This shared display format does not change stored names, term IDs or date assignments. Superadmin continues to edit the base name and dates separately.
+
+Term-label verification: TypeScript, targeted lint and production build passed. All six focused desktop/mobile scenarios passed for public term browsing, staff forms and Superadmin term management; screenshots were reviewed. The Windows browser-test server teardown was interrupted after the assertions completed. No database migration is required for this presentation change.
 
 Current/Previous/Upcoming status is computed using the calendar date in **Asia/Manila**, including inclusive start and end dates. There is no manual current toggle. Request-time rendering and uncached term reads allow the default term to switch at Philippine midnight without deployment.
 

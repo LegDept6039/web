@@ -1,5 +1,5 @@
 "use client";
-import { termForDate } from "@/lib/legislative/terms";
+import { termDisplayName, termForDate } from "@/lib/legislative/terms";
 
 import { useState } from "react";
 import { COMMITTEE_DESCRIPTION_MAX_LENGTH } from "@/lib/legislative/config";
@@ -43,6 +43,7 @@ export function LegislativeFields({
     collection === "committees"
       ? manualTerm
       : termForDate(terms, recordDate)?.id;
+  const assignedTerm = terms.find((term) => term.id === termId);
   const matchingSessions = options.sessions.filter(
     (session) =>
       Boolean(termId) &&
@@ -64,7 +65,7 @@ export function LegislativeFields({
         Session
         <select
           name="session_id"
-        aria-label="Session"
+          aria-label="Session"
           required
           value={matchedSessionId}
           onChange={(event) => setSessionId(event.target.value)}
@@ -84,16 +85,12 @@ export function LegislativeFields({
       <label>
         Session
         <input type="hidden" name="session_id" value={matchedSessionId} />
-        <input
-          readOnly
-        aria-label="Session"
-          value={
-            matchingSessions[0]?.name ||
+        <output className="staff-derived-value" aria-label="Session">
+          {matchingSessions[0]?.name ||
             (recordDate
               ? "No matching session"
-              : "Enter the document date first")
-          }
-        />
+              : "Enter the document date first")}
+        </output>
         <span className="staff-note">
           {matchingSessions.length
             ? "Automatically matched to the document date."
@@ -114,7 +111,7 @@ export function LegislativeFields({
           <option value="">Select a term</option>
           {terms.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.name}
+              {termDisplayName(t, options.today)}
             </option>
           ))}
         </select>
@@ -122,10 +119,14 @@ export function LegislativeFields({
     ) : (
       <label>
         Assigned Legislative Term
-        <input
-          readOnly
-          value={terms.find((t) => t.id === termId)?.name || "No matching term"}
-        />
+        <output
+          className="staff-derived-value"
+          aria-label="Assigned Legislative Term"
+        >
+          {assignedTerm
+            ? termDisplayName(assignedTerm, options.today)
+            : "No matching term"}
+        </output>
         <span className="staff-note">
           Determined by the record date.{" "}
           {termId

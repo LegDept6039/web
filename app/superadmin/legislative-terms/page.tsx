@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/auth/server";
 import { getTerms } from "@/lib/legislative/terms-server";
-import { termStatus } from "@/lib/legislative/terms";
+import { termDisplayName, termStatus } from "@/lib/legislative/terms";
 import { TermForm } from "./TermForm";
 import { pageDetails, paginationHref } from "@/lib/admin/pagination";
 import { AdminPagination } from "@/components/admin/AdminPagination";
@@ -36,7 +36,7 @@ export default async function Page({
           <tbody>
             {visibleTerms.map((t) => (
               <tr key={t.id}>
-                <td>{t.name}</td>
+                <td>{termDisplayName(t)}</td>
                 <td>{t.start_date}</td>
                 <td>{t.end_date}</td>
                 <td>{termStatus(t)}</td>

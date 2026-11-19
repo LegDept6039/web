@@ -1,5 +1,5 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { saveUser, resetPassword } from "./actions";
 import { roles, type Office, type Access } from "@/lib/offices/permissions";
 export interface Account {
@@ -22,6 +22,7 @@ export function UserForm({
   access?: Access[];
 }) {
   const [message, action, pending] = useActionState(saveUser, "");
+  const [selectedRole, setSelectedRole] = useState(account?.role || "viewer");
   return (
     <form action={action} className="staff-form staff-card">
       <input type="hidden" name="user_id" value={account?.user_id || ""} />
@@ -73,7 +74,12 @@ export function UserForm({
       )}
       <label>
         Role
-        <select name="role" required defaultValue={account?.role || "viewer"}>
+        <select
+          name="role"
+          required
+          value={selectedRole}
+          onChange={(event) => setSelectedRole(event.target.value)}
+        >
           {roles.map((role) => (
             <option key={role} value={role}>
               {role === "superadmin"
@@ -96,7 +102,13 @@ export function UserForm({
         update and delete their news, programs and contacts. Admin: create,
         update, and delete within assigned access. Super Admin: unrestricted.
       </p>
-      <fieldset>
+      {selectedRole === "superadmin" && (
+        <p className="staff-note">
+          Super Admin has access to all offices and modules. No office
+          assignment is needed.
+        </p>
+      )}
+      <fieldset hidden={selectedRole === "superadmin"}>
         <legend>Office access</legend>
         <p>
           Choose the office this user can manage. The selected role determines
@@ -130,9 +142,8 @@ export function UserForm({
         </label>
         <p className="staff-note">
           Select an office. Ctrl/Cmd-click selects multiple offices for staff
-          who need them. Superadmins do not need an office assignment. For
-          Transparency, Editors and Admins can manage modules and reports;
-          Viewers can only read records and preview PDFs.
+          who need them. For Transparency, Editors and Admins can manage modules
+          and reports; Viewers can only read records and preview PDFs.
         </p>
         {access.some((a) =>
           offices.some((o) => o.id === a.office_id && !o.active),

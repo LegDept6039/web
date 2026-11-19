@@ -113,11 +113,48 @@ test("superadmin creates user from website, assigns offices and resets password"
   await page
     .getByRole("listbox", { name: "Office Access", exact: true })
     .selectOption("10000000-0000-4000-8000-000000000001");
+  const role = page.getByRole("combobox", { name: "Role", exact: true });
+  const officeAccess = page.locator('select[name="office"]');
+  await role.selectOption("superadmin");
+  await expect(officeAccess).toBeHidden();
+  await expect(page.getByText(/Super Admin has .*access/i)).toBeVisible();
+  await role.selectOption("editor");
+  await expect(officeAccess).toBeVisible();
+  await expect(officeAccess).toHaveValues([
+    "10000000-0000-4000-8000-000000000001",
+  ]);
   await page.getByRole("button", { name: "Create user", exact: true }).click();
   await expect(page).toHaveURL(/\/superadmin\/users$/);
   const row = page
     .getByRole("row")
     .filter({ hasText: `new-${testInfo.project.name}@example.test` });
+  await expect(row).toContainText("MPDC");
+  await row.getByRole("link").click();
+  await role.selectOption("superadmin");
+  await expect(officeAccess).toBeHidden();
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(page).toHaveURL(/\/superadmin\/users$/);
+  await expect(row).toContainText("superadmin");
+  await row.getByRole("link").click();
+  await expect(role).toHaveValue("superadmin");
+  await expect(officeAccess).toBeHidden();
+  await expect(page.getByText(/Super Admin has .*access/i)).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("superadmin-user-form.png"),
+    fullPage: true,
+  });
+  await role.selectOption("editor");
+  await expect(officeAccess).toBeVisible();
+  await expect(officeAccess).toHaveValues([
+    "10000000-0000-4000-8000-000000000001",
+  ]);
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(page).toHaveURL(/\/superadmin\/users$/);
   await expect(row).toContainText("MPDC");
   await row.getByRole("link").click();
   await page

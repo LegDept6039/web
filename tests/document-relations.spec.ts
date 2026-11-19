@@ -10,12 +10,12 @@ test("member-only authors and same-date session matching survive saving and edit
   await expect(page.locator("main .staff-grid").first()).toBeVisible();
   await page.goto(`/admin/content/ordinances/new?office=${office}`);
   await page.getByLabel("Date", { exact: true }).fill("2025-08-08");
-  await expect(page.getByLabel("Assigned Legislative Term")).toHaveValue(
-    "Current Council",
-  );
   await expect(
-    page.getByRole("textbox", { name: "Session", exact: true }),
-  ).toHaveValue("6th Regular Session");
+    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+  ).toHaveText("Current Council 2025-Current");
+  await expect(
+    page.getByRole("status", { name: "Session", exact: true }),
+  ).toHaveText("6th Regular Session");
   for (const name of ["Author", "Co-author"]) {
     await expect(page.getByLabel(name, { exact: true })).not.toContainText(
       "Vice Mayor Test",
@@ -43,8 +43,8 @@ test("member-only authors and same-date session matching survive saving and edit
   await page.getByLabel("Body", { exact: true }).fill("Document body.");
   await page.getByLabel("Date", { exact: true }).fill("2025-08-10");
   await expect(
-    page.getByRole("textbox", { name: "Session", exact: true }),
-  ).toHaveValue("No matching session");
+    page.getByRole("status", { name: "Session", exact: true }),
+  ).toHaveText("No matching session");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page.locator("main").getByRole("alert")).toContainText(
     "No matching session",
@@ -89,11 +89,11 @@ test("member-only authors and same-date session matching survive saving and edit
     );
     await page.getByLabel("Date", { exact: true }).fill("2025-08-08");
     await expect(
-      page.getByRole("textbox", { name: "Session", exact: true }),
-    ).toHaveValue("6th Regular Session");
-    await expect(page.getByLabel("Assigned Legislative Term")).toHaveValue(
-      "Current Council",
-    );
+      page.getByRole("status", { name: "Session", exact: true }),
+    ).toHaveText("6th Regular Session");
+    await expect(
+      page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    ).toHaveText("Current Council 2025-Current");
   }
   await page.screenshot({
     path: info.outputPath("automatic-session.png"),

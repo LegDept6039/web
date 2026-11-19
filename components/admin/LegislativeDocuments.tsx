@@ -1,5 +1,5 @@
 import { getTerms } from "@/lib/legislative/terms-server";
-import { selectedTerm, termStatus } from "@/lib/legislative/terms";
+import { selectedTerm, termDisplayName } from "@/lib/legislative/terms";
 import Link from "next/link";
 import { DocumentTransferControls } from "@/components/admin/DocumentTransferControls";
 import type { OfficeContext } from "@/lib/offices/server";
@@ -126,7 +126,7 @@ export async function LegislativeDocuments({
             </option>
             {terms.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.name} - {termStatus(t)}
+                {termDisplayName(t)}
               </option>
             ))}
             <option value="unassigned">Unassigned historical records</option>

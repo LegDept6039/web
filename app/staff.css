@@ -40,6 +40,17 @@
   min-height: 110px;
   resize: vertical;
 }
+.staff-derived-value {
+  display: block;
+  min-width: 0;
+  padding: 10px 12px;
+  border-inline-start: 3px solid var(--blue);
+  border-radius: 0 4px 4px 0;
+  background: var(--light);
+  color: var(--ink);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 .staff-form label:has(input[type="checkbox"]) {
   display: flex;
   align-items: center;

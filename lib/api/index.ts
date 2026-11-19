@@ -56,6 +56,23 @@ export async function getDepartments() {
     (d) => d.contentScope !== "legislative" && d.active !== false,
   );
 }
+export async function getDepartmentContactDirectory() {
+  const [departments, contacts] = await Promise.all([
+    getDepartments(),
+    getCollection("contacts", { content_scope: "executive" }),
+  ]);
+  const contactsByOffice = new Map<string, typeof contacts>();
+  for (const contact of contacts) {
+    if (!contact.value.trim()) continue;
+    const entries = contactsByOffice.get(contact.officeId) || [];
+    entries.push(contact);
+    contactsByOffice.set(contact.officeId, entries);
+  }
+  return departments.flatMap((department) => {
+    const entries = contactsByOffice.get(department.officeId || department.id);
+    return entries?.length ? [{ department, contacts: entries }] : [];
+  });
+}
 export async function getCommittees() {
   return getCollection("committees");
 }
