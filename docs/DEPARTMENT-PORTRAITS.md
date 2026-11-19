@@ -1,10 +1,10 @@
 # Department portraits, biographies and directory cards
 
-The public `/departments` directory and `/departments/[slug]` detail page now use `head_photo`. Missing or failed photos reuse the existing neutral OfficialPhoto silhouette; neither page falls back to a department logo. Uploaded files and the `image_url` field remain unchanged and editable in Superadmin. The homepage retains its compact department-image variant.
+All public Department cards on the homepage, `/executive` and `/departments`, plus the `/departments/[slug]` detail page, use `head_photo` in a 3:4 portrait frame. Missing or failed photos reuse the existing neutral OfficialPhoto silhouette; cards never fall back to a department logo. Uploaded files and the `image_url` field remain unchanged and editable in Superadmin. Homepage cards use the same 3:4 frame, with head photos positioned at center top to keep faces visible. Department head previews in both Admin and Superadmin also use 3:4.
 
 Portraits reserve a 3:4 box with cover fit and center-top positioning. The detail portrait is limited to 300px, with information alongside it on desktop and stacked on mobile. Complete biographies use preserved line breaks and natural wrapping. About, News, Programs, Contacts, slugs, publication filters and permissions remain intact.
 
-Department directory cards use flexible equal-height grid items, full wrapping names, three-line descriptions and bottom-aligned actions. News/Activities directories use the shared NewsGrid uniform variant with 16:9 images, three-line excerpts and bottom-aligned links. Homepage news and compact department news retain their existing variants. Text is clamped only in CSS; saved content is unchanged.
+Department directory cards fit four columns at desktop widths (1024px and above), two at tablet widths (640px and above), and one on mobile. Compact 18px padding, 20px names and 20px gaps reduce each card's footprint while preserving 3:4 head photos. Cards use flexible equal-height grid items, full wrapping names, three-line descriptions and bottom-aligned actions. The Executive preview reuses this layout. News/Activities directories use the shared NewsGrid uniform variant with 16:9 images, three-line excerpts and bottom-aligned links. Homepage news and compact department news retain their existing variants. Text is clamped only in CSS; saved content is unchanged.
 
 ## Biography editing
 
@@ -23,6 +23,8 @@ No migration is required. The application enforces the new editorial limit; exis
 
 ## Verification
 
+- Compact four-column directory: type check and targeted lint passed. Browser measurements confirmed four cards per row at 1440px/1024px, two at 768px and one at 390px/320px, with 3:4 photos and no horizontal overflow. Desktop/mobile screenshots were reviewed for wrapping, ellipsis and aligned actions.
+- Shared head-photo card update: type check and targeted lint passed. Read-only browser checks passed for homepage, Executive and Department directory cards at 1440px, 768px and 390px, including matching a homepage image to its department head photo, top positioning, placeholders and overflow. Desktop/mobile homepage screenshots were reviewed. No CMS data or stored images were changed.
 - All 111 data tests passed; the biography boundary test was rerun after adding CRLF coverage and passed.
 - TypeScript, lint and production build passed.
 - Existing public browser suite: 16 desktop/mobile scenarios passed.
@@ -36,6 +38,8 @@ Browser workflows use the isolated Supabase transport fixture; they do not write
 ### 3:4 portrait update
 
 Changed both public portrait containers to 3:4. Production build passed. The focused portrait browser scenario passed at 1440px, 768px and 390px; desktop/mobile screenshots were reviewed. The test server required interruption during Windows teardown after the assertion pass.
+
+The shared Department photo frame now defaults to 3:4, including homepage dashboard cards, with no landscape override. Superadmin's head-photo upload preview also uses 3:4 with cover fit and center-top positioning; the Admin preview already uses this frame. Build/type checks and targeted lint passed. Browser measurements verified 3:4 on the homepage, Executive, Department directory and Department detail at 1440px, 768px and 390px, and in both CMS previews at desktop/mobile widths. Screenshots were reviewed and no horizontal overflow was found. CMS checks used the isolated fixture and did not save any records.
 
 ### Department page editor
 

@@ -85,8 +85,7 @@ export function DepartmentEditorFields({
         <div>
           <h2>Department image</h2>
           <p className="staff-note">
-            Shown on the homepage department cards. The department page uses the
-            head portrait above.
+            Public department cards and pages use the head portrait above.
           </p>
         </div>
         <ImageEditOverlay

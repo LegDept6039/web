@@ -138,6 +138,7 @@ export function OfficeForm({
           name="photo"
           label="Department Head Photo"
           current={office?.head_photo}
+          portrait
         />
         {office?.head_photo && (
           <label>

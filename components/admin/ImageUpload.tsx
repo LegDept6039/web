@@ -5,10 +5,12 @@ export function ImageUpload({
   name,
   label,
   current,
+  portrait = false,
 }: {
   name: string;
   label: string;
   current?: string;
+  portrait?: boolean;
 }) {
   const [preview, setPreview] = useState<string>();
   const [error, setError] = useState("");
@@ -48,8 +50,19 @@ export function ImageUpload({
         <Image
           unoptimized
           width={240}
-          height={160}
-          style={{ objectFit: "contain", maxWidth: "100%" }}
+          height={portrait ? 320 : 160}
+          style={
+            portrait
+              ? {
+                  width: 240,
+                  maxWidth: "100%",
+                  height: "auto",
+                  aspectRatio: "3 / 4",
+                  objectFit: "cover",
+                  objectPosition: "center top",
+                }
+              : { objectFit: "contain", maxWidth: "100%" }
+          }
           src={preview || current!}
           alt={`${label} preview`}
         />

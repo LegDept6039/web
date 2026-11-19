@@ -1,7 +1,6 @@
 import { OfficialPhoto } from "@/components/officials/OfficialPhoto";
 import Link from "next/link";
 import type { Department, Program } from "@/types";
-import { DepartmentImage } from "./DepartmentImage";
 export function DepartmentGrid({
   departments,
   portraits = false,
@@ -20,15 +19,11 @@ export function DepartmentGrid({
       {departments.map((d) => (
         <article className="info-card department-card" key={d.id}>
           <div className="department-photo">
-            {portraits ? (
-              <OfficialPhoto
-                src={d.headPhoto}
-                name={d.headName || `${d.name} department head`}
-                sizes="(max-width: 640px) 85vw, (max-width: 1000px) 40vw, 28vw"
-              />
-            ) : (
-              <DepartmentImage src={d.imageUrl} name={d.name} />
-            )}
+            <OfficialPhoto
+              src={d.headPhoto}
+              name={d.headName || `${d.name} department head`}
+              sizes="(max-width: 639px) 85vw, (max-width: 1023px) 40vw, 22vw"
+            />
           </div>
           {d.acronym && <span className="eyebrow">{d.acronym}</span>}
           <h2>

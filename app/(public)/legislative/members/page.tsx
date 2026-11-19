@@ -12,8 +12,11 @@ export default async function Page({
 }: {
   searchParams: Promise<{ term?: string }>;
 }) {
-  const { terms, selected } = await publicTerm((await searchParams).term);
-  const officials = (await getOfficials()).filter(
+  const [{ terms, selected }, allOfficials] = await Promise.all([
+    publicTerm((await searchParams).term),
+    getOfficials(),
+  ]);
+  const officials = allOfficials.filter(
     (o) => isLegislativeRole(o.legislativeRole) && inTerm(o, selected),
   );
   return (
