@@ -34,9 +34,6 @@ export default async function Page() {
               {mayor?.description ||
                 "The mayor?s profile will be published once the official information is available."}
             </p>
-            {mayor?.isSample && (
-              <p className="meta">Name and portrait to be confirmed.</p>
-            )}
             <nav
               className="mayor-profile-links"
               aria-label="Explore Executive services"

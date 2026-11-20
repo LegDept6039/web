@@ -37,6 +37,7 @@ export async function AdminShell({
                   Master Committees
                 </Link>
                 <Link href="/superadmin/departments">Departments</Link>
+                <Link href="/superadmin/contact">Municipal Contact</Link>
                 <Link href="/superadmin/users">Users & access control</Link>
                 <Link href="/superadmin/audit">Audit log</Link>
               </>

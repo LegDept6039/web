@@ -89,7 +89,13 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => await db.close());
 test("Executive collection availability excludes Legislative modules", () => {
-  for (const c of ["departments", "news", "programs", "contacts"] as const)
+  for (const c of [
+    "departments",
+    "news",
+    "programs",
+    "services",
+    "contacts",
+  ] as const)
     expect(branchAllows("executive", c)).toBe(true);
   for (const c of [
     "officials",
@@ -100,7 +106,6 @@ test("Executive collection availability excludes Legislative modules", () => {
     "hearings",
     "documents",
     "documentCategories",
-    "services",
   ] as const) {
     expect(branchAllows("executive", c)).toBe(false);
     expect(branchAllows("legislative", c)).toBe(true);

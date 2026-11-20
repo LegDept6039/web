@@ -56,7 +56,8 @@ test("homepage and responsive navigation", async ({ page }, testInfo) => {
 test("ordinances search, year filter, empty state, reset and record detail", async ({
   page,
 }) => {
-  await page.goto("/legislative/ordinances");
+  // Mock records have no term assignment; use the historical browsing option.
+  await page.goto("/legislative/ordinances?term=unassigned");
   await expect(page.locator(".legislative-table tbody tr")).toHaveCount(4);
   await page
     .getByRole("combobox", { name: "Filter by year" })
@@ -78,7 +79,7 @@ test("ordinances search, year filter, empty state, reset and record detail", asy
   await expect(
     page.getByRole("heading", { name: "Ordinance No. 01-2026", exact: true }),
   ).toBeVisible();
-  const pdf = page.getByRole("link", { name: "View sample PDF document" });
+  const pdf = page.getByRole("link", { name: "View PDF document" });
   await expect(pdf).toBeVisible();
   const response = await page.request.get((await pdf.getAttribute("href"))!);
   expect(response.status()).toBe(200);
@@ -98,12 +99,15 @@ test("resolution co-author and year searches", async ({ page }) => {
   await expect(page.getByText("Co-author", { exact: true })).toBeVisible();
 });
 
-test("news category, keyword, article and site search", async ({ page }) => {
+test("news department, keyword, article and site search", async ({ page }) => {
   await page.goto("/news");
   await page
-    .getByRole("combobox", { name: "News category" })
-    .selectOption("Legislative");
-  await expect(page.locator(".news-card")).toHaveCount(1);
+    .getByRole("combobox", { name: "Department", exact: true })
+    .selectOption({ label: "Municipal information portal" });
+  await expect(page.locator(".news-card")).toHaveCount(5);
+  await expect(
+    page.getByRole("combobox", { name: "News category" }),
+  ).toHaveCount(0);
   await page.getByRole("textbox", { name: "Search news" }).fill("missingword");
   await expect(
     page.getByRole("heading", { name: "No matching results" }),

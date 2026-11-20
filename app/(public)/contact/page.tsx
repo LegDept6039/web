@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Phone, Mail, Clock3, Globe } from "lucide-react";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 import { DepartmentContacts } from "@/components/departments/DepartmentContacts";
 import { getDepartmentContactDirectory } from "@/lib/api";
+import { MunicipalContact } from "@/components/contact/MunicipalContact";
+import { getMunicipalContact } from "@/lib/municipal-contact/server";
 export const metadata: Metadata = {
   title: "Contact us",
   description:
     "Contact information for the Municipality of Pinamungajan, Cebu, Philippines.",
 };
 export default async function Page() {
-  const directory = await getDepartmentContactDirectory();
+  const [contact, directory] = await Promise.all([
+    getMunicipalContact(),
+    getDepartmentContactDirectory(),
+  ]);
   return (
     <>
       <PageHero
@@ -18,72 +22,13 @@ export default async function Page() {
         eyebrow="CONTACT YOUR MUNICIPALITY"
         description="We are here to help you find the right office and information."
       />
-      <section className="container section">
-        <PreviewNote>
-          Verified telephone numbers, email addresses, office hours, and social
-          channels will be added before public launch.
-        </PreviewNote>
-        <div className="contact-grid">
-          <div>
-            <h2>Municipality of Pinamungajan</h2>
-            <div className="contact-details">
-              <div className="contact-item">
-                <MapPin size={22} />
-                <div>
-                  <h3>Visit the Municipal Hall</h3>
-                  <p>
-                    Municipal Hall
-                    <br />
-                    Pinamungajan, Cebu
-                    <br />
-                    Philippines
-                  </p>
-                </div>
-              </div>
-              <div className="contact-item">
-                <Phone size={22} />
-                <div>
-                  <h3>Telephone</h3>
-                  <p>Official number to be confirmed</p>
-                </div>
-              </div>
-              <div className="contact-item">
-                <Mail size={22} />
-                <div>
-                  <h3>Email</h3>
-                  <p>Official email to be confirmed</p>
-                </div>
-              </div>
-              <div className="contact-item">
-                <Clock3 size={22} />
-                <div>
-                  <h3>Office hours</h3>
-                  <p>Schedule to be confirmed with the municipality</p>
-                </div>
-              </div>
-              <div className="contact-item">
-                <Globe size={22} />
-                <div>
-                  <h3>Social media</h3>
-                  <p>Verified municipal channels coming soon</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="map-placeholder">
-            <div>
-              <MapPin size={38} />
-              <h3>Municipal Hall</h3>
-              <p>Pinamungajan, Cebu, Philippines</p>
-              <small>
-                Location map placeholder
-                <br />
-                Verified map information coming soon
-              </small>
-            </div>
-          </div>
-        </div>
-      </section>
+      {contact ? (
+        <MunicipalContact contact={contact} />
+      ) : (
+        <section className="container section">
+          <p>Municipal contact information will be available soon.</p>
+        </section>
+      )}
       {directory.length > 0 && (
         <section
           className="container department-contact-directory"

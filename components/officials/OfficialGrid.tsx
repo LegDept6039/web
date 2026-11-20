@@ -23,8 +23,8 @@ export function OfficialGrid({
               name={o.name}
               sizes={
                 directory
-                  ? "(max-width: 640px) 90vw, (max-width: 1100px) 45vw, 25vw"
-                  : undefined
+                  ? "(max-width: 640px) 200px, 240px"
+                  : "(max-width: 540px) 40vw, (max-width: 800px) 240px, (max-width: 1100px) 20vw, 240px"
               }
             />
           </div>
@@ -38,9 +38,6 @@ export function OfficialGrid({
             </p>
             {directory && o.description && (
               <p className="official-description">{o.description}</p>
-            )}
-            {o.isSample && (
-              <p className="meta">Name and portrait to be confirmed</p>
             )}
           </div>
         </article>

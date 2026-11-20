@@ -75,7 +75,6 @@ test("formatted news validates publication, restores formatting and renders safe
   for (const [key, value] of Object.entries({
     slug,
     title: slug,
-    category: "Test",
     date: "2026-10-10",
     excerpt: "A compact formatted article.",
   }))
@@ -186,7 +185,6 @@ test("public article displays script-like body text literally", async ({
   for (const [key, value] of Object.entries({
     slug,
     title: slug,
-    category: "Test",
     date: "2026-10-10",
     excerpt: "Escaped text test.",
   }))

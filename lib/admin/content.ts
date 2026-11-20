@@ -1,4 +1,5 @@
 import { validateBiography } from "@/lib/content/department-biography";
+import { validateService } from "@/lib/content/service";
 import { publicationPosition } from "./publication";
 import {
   definitions,
@@ -19,13 +20,23 @@ export function label(value: string) {
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 export function parseContent(collection: Collection, form: FormData) {
+  if (collection === "services") {
+    const service = validateService(
+      String(form.get("name") || ""),
+      String(form.get("body") || ""),
+    );
+    form.set("name", service.name);
+    form.set("body", service.body);
+  }
   if (collection === "departments")
     validateBiography(String(form.get("head_description") || ""));
   const definition = definitions[collection];
   const row: Record<string, unknown> = {};
   for (const field of Object.values(definition.fields)) {
     if (
-      ["officials", "contacts", "programs", "news"].includes(collection) &&
+      ["officials", "contacts", "programs", "news", "services"].includes(
+        collection,
+      ) &&
       field.column === "id" &&
       !form.get("original")
     ) {
@@ -40,7 +51,9 @@ export function parseContent(collection: Collection, form: FormData) {
     ).trim();
     if (raw.length > 30000)
       throw new Error(`${label(field.column)} is too long.`);
-    if (field.kind === "boolean") row[field.column] = raw === "on";
+    if (collection === "services" && field.column === "steps" && !raw)
+      row.steps = [];
+    else if (field.kind === "boolean") row[field.column] = raw === "on";
     else if (field.optional && !raw) row[field.column] = null;
     else {
       if (!raw) throw new Error(`${label(field.column)} is required.`);
@@ -61,7 +74,9 @@ export function parseContent(collection: Collection, form: FormData) {
     );
   decodeRecord(collection, row);
   if (
-    ["officials", "contacts", "programs", "news"].includes(collection) &&
+    ["officials", "contacts", "programs", "news", "services"].includes(
+      collection,
+    ) &&
     !form.get("original")
   )
     delete row.id;

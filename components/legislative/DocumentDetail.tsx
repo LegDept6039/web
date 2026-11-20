@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, FileText } from "lucide-react";
 import type { LegislativeDocument } from "@/types";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 import { RecordBody } from "@/components/legislative/RecordBody";
 import { formatDate } from "@/lib/utils";
 export function DocumentDetail({
@@ -21,25 +21,17 @@ export function DocumentDetail({
       <PageHero
         title={`${label} No. ${numberWithYear}`}
         description={d.title}
-        eyebrow={
-          d.isSample ? "SAMPLE LEGISLATIVE RECORD" : "LEGISLATIVE RECORD"
-        }
+        eyebrow="LEGISLATIVE RECORD"
       />
       <div className="container legislative-record-content">
         <article className="record-detail">
-          {d.isSample && (
-            <PreviewNote>
-              This is a fictional sample record. It is not an enacted municipal
-              measure or an official legal document.
-            </PreviewNote>
-          )}
           <dl aria-label="Record details">
             <div>
-              <dt>Date approved{d.isSample ? " (sample)" : ""}</dt>
+              <dt>Date approved</dt>
               <dd>{formatDate(d.dateApproved)}</dd>
             </div>
             <div>
-              <dt>Status{d.isSample ? " (sample)" : ""}</dt>
+              <dt>Status</dt>
               <dd>{d.status}</dd>
             </div>
             <div>
@@ -76,12 +68,6 @@ export function DocumentDetail({
             <FileText size={24} aria-hidden="true" />
             <div>
               <h2 id="record-attachment-title">Document Attachment</h2>
-              {d.isSample && (
-                <p>
-                  The linked file is a shared demonstration attachment, not the
-                  official text of this record.
-                </p>
-              )}
               {d.pdfUrl ? (
                 <a
                   className="text-link"
@@ -89,9 +75,7 @@ export function DocumentDetail({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {d.isSample
-                    ? "View sample PDF document"
-                    : "View PDF document"}
+                  View PDF document
                 </a>
               ) : (
                 <p>

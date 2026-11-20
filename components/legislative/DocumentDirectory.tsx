@@ -91,10 +91,7 @@ export function DocumentDirectory({
                     Author: {d.author}
                     {d.coAuthor ? ` | Co-author: ${d.coAuthor}` : ""}
                   </p>
-                  <span className="status">
-                    {d.status}
-                    {d.isSample ? " | sample" : ""}
-                  </span>
+                  <span className="status">{d.status}</span>
                 </td>
                 <td data-label="Approved">{formatDate(d.dateApproved)}</td>
                 <td>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CalendarDays, MapPin, Users, FileText } from "lucide-react";
 import { getHearings } from "@/lib/api";
-import { PageHero, PreviewNote, SectionHeader } from "@/components/shared/ui";
+import { PageHero, SectionHeader } from "@/components/shared/ui";
 import { formatDate } from "@/lib/utils";
 export const metadata: Metadata = { title: "Public hearings" };
 export default async function Page() {
@@ -14,10 +14,6 @@ export default async function Page() {
         description="Learn about public consultations and the local measures being discussed."
       />
       <section className="container section">
-        <PreviewNote>
-          All hearings below are fictional examples. These dates are not
-          invitations to actual events.
-        </PreviewNote>
         {(["Upcoming", "Previous"] as const).map((status) => (
           <div key={status} className="mb-12">
             <SectionHeader
@@ -29,7 +25,7 @@ export default async function Page() {
                 .filter((h) => h.status === status)
                 .map((h) => (
                   <article className="info-card" key={h.id}>
-                    <span className="eyebrow">{h.status} · Sample</span>
+                    <span className="eyebrow">{h.status}</span>
                     <h3>{h.title}</h3>
                     <div className="hearing-meta">
                       <span>

@@ -1,13 +1,14 @@
 import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/auth/server";
 import { officeContext, readOfficeAccess } from "@/lib/offices/server";
-import { UserForm, PasswordResetForm } from "../UserForm";
+import { UserForm } from "../UserForm";
+import { PasswordResetForm } from "../PasswordResetForm";
 export default async function EditUser({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireStaff(true);
+  const { profile } = await requireStaff(true);
   const { client, offices } = await officeContext();
   const { id } = await params;
   const { data: account, error } = await client
@@ -28,7 +29,9 @@ export default async function EditUser({
         offices={offices}
         access={access || []}
       />
-      {!account.deleted_at && <PasswordResetForm id={id} />}
+      {!account.deleted_at && (
+        <PasswordResetForm account={account} isSelf={profile.user_id === id} />
+      )}
     </>
   );
 }

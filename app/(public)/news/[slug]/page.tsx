@@ -6,7 +6,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getNews, getArticle } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { PreviewNote, SectionHeader } from "@/components/shared/ui";
+import { SectionHeader } from "@/components/shared/ui";
 import { NewsGrid } from "@/components/news/NewsCard";
 export async function generateMetadata({
   params,
@@ -34,12 +34,10 @@ export default async function Page({
           <span>/</span>
           <Link href="/news">News & updates</Link>
         </div>
-        <span className="eyebrow">{a.category}</span>
         <h1>{a.title}</h1>
         <NewsSource article={a} />
         <p className="meta mt-5">
           {formatDate(a.date)} · Municipal information portal
-          {a.isSample ? " \u00b7 Sample article" : ""}
         </p>
         <div className="article-image">
           <Image
@@ -50,7 +48,6 @@ export default async function Page({
             priority
           />
         </div>
-        {a.isSample && <PreviewNote />}
         <div className="article-body">
           <RichText document={a.richBody} legacy={a.content} />
         </div>

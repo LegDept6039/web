@@ -24,13 +24,9 @@ export function NewsCard({
               : "(max-width: 700px) 100vw, 33vw"
           }
         />
-        <span className="image-tag">{article.category}</span>
       </Link>
       <div className="news-card-body">
-        <span className="meta">
-          {formatDate(article.date)}{" "}
-          {article.isSample && <span>· Sample update</span>}
-        </span>
+        <span className="meta">{formatDate(article.date)} </span>
         <h3>
           <Link href={`/news/${article.slug}`}>{article.title}</Link>
         </h3>

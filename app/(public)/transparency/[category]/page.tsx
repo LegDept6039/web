@@ -77,7 +77,6 @@ export default async function Page({
                 <div className="document-content">
                   <span className="eyebrow">
                     {doc.date}
-                    {doc.isSample ? " ? Sample document" : ""}
                   </span>
                   <h2>{doc.title}</h2>
                   <p className="body-copy">{doc.description}</p>

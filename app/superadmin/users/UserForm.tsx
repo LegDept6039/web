@@ -1,6 +1,6 @@
 "use client";
 import { useActionState, useState } from "react";
-import { saveUser, resetPassword } from "./actions";
+import { saveUser } from "./actions";
 import { roles, type Office, type Access } from "@/lib/offices/permissions";
 export interface Account {
   user_id: string;
@@ -176,45 +176,5 @@ export function UserForm({
         {pending ? "Saving..." : account ? "Save changes" : "Create user"}
       </button>
     </form>
-  );
-}
-export function PasswordResetForm({ id }: { id: string }) {
-  const [message, action, pending] = useActionState(resetPassword, "");
-  return (
-    <details className="staff-card">
-      <summary>Reset password</summary>
-      <form className="staff-form" action={action}>
-        <input type="hidden" name="user_id" value={id} />
-        <label>
-          New password
-          <input
-            type="password"
-            name="password"
-            autoComplete="new-password"
-            required
-            minLength={12}
-            maxLength={128}
-          />
-        </label>
-        <label>
-          Confirm new password
-          <input
-            type="password"
-            name="confirm_password"
-            autoComplete="new-password"
-            required
-            minLength={12}
-            maxLength={128}
-          />
-        </label>
-        <p>
-          Share the new password privately. This action does not send an email.
-        </p>
-        {message && <p role="status">{message}</p>}
-        <button className="button button-blue" disabled={pending}>
-          {pending ? "Resetting..." : "Reset password"}
-        </button>
-      </form>
-    </details>
   );
 }

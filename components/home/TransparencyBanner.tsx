@@ -20,10 +20,6 @@ export function TransparencyBanner() {
           </Link>
         </div>
       </section>
-      <div className="container preview-home">
-        Development preview: sample content and placeholder official profiles
-        are shown for review.
-      </div>
     </>
   );
 }

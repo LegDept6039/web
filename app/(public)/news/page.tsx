@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getNews } from "@/lib/api";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 import { NewsDirectory } from "@/components/news/NewsDirectory";
 export const metadata: Metadata = {
   title: "News & updates",
@@ -15,7 +15,6 @@ export default async function Page() {
         description="Stories, announcements, and activities from around our municipality."
       />
       <section className="container section">
-        <PreviewNote />
         <NewsDirectory articles={await getNews()} />
       </section>
     </>

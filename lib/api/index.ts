@@ -110,13 +110,20 @@ export async function getDepartment(slug: string) {
   return (await getCollection("departments", { id }))[0];
 }
 export async function getDepartmentContent(officeId?: string) {
-  if (!officeId) return { news: [], programs: [], contacts: [] };
-  const [news, programs, contacts] = await Promise.all([
+  if (!officeId) return { news: [], programs: [], contacts: [], services: [] };
+  const [news, programs, contacts, services] = await Promise.all([
     getCollection("news", { office_id: officeId }),
     getCollection("programs", { office_id: officeId }),
     getCollection("contacts", { office_id: officeId }),
+    getCollection("services", {
+      office_id: officeId,
+      content_scope: "executive",
+    }),
   ]);
   return {
+    services: services.filter(
+      (s) => s.officeId === officeId && s.contentScope === "executive",
+    ),
     contacts: contacts.filter((c) => c.officeId === officeId),
     news: news.filter(
       (n) => n.officeId === officeId && n.contentScope !== "legislative",

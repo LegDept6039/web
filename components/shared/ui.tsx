@@ -1,5 +1,5 @@
 ﻿import Link from "next/link";
-import { ArrowRight, ChevronRight, Info, SearchX } from "lucide-react";
+import { ArrowRight, ChevronRight, SearchX } from "lucide-react";
 export function SectionHeader({
   eyebrow,
   title,
@@ -50,17 +50,6 @@ export function PageHero({
         <h1>{title}</h1>
         <p>{description}</p>
       </div>
-    </div>
-  );
-}
-export function PreviewNote({ children }: { children?: React.ReactNode }) {
-  return (
-    <div className="preview-note">
-      <Info size={17} />
-      <p>
-        {children ??
-          "Development preview — records, schedules, and content shown here are samples, not official municipal publications."}
-      </p>
     </div>
   );
 }

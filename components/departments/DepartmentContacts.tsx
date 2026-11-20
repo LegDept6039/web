@@ -1,11 +1,9 @@
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin, Globe } from "lucide-react";
 import type { DepartmentContact } from "@/types";
-const types = {
-  PHONE: "Phone",
-  LANDLINE: "Landline",
-  EMAIL: "Email",
-  LOCATION: "Location",
-} as const;
+import {
+  departmentContactTypes,
+  isSocialContactUrl,
+} from "@/lib/content/department-contact";
 
 function contactLabel(label: string | undefined, departmentName?: string) {
   const value = label?.trim() || "";
@@ -39,7 +37,7 @@ export function DepartmentContacts({
     >
       {!compact && <h2 className="mb-4">Contact Information</h2>}
       <div className="department-contact-grid">
-        {Object.entries(types).map(([type, label]) => {
+        {Object.entries(departmentContactTypes).map(([type, label]) => {
           const records = contacts.filter((c) => c.type === type);
           if (!records.length) return null;
           return (
@@ -47,6 +45,8 @@ export function DepartmentContacts({
               <ContactHeading title={compact ? label : undefined}>
                 {type === "EMAIL" ? (
                   <Mail size={16} aria-hidden="true" />
+                ) : type === "SOCIAL" ? (
+                  <Globe size={16} aria-hidden="true" />
                 ) : type === "LOCATION" ? (
                   <MapPin size={16} aria-hidden="true" />
                 ) : (
@@ -56,6 +56,18 @@ export function DepartmentContacts({
               </ContactHeading>
               <ul>
                 {records.map((c) => {
+                  if (type === "SOCIAL")
+                    return isSocialContactUrl(c.value) && c.label?.trim() ? (
+                      <li key={c.id}>
+                        <a
+                          href={c.value}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {c.label}
+                        </a>
+                      </li>
+                    ) : null;
                   const displayLabel =
                     contactLabel(c.label, departmentName) ||
                     (compact ? label : "");

@@ -31,10 +31,7 @@ export function LegislativeUpdates({
                   <CalendarDays size={23} />
                 </span>
                 <div>
-                  <span className="meta">
-                    {formatDate(s.date)}
-                    {s.isSample ? " \u00b7 Sample session" : ""}
-                  </span>
+                  <span className="meta">{formatDate(s.date)}</span>
                   <h3>
                     {s.number} {s.type}
                   </h3>

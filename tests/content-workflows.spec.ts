@@ -114,10 +114,10 @@ test("news image create, edit by UUID after slug changes and immutable replaceme
   );
   await login(page);
   await page.goto(`/admin/content/news/new?office=${office}`);
+  await expect(page.locator('form [name="category"]')).toHaveCount(0);
   await fill(page, {
     slug,
     title: `Image news ${info.project.name}`,
-    category: "Services",
     date: "2026-10-08",
     excerpt: "News excerpt",
     content: "First story",
@@ -156,7 +156,6 @@ test("news image create, edit by UUID after slug changes and immutable replaceme
   await fill(page, {
     slug,
     title: `Image news ${info.project.name}`,
-    category: "Services",
     date: "2026-10-08",
     excerpt: "News excerpt",
     content: "First story",
@@ -247,7 +246,6 @@ test("Legislative news creation receives its owning department for image uploads
   await fill(page, {
     slug,
     title: slug,
-    category: "Legislative",
     date: "2026-10-08",
     excerpt: "Test image",
     content: "Test story",

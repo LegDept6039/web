@@ -1,4 +1,8 @@
 import { validateRichText } from "./rich-text";
+import {
+  departmentContactTypes,
+  validateSocialContact,
+} from "./department-contact";
 import { legislativeRoles } from "@/lib/officials/roles";
 import type {
   DepartmentContact,
@@ -89,7 +93,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
       },
       type: {
         ...text("type"),
-        values: ["PHONE", "LANDLINE", "EMAIL", "LOCATION"],
+        values: Object.keys(departmentContactTypes),
       },
       value: text("value"),
       label: { ...text("label"), optional: true },
@@ -161,6 +165,13 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "services",
     key: "id",
     fields: {
+      body: { ...text("body"), optional: true },
+      officeId: { ...text("office_id"), optional: true },
+      contentScope: {
+        ...text("content_scope"),
+        optional: true,
+        values: ["executive", "legislative"],
+      },
       id: text("id"),
       name: text("name"),
       description: text("description"),
@@ -393,6 +404,11 @@ export function decodeRecord<K extends Collection>(
     const relation = row[join] as { name?: string; number?: string } | null;
     if (relation) output[key] = relation.name || relation.number;
   }
+  if (collection === "contacts" && output.type === "SOCIAL")
+    validateSocialContact(
+      output.value as string,
+      output.label as string | undefined,
+    );
   // Every domain field was validated against its collection's typed definition above.
   return output as unknown as Collections[K];
 }

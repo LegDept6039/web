@@ -16,9 +16,7 @@ export function SessionCard({ session }: { session: Session }) {
       <div className="p-6">
         <span className="eyebrow">{session.type}</span>
         <h2>{session.name || `${session.number} ${session.type}`}</h2>
-        <p className="meta">
-          Sangguniang Bayan{session.isSample ? " \u00b7 Sample record" : ""}
-        </p>
+        <p className="meta">Sangguniang Bayan</p>
         <p className="flex items-center gap-2 mt-4 text-sm">
           <CalendarDays size={16} />
           {formatDate(session.date)}
@@ -28,7 +26,7 @@ export function SessionCard({ session }: { session: Session }) {
           <details className="agenda">
             <summary>
               <FileText size={16} />
-              {session.isSample ? "View sample agenda" : "View agenda"}
+              View agenda
             </summary>
             <ol>
               {session.agenda.map((item) => (

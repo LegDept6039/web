@@ -79,8 +79,7 @@ export function Footer() {
           reserved.
         </span>
         <span className="flex items-center gap-2">
-          <Landmark size={14} /> Municipal Government Website · Development
-          preview
+          <Landmark size={14} /> Municipal Government Website
         </span>
       </div>
     </footer>

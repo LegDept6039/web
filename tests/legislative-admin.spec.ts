@@ -231,7 +231,9 @@ test("Secretary creates and uploads one official, VMO edits it, public card has 
   await page.goto("/legislative/members");
   const card = page.locator(".official-card").filter({ hasText: name });
   await expect(card).toHaveCount(1);
-  await expect(card.locator("h3 + p")).toHaveText("Updated Description");
+  await expect(card.locator(".official-description")).toHaveText(
+    "Updated Description",
+  );
   await expect(card).toContainText("Sangguniang Bayan");
   await expect(card.locator("a,button")).toHaveCount(0);
   await expect(card.locator("img")).toBeVisible();

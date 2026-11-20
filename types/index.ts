@@ -58,6 +58,9 @@ export interface Session extends ContentRecord {
   image: string;
 }
 export interface Service extends ContentRecord {
+  body?: string;
+  officeId?: string;
+  contentScope?: "executive" | "legislative";
   id: string;
   name: string;
   description: string;
@@ -149,7 +152,7 @@ export interface DepartmentContact extends ContentRecord {
   id: string;
   officeId: string;
   contentScope: "executive" | "legislative";
-  type: "PHONE" | "LANDLINE" | "EMAIL" | "LOCATION";
+  type: "PHONE" | "LANDLINE" | "EMAIL" | "LOCATION" | "SOCIAL";
   value: string;
   label?: string;
 }

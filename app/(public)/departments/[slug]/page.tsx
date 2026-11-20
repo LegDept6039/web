@@ -6,6 +6,7 @@ import { OfficialPhoto } from "@/components/officials/OfficialPhoto";
 import { NewsGrid } from "@/components/news/NewsCard";
 import { ProgramGrid } from "@/components/departments/DepartmentGrid";
 import { DepartmentContacts } from "@/components/departments/DepartmentContacts";
+import { DepartmentServices } from "@/components/departments/DepartmentServices";
 export async function generateMetadata({
   params,
 }: {
@@ -26,7 +27,7 @@ export default async function Page({
   const d = await getDepartment(slug);
   if (!d) notFound();
   if (d.slug && slug !== d.slug) permanentRedirect(`/departments/${d.slug}`);
-  const { news, programs, contacts } = await getDepartmentContent(
+  const { news, programs, contacts, services } = await getDepartmentContent(
     d.officeId || d.id,
   );
   return (
@@ -75,6 +76,7 @@ export default async function Page({
               ))}
           </div>
         </section>
+        <DepartmentServices services={services} />
         <section className="mt-16">
           <h2 className="mb-6">Department news</h2>
           {news.length ? (

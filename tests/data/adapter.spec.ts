@@ -218,6 +218,7 @@ test("department detail and owned resources use database filters with publicatio
     ["news", { office_id: "department-uuid" }],
     ["programs", { office_id: "department-uuid" }],
     ["contacts", { office_id: "department-uuid" }],
+    ["services", { office_id: "department-uuid", content_scope: "executive" }],
   ] as const) {
     await readSupabaseCollection(
       collection,

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDepartments, getNews, getPrograms } from "@/lib/api";
-import { PageHero, PreviewNote, SectionHeader } from "@/components/shared/ui";
+import { PageHero, SectionHeader } from "@/components/shared/ui";
 import { DepartmentGrid } from "@/components/departments/DepartmentGrid";
 import { NewsGrid } from "@/components/news/NewsCard";
 export const metadata: Metadata = {
@@ -23,10 +23,6 @@ export default async function Page() {
         description="Implementing local priorities, delivering municipal services, and working for a progressive Pinamungajan."
       />
       <section className="container section">
-        <PreviewNote>
-          Official profiles and program information are placeholders awaiting
-          municipal verification.
-        </PreviewNote>
         <nav className="branch-links" aria-label="Executive pages">
           {[
             ["Municipal Mayor", "mayor"],

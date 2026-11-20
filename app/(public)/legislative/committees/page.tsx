@@ -4,7 +4,7 @@ import { TermSelector } from "@/components/legislative/TermSelector";
 import type { Metadata } from "next";
 import { getCommittees, getOfficials } from "@/lib/api";
 import { CommitteeDirectory } from "@/components/officials/CommitteeDirectory";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 export const metadata: Metadata = { title: "Standing committees" };
 export default async function Page({
   searchParams,
@@ -51,12 +51,6 @@ export default async function Page({
           selected={selected}
           today={philippineDate()}
         />
-        {committees.some((committee) => committee.isSample) && (
-          <PreviewNote>
-            Sample committee structure. Official committee names, membership,
-            and assignments are to be confirmed.
-          </PreviewNote>
-        )}
         <CommitteeDirectory committees={directory} />
       </section>
     </>

@@ -5,7 +5,7 @@ import { isLegislativeRole } from "@/lib/officials/roles";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getOfficials, getSessions } from "@/lib/api";
-import { PageHero, PreviewNote, SectionHeader } from "@/components/shared/ui";
+import { PageHero, SectionHeader } from "@/components/shared/ui";
 import { OfficialGrid } from "@/components/officials/OfficialGrid";
 import { SessionCard } from "@/components/legislative/SessionCard";
 export const metadata: Metadata = {
@@ -36,7 +36,6 @@ export default async function Page({
           selected={selected}
           today={philippineDate()}
         />
-        <PreviewNote />
         <nav className="branch-links" aria-label="Legislative pages">
           {[
             ["Council members", "members"],

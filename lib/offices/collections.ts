@@ -4,6 +4,8 @@ export function branchAllows(branch: string, collection: Collection) {
   return (
     branch === "legislative" ||
     (branch === "executive" &&
-      ["departments", "news", "programs", "contacts"].includes(collection))
+      ["departments", "news", "programs", "services", "contacts"].includes(
+        collection,
+      ))
   );
 }

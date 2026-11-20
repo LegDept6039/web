@@ -1,5 +1,4 @@
 "use client";
-import { termDisplayName, termForDate } from "@/lib/legislative/terms";
 import { LegislativeFields } from "@/components/admin/LegislativeFields";
 import { PdfAttachment } from "@/components/admin/PdfAttachment";
 import { PDF_LIMIT } from "@/lib/admin/document-pdf-validation";
@@ -10,6 +9,9 @@ import {
   type LegislativeOptions,
 } from "@/lib/legislative/config";
 import { DepartmentEditorFields } from "@/components/admin/DepartmentEditorFields";
+import { DepartmentContactFields } from "@/components/admin/DepartmentContactFields";
+import { DepartmentServiceFields } from "@/components/admin/DepartmentServiceFields";
+import { OfficialEditorFields } from "@/components/admin/OfficialEditorFields";
 import dynamic from "next/dynamic";
 import { PublicationFields } from "@/components/admin/PublicationFields";
 import {
@@ -20,7 +22,6 @@ import {
 } from "@/lib/content/rich-text";
 import Image from "next/image";
 import { useActionState, useState, useEffect, useRef } from "react";
-import { legislativeRoles } from "@/lib/officials/roles";
 import type { Office } from "@/lib/offices/permissions";
 import { definitions, type Collection } from "@/lib/content/schema";
 import { label } from "@/lib/admin/content";
@@ -184,6 +185,8 @@ export function ContentForm({
   );
   const legislative =
     scope === "legislative" && usesLegislativeFields(collection);
+  const legislativeOfficial =
+    scope === "legislative" && collection === "officials";
   const definition = definitions[collection];
   const photoColumn = "photo_url";
   const original = String(row[definition.key] || "");
@@ -202,8 +205,13 @@ export function ContentForm({
   return (
     <>
       <form
-        className={`staff-form staff-card${collection === "departments" ? " department-edit-form" : ""}`}
+        className={`staff-form staff-card${collection === "departments" ? " department-edit-form" : legislativeOfficial ? " profile-edit-form" : ""}`}
         action={action}
+        onReset={
+          ["contacts", "services"].includes(collection)
+            ? (event) => event.preventDefault()
+            : undefined
+        }
         onChange={(event) => {
           const input = event.target;
           if (input instanceof HTMLSelectElement && input.name === "office_id")
@@ -221,7 +229,9 @@ export function ContentForm({
             {canWrite
               ? collection === "departments"
                 ? "Department page and head"
-                : "Record details"
+                : legislativeOfficial
+                  ? "Official profile"
+                  : "Record details"
               : "View only"}
           </legend>
           {scope === "executive" &&
@@ -247,9 +257,13 @@ export function ContentForm({
                   name="office_id"
                   defaultValue={String(row.office_id || "")}
                   required={
-                    ["news", "programs", "departments", "contacts"].includes(
-                      collection,
-                    ) || !superadmin
+                    [
+                      "news",
+                      "programs",
+                      "departments",
+                      "contacts",
+                      "services",
+                    ].includes(collection) || !superadmin
                   }
                   disabled={Boolean(original) && !superadmin}
                 >
@@ -264,36 +278,21 @@ export function ContentForm({
               </label>
             )
           )}
-          {collection === "officials" && (
+          {collection === "news" && (
+            <p className="staff-note">
+              News is categorized automatically by its owning office.
+            </p>
+          )}
+          {legislativeOfficial && (
+            <OfficialEditorFields
+              row={row}
+              editable={canWrite}
+              options={legislativeOptions}
+            />
+          )}
+          {collection === "officials" && !legislativeOfficial && (
             <>
               {original && <p className="staff-note">Record ID: {original}</p>}
-              {collection === "officials" && scope === "legislative" && (
-                <label>
-                  Official role
-                  <select
-                    name="legislative_role"
-                    required
-                    defaultValue={String(row.legislative_role || "")}
-                  >
-                    <option value="">Select a role...</option>
-                    {Object.entries(legislativeRoles)
-                      .filter(
-                        ([value]) =>
-                          value !== "SECRETARY_TO_THE_SANGGUNIANG_BAYAN" ||
-                          row.legislative_role === value,
-                      )
-                      .map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {value === "MUNICIPAL_VICE_MAYOR"
-                            ? "Vice-Mayor"
-                            : value === "SANGGUNIANG_BAYAN"
-                              ? "Sangguniang Bayan Member"
-                              : label}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-              )}
               <label>
                 Profile picture (JPEG, PNG, WebP; up to 10 MB)
                 <input
@@ -397,32 +396,6 @@ export function ContentForm({
               Valid documents are published when saved.
             </p>
           )}
-          {scope === "legislative" && collection === "officials" && (
-            <label>
-              Legislative Term
-              <select
-                name="term_id"
-                required
-                defaultValue={String(
-                  row.term_id ||
-                    (row.id
-                      ? ""
-                      : termForDate(
-                          legislativeOptions.terms || [],
-                          legislativeOptions.today || "",
-                        )?.id) ||
-                    "",
-                )}
-              >
-                <option value="">Select a term</option>
-                {(legislativeOptions.terms || []).map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {termDisplayName(t, legislativeOptions.today)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
           {legislative && (
             <LegislativeFields
               collection={collection}
@@ -437,7 +410,15 @@ export function ContentForm({
               )}
             />
           )}
+          {collection === "contacts" && <DepartmentContactFields row={row} />}
+          {collection === "services" && <DepartmentServiceFields row={row} />}
           {Object.entries(definition.fields).map(([name, field]) => {
+            if (collection === "services") return null;
+            if (
+              collection === "contacts" &&
+              ["type", "value", "label"].includes(name)
+            )
+              return null;
             if (
               [
                 "reportFrequency",
@@ -452,6 +433,7 @@ export function ContentForm({
               return null;
             if (name === "termId") return null;
             if (legislative) return null;
+            if (legislativeOfficial) return null;
             if (scope === "legislative" && name === "isSample") return null;
             if (collection === "departments") return null;
             if (
@@ -471,7 +453,8 @@ export function ContentForm({
               return original ? (
                 <input key={name} type="hidden" name="id" value={original} />
               ) : null;
-            if (collection === "news" && name === "image") return null;
+            if (collection === "news" && ["image", "category"].includes(name))
+              return null;
             if (collection === "news" && name === "content")
               return (
                 <div key={name}>

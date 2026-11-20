@@ -3,7 +3,7 @@ import { inTerm, philippineDate } from "@/lib/legislative/terms";
 import { TermSelector } from "@/components/legislative/TermSelector";
 import type { Metadata } from "next";
 import { getSessions } from "@/lib/api";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 import { SessionCard } from "@/components/legislative/SessionCard";
 export const metadata: Metadata = {
   title: "Council sessions",
@@ -29,7 +29,6 @@ export default async function Page({
           selected={selected}
           today={philippineDate()}
         />
-        <PreviewNote />
         <div className="grid gap-6 md:grid-cols-2">
           {(await getSessions())
             .filter((s) => inTerm(s, selected))

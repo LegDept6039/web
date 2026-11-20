@@ -7,6 +7,9 @@ async function login(page: Page, role: string) {
   await expect(page).toHaveURL(
     role === "superadmin" ? /\/superadmin$/ : /\/admin$/,
   );
+  await expect(
+    page.getByRole("button", { name: "Sign out", exact: true }),
+  ).toBeVisible();
 }
 test("standalone login, invalid credentials, logout and protected routes", async ({
   page,
@@ -43,6 +46,9 @@ test("editor sees only MPDC, cannot enter superadmin or unrelated records", asyn
   ).toHaveCount(0);
   await page.goto("/superadmin/users");
   await expect(page).toHaveURL(/\/admin$/);
+  await expect(
+    page.getByRole("button", { name: "Sign out", exact: true }),
+  ).toBeVisible();
   await page.goto("/admin/content/departments");
   await expect(page.getByText("MPDC draft", { exact: true })).toBeVisible();
   await expect(page.getByText("MAYOR draft", { exact: true })).toHaveCount(0);
@@ -158,17 +164,14 @@ test("superadmin creates user from website, assigns offices and resets password"
   await expect(row).toContainText("MPDC");
   await row.getByRole("link").click();
   await page
-    .locator("summary")
-    .filter({ hasText: /^Reset password$/ })
+    .getByRole("button", { name: "Reset Password", exact: true })
     .click();
+  await page.locator('[name="confirm_reset"]').check();
   await page
-    .getByLabel("New password", { exact: true })
-    .fill("ResetPassword123!");
-  await page
-    .getByLabel("Confirm new password", { exact: true })
-    .fill("ResetPassword123!");
-  await page
-    .getByRole("button", { name: "Reset password", exact: true })
+    .getByRole("button", { name: "Reset Password", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("Password reset.");
+  await expect(page.getByTestId("temporary-password")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Copy temporary password" }),
+  ).toBeVisible();
 });

@@ -1,15 +1,14 @@
 import Link from "next/link";
 import type { NewsArticle } from "@/types";
+import { getNewsSource } from "@/lib/news/source";
 export function NewsSource({ article }: { article: NewsArticle }) {
-  if (!article.source) return null;
+  const source = getNewsSource(article);
   return (
     <span className="news-source">
-      {article.source.slug ? (
-        <Link href={`/departments/${article.source.slug}`}>
-          {article.source.name}
-        </Link>
+      {source.slug ? (
+        <Link href={`/departments/${source.slug}`}>{source.name}</Link>
       ) : (
-        article.source.name
+        source.name
       )}
     </span>
   );

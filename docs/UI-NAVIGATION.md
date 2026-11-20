@@ -155,3 +155,47 @@ Long document bodies initially show five lines with an ellipsis. **See more / Se
 Body preview verification: TypeScript, targeted lint and production build passed. Resolution and ordinance browser checks passed at 1440px and 390px, covering short/long text, keyboard expansion/collapse, accessible state, resizing and no horizontal overflow. Collapsed/expanded screenshots were reviewed using local mock data and browser-only long-text examples.
 
 Validation: TypeScript, full lint and production build passed. Both detail routes were checked at 1440px and 390px using an isolated mock server, including a single full title, justified text, preserved line breaks, PDF/back links and no horizontal overflow. Six screenshots were reviewed, including long-title and multiline-body browser-only stress cases. No hosted content was changed.
+
+### Legislative Profile Portraits and Editor
+
+Legislative portraits use a shared 3:4 frame on the homepage leadership preview, Legislative overview and council members directory. Photos crop from the top; missing and broken images keep the same frame. Portraits remain compact (up to 240px wide, or 200px in the single-column mobile directory) with the existing responsive card columns.
+
+The Legislative official create/edit form follows the Department editor's layout: identity header, portrait on the left and term, name, role and description on the right, stacked on small screens. It reuses `ImageEditOverlay` for adding, replacing and removing photos, including its 3:4 preview and upload validation. Use a 3:4 source portrait such as 900 x 1200px; JPEG, PNG and WebP remain supported up to 10 MB. Descriptions preserve line breaks. Publication settings, term defaults, historical IDs, upload retry behavior and permissions are unchanged.
+
+Validation: production build, TypeScript and full lint passed. Six existing desktop/mobile browser scenarios passed for upload, replacement, invalid files and historical official editing/term assignment. The older upload test now locates the description directly instead of assuming an `h3` heading on the directory. Additional isolated-fixture checks verified 3:4 geometry and no horizontal overflow at 1440, 768, 390 and 320px across all three public views and the CMS; failed-save photo retention, missing/broken images and photo removal also passed. Desktop/mobile screenshots were reviewed. Temporary test servers required manual shutdown after assertions completed; both test commands then exited successfully. No hosted data, schema or deployment changed.
+
+### News Categorization by Office
+
+News create/edit forms no longer ask for a separate Category. The server derives it from the record's authorized owning office. Public news cards and article pages show the office source once, while `/news` filters and searches by that office using its stable ID. The displayed name comes from the current department record, so renaming a department updates its public news labels without editing each article. Existing category values remain stored for compatibility; no category migration is required.
+
+Public source links retain the existing active, published, nonarchived Executive department rules. Published news from other offices keeps its permitted source label without creating an unavailable department link. Unassigned legacy news uses a neutral municipal-portal label, and draft articles remain excluded by the existing public adapter and database projection. `/activities` retains its Executive department filter.
+
+For existing seeded news, apply the **contents** of `supabase/migrations/202611190022_legacy_content_ordering.sql` in Supabase SQL Editor after migration 021. Moving an article from the unassigned group into a department previously reordered its unassigned siblings, whose ownership trigger rejected even that internal position change. Migration 022 permits only nested order/timestamp changes to untouched unassigned peers; actual edits still require an owning office. It does not rewrite content, assign other articles or move files. Select the article's correct Owning office, then save. The Is Sample flag is independent of this failure.
+
+Validation: production build, TypeScript, full lint and all 165 data tests passed, including an original-seed reproduction against real SQL migrations before/after 022. Ten desktop/mobile browser scenarios passed using isolated transport fixtures: news save, formatting, image replacement, Legislative ownership, department filtering, draft exclusion, cross-office rejection and public search. CMS/public screenshots were reviewed. No hosted migration or content change was performed.
+
+### Public Preview Notices
+
+Public pages no longer display development-preview banners, sample badges, sample-specific metadata labels or the footer preview suffix. Record content, attachments, publication rules and the CMS Is Sample flag are retained. Missing-information fallbacks still describe unavailable contact details or documents. This presentation change requires no database migration.
+
+Validation: build (including TypeScript), full lint and six desktop/mobile browser scenarios passed across the homepage/navigation, news/search and ordinance/detail/PDF checks. The existing ordinance scenario now explicitly selects unassigned historical mock records, matching the term filter. Homepage screenshots were reviewed.
+
+### Municipal Contact Settings
+
+**Superadmin > Municipal Contact** (`/superadmin/contact`) edits the main contact information and Google Maps location displayed on `/contact`. The form groups municipal name/address, optional contact details and the map URL using the existing dashboard styling. Optional blank values stay hidden publicly. The existing Department Contacts directory remains below this section. See [MUNICIPAL-CONTACT.md](MUNICIPAL-CONTACT.md) for migration 023 and the setup workflow.
+
+### Department Social Links
+
+Apply the **contents** of `supabase/migrations/202611190024_department_social_contacts.sql` after migration 023. Under an assigned department's **Contacts**, choose **Social Link**, then enter **Social Link Label** (up to 100 characters) and **Social Link URL** (a full HTTPS URL, up to 1000 characters). Multiple social contacts can be added. Existing contact types and fields are retained.
+
+Published social contacts show their label once as a clickable link on the department page and `/contact` directory. Links open in a new tab. Draft contacts and contacts belonging to inactive, unpublished or archived departments stay hidden by the existing public rules. The existing department permissions, ordering, audit and edit/delete workflow still apply. Failed validation preserves the entered contact fields. Migration 024 only extends type and validation constraints; it does not rewrite contacts or change access. Hosted migration application is a manual step.
+
+Verification: production build with TypeScript, full lint, seven focused validation/SQL cases within all 181 data tests, and two desktop/mobile browser workflows passed. Browser coverage includes URL validation and retry, create/edit, fresh public links, draft exclusion and no horizontal overflow using the isolated Supabase transport fixture. Screenshots were reviewed. No hosted data was changed; the temporary test server was stopped after assertions completed.
+
+### Department Services
+
+Every department workspace includes **Services**. The create/edit form contains **Title** and **Body**, with publication and display-position controls and no date. Published services appear as compact expandable rows on the department page; multiline body text retains its line breaks. The existing `/services` directory also includes published services. Apply migration 025 after 024. See [DEPARTMENT-SERVICES.md](DEPARTMENT-SERVICES.md) for setup, permissions and preservation details.
+
+### Staff Password Reset
+
+**Superadmin > Users > Reset Password** now confirms the selected account and identity verification before showing a temporary password once, with Copy and expiry controls. Staff using it go to a standalone **Create a new password** page with only the password form and Sign out. Completion returns them to login; their role and office assignments are preserved. Apply migration 026 after 025. See [STAFF-PASSWORD-RESET.md](STAFF-PASSWORD-RESET.md) for the workflow, server/database enforcement, configuration and interrupted-operation recovery.

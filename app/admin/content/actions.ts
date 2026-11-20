@@ -17,6 +17,7 @@ import {
 } from "@/lib/legislative/config";
 import { uploadDocumentPdf } from "@/lib/admin/document-pdf";
 import { definitions } from "@/lib/content/schema";
+import { serviceExcerpt } from "@/lib/content/service";
 
 export async function saveContent(
   _state: string,
@@ -37,7 +38,7 @@ export async function saveContent(
   const scope =
     form.get("content_scope") === "legislative" ? "legislative" : "executive";
   const original = String(form.get("original") || "");
-  if (["news", "programs"].includes(collection) && original)
+  if (["news", "programs", "services"].includes(collection) && original)
     form.set("id", original);
   if (collection === "news")
     form.set("image", "/images/department-placeholder.svg");
@@ -145,12 +146,41 @@ export async function saveContent(
     )
       return "Only a Super Admin can transfer content scope.";
   }
+  if (collection === "news") {
+    if (!office)
+      return "Choose the owning office before saving this news article.";
+    const owner = context.offices.find(
+      (item) => item.id === office && item.department === scope,
+    );
+    if (!owner) return "You do not have permission to edit this office.";
+    // Category follows trusted ownership, never a separate client-supplied label.
+    form.set("category", owner.name);
+  }
+  if (collection === "services") {
+    const owner = context.offices.find(
+      (item) => item.id === office && item.department === scope && item.active,
+    );
+    if (!owner || !allowed(context, owner.id, "write"))
+      return "Choose an owning department you have permission to edit.";
+    // The form edits title and body only. Legacy presentation fields and
+    // ownership labels are derived here, never taken from submitted values.
+    form.set("office", owner.name);
+    form.set(
+      "icon",
+      typeof existing?.icon === "string" ? existing.icon : "file",
+    );
+    form.set("description", serviceExcerpt(String(form.get("body") || "")));
+    form.set("steps", "");
+    form.set("is_sample", existing?.is_sample === true ? "on" : "");
+  }
   let row: Record<string, unknown>;
   try {
     row =
       scope === "legislative" && usesLegislativeFields(collection)
         ? parseLegislative(collection, form, existing)
         : parseContent(collection, form);
+    if (collection === "services")
+      row.steps = Array.isArray(existing?.steps) ? existing.steps : [];
     if (["news", "programs"].includes(collection) && form.has("rich_body")) {
       const raw = String(form.get("rich_body"));
       if (raw.length > 200000) return "Content is too long.";

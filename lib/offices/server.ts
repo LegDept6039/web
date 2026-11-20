@@ -104,7 +104,7 @@ export function contentAllowed(
       office.id,
       operation === "delete" &&
         office.department === "executive" &&
-        ["news", "programs", "contacts"].includes(collection)
+        ["news", "programs", "services", "contacts"].includes(collection)
         ? "write"
         : operation,
     ),

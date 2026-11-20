@@ -4,7 +4,7 @@ import { TermSelector } from "@/components/legislative/TermSelector";
 import { isLegislativeRole } from "@/lib/officials/roles";
 import type { Metadata } from "next";
 import { getOfficials } from "@/lib/api";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 import { OfficialGrid } from "@/components/officials/OfficialGrid";
 export const metadata: Metadata = { title: "Sangguniang Bayan members" };
 export default async function Page({
@@ -46,13 +46,6 @@ export default async function Page({
             compact
           />
         </div>
-        {officials.some((o) => o.isSample) && (
-          <PreviewNote>
-            Directory structure only. The verified council roster, names,
-            photographs, terms, and committee assignments will be supplied by
-            the SB Secretariat.
-          </PreviewNote>
-        )}
         {officials.length ? (
           <OfficialGrid officials={officials} directory />
         ) : (

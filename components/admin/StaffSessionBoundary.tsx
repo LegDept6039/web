@@ -58,6 +58,17 @@ export function StaffSessionBoundary({
           void end();
           return;
         }
+        if ("passwordReset" in result) {
+          ending = true;
+          setReady(false);
+          setMessage(
+            "A password change is required. Opening the password form...",
+          );
+          // Discard cached CMS payloads when credentials are revoked.
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+          window.location.assign("/change-password");
+          return;
+        }
         deadline = Date.now() + result.remainingMs;
         lastSent = Date.now();
         setReady(true);
@@ -121,13 +132,13 @@ export function StaffSessionBoundary({
         return;
       }
       if (
-        dirty &&
         !busy &&
         document.visibilityState === "visible" &&
         Date.now() - lastSent >= 30000
       ) {
+        const active = dirty;
         dirty = false;
-        void verify(true);
+        void verify(active);
       }
     }, 1000);
     return () => {

@@ -23,12 +23,16 @@ test("ACCOUNTING sidebar and dashboard have only office-appropriate collections"
     exact: true,
   });
   await expect(
-    nav.getByRole("link", { name: "ACCOUNTING", exact: true }),
+    nav.getByRole("button", { name: "ACCOUNTING", exact: true }),
+  ).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    nav.getByRole("link", { name: "Office overview", exact: true }),
   ).toHaveAttribute("aria-current", "page");
   await expect(nav).not.toContainText("Executive /");
   await expect(page.locator("main .staff-grid h2")).toHaveText([
     "Contacts",
     "News",
+    "Services",
     "Department Page",
     "Programs",
   ]);
@@ -103,12 +107,12 @@ test("MHO profile photo, owned news/programs, forged office rejection and public
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/departments\?/);
   await page.goto(`/admin/content/news/new?office=${mho}`);
+  await expect(page.locator('form [name="category"]')).toHaveCount(0);
   await expect(page.locator('select[name="office_id"]')).toHaveCount(0);
   await expect(page.locator('input[name="office_id"]')).toHaveValue(mho);
   for (const [name, value] of Object.entries({
     slug,
     title,
-    category: "Health",
     date: "2026-10-02",
     excerpt: "MHO information",
     content: "Public health awareness article.",
@@ -131,7 +135,6 @@ test("MHO profile photo, owned news/programs, forged office rejection and public
   for (const [name, value] of Object.entries({
     slug,
     title,
-    category: "Health",
     date: "2026-10-02",
     excerpt: "MHO information",
     content: "Public health awareness article.",
@@ -193,6 +196,20 @@ test("MHO profile photo, owned news/programs, forged office rejection and public
   );
   for (const url of ["/news", "/executive", "/departments/mho"]) {
     await page.goto(url);
+    if (url === "/news") {
+      await page
+        .getByRole("combobox", { name: "Department", exact: true })
+        .selectOption(mho);
+      await expect(
+        page.getByText("MENRO private draft", { exact: true }),
+      ).toHaveCount(0);
+      await expect(
+        page
+          .locator(".news-card")
+          .filter({ hasText: title })
+          .locator(".news-source a"),
+      ).toHaveAttribute("href", "/departments/mho");
+    }
     await expect(
       page.getByRole("heading", { name: title, exact: true }),
     ).toBeVisible();

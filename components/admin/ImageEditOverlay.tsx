@@ -46,9 +46,7 @@ export function ImageEditOverlay({
         ) : (
           <div className="image-edit-placeholder">
             {portrait ? <UserRound size={54} /> : <ImageIcon size={44} />}
-            <span>
-              {portrait ? "Department head photo" : "Department image"}
-            </span>
+            <span>{label}</span>
           </div>
         )}
         {editable && (
@@ -87,6 +85,7 @@ export function ImageEditOverlay({
       </div>
       <p className="staff-note" id={id}>
         JPEG, PNG or WebP, up to 10 MB.
+        {portrait && " Use a 3:4 portrait, such as 900 × 1200 px."}
       </p>
       {error && (
         <p role="alert" className="staff-error">

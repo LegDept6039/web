@@ -3,7 +3,7 @@ import { inTerm, philippineDate } from "@/lib/legislative/terms";
 import { TermSelector } from "@/components/legislative/TermSelector";
 import type { Metadata } from "next";
 import { getResolutions } from "@/lib/api";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 import { DocumentDirectory } from "@/components/legislative/DocumentDirectory";
 export const metadata: Metadata = {
   title: "Resolutions",
@@ -29,7 +29,6 @@ export default async function Page({
           selected={selected}
           today={philippineDate()}
         />
-        <PreviewNote />
         <DocumentDirectory
           kind="resolutions"
           documents={(await getResolutions()).filter((d) =>

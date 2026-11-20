@@ -618,10 +618,11 @@ h1,
 }
 .official-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px;
 }
 .official-card {
+  min-width: 0;
   border: 1px solid var(--line);
   overflow: hidden;
 }
@@ -666,6 +667,34 @@ h1,
 .portrait-3 {
   background: #e5ebed;
 }
+/* Legislative portraits share a compact 3:4 frame across public directories and previews. */
+.official-grid .official-portrait {
+  width: calc(100% - 32px);
+  max-width: 240px;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  margin: 16px auto 0;
+  padding: 0;
+  justify-content: center;
+  border-radius: 6px;
+}
+.official-grid .official-portrait::before {
+  display: none;
+}
+.official-grid .official-portrait img {
+  object-position: center top;
+}
+.official-grid .official-portrait > svg {
+  width: min(120px, 55%);
+  height: auto;
+  aspect-ratio: 1;
+}
+.official-grid .official-portrait > span {
+  padding: 10px 4px;
+  font-size: 7px;
+  letter-spacing: 1.5px;
+  text-align: center;
+}
 .official-info {
   position: relative;
   padding: 18px 15px 21px;
@@ -678,6 +707,7 @@ h1,
 .official-info h3 {
   font-size: 15px;
   padding-right: 10px;
+  overflow-wrap: anywhere;
 }
 .official-info .meta {
   font-size: 9px;
@@ -902,11 +932,6 @@ h1,
   margin-left: auto;
   font-size: 11px;
 }
-.preview-home {
-  font-size: 10px;
-  color: #687582;
-  padding-bottom: 24px;
-}
 footer {
   background: var(--deep);
   color: #b7c7d4;
@@ -986,21 +1011,6 @@ footer {
   color: var(--muted);
   font-size: 14px;
   margin-top: 17px;
-}
-.preview-note {
-  display: flex;
-  gap: 11px;
-  align-items: start;
-  font-size: 12px;
-  line-height: 1.7;
-  background: #fbf7ee;
-  border-left: 3px solid #c8a25b;
-  padding: 15px 18px;
-  margin-bottom: 30px;
-  color: #75603d;
-}
-.preview-note svg {
-  margin-top: 2px;
 }
 .filter-bar {
   display: flex;
@@ -1368,7 +1378,7 @@ footer {
 }
 .contact-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 50px;
 }
 .contact-details {
@@ -1391,55 +1401,35 @@ footer {
   font-size: 13px;
   color: var(--muted);
 }
-.map-placeholder {
-  background: #edf1ef;
-  border: 1px solid #d8e0dc;
-  min-height: 390px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: relative;
-  background-image:
-    linear-gradient(
-      30deg,
-      transparent 48%,
-      #dce5df 48%,
-      #dce5df 50%,
-      transparent 50%
-    ),
-    linear-gradient(
-      120deg,
-      transparent 48%,
-      #dce5df 48%,
-      #dce5df 50%,
-      transparent 50%
-    );
-  background-size: 90px 90px;
+.municipal-contact-info h2,
+.municipal-contact-info .contact-item > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
-.map-placeholder > div {
-  padding: 30px;
-  background: #fffefbf0;
-  max-width: 80%;
+.municipal-contact-info .contact-item svg {
+  flex-shrink: 0;
 }
-.map-placeholder svg {
-  margin: auto auto 18px;
-  color: var(--blue);
+.municipal-contact-info .contact-item p {
+  white-space: pre-line;
 }
-.map-placeholder h3 {
-  font-size: 20px;
-  font-family: Georgia, serif;
+.municipal-contact-info .contact-item a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
-.map-placeholder p {
-  font-size: 12px;
-  margin-top: 8px;
-  color: var(--muted);
+.municipal-contact-map-panel {
+  align-self: start;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--light);
 }
-.map-placeholder small {
+.municipal-contact-map {
   display: block;
-  margin-top: 18px;
-  font-size: 10px;
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+  aspect-ratio: 4 / 3;
+  border: 0;
 }
 .skeleton {
   background: #e9eef2;
@@ -1648,7 +1638,7 @@ footer {
     display: none;
   }
   .official-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .official-info h3 {
     font-size: 15px;
@@ -1988,9 +1978,6 @@ footer {
   .contact-grid {
     grid-template-columns: 1fr;
   }
-  .map-placeholder {
-    min-height: 300px;
-  }
   .article h1 {
     font-size: 32px;
   }
@@ -2005,9 +1992,6 @@ footer {
   }
   .record-shortcuts a {
     font-size: 10px;
-  }
-  .preview-note {
-    font-size: 11px;
   }
   .session-row h3 {
     font-size: 14px;
@@ -2183,6 +2167,51 @@ footer {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
   gap: 1rem;
 }
+.department-service-list {
+  display: grid;
+  gap: 10px;
+}
+.department-service {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.department-service summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  cursor: pointer;
+  list-style: none;
+  background: var(--light);
+}
+.department-service summary::-webkit-details-marker { display: none; }
+.department-service summary h3 {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.department-service summary svg { flex-shrink: 0; }
+.department-service[open] summary svg { transform: rotate(180deg); }
+.department-service summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: -3px;
+}
+.service-body {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-align: justify;
+  line-height: 1.8;
+  font-size: 15px;
+}
+.department-service .service-body {
+  padding: 16px 18px;
+  border-top: 1px solid var(--line);
+}
+.article > .service-body { margin-top: 24px; }
 .department-contact-group {
   border-top: 1px solid var(--line);
   padding: 1rem 0;
@@ -2731,18 +2760,7 @@ footer {
   box-shadow: 0 4px 18px rgb(16 42 67 / 5%);
 }
 .council-directory .official-portrait {
-  height: 160px;
-  justify-content: center;
   border-bottom: 3px solid var(--blue);
-}
-.council-directory .official-portrait::before {
-  width: 120px;
-  height: 120px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.council-directory .official-portrait img {
-  object-position: center top;
 }
 .council-directory .official-info {
   padding: 16px;
@@ -2775,6 +2793,7 @@ footer {
 }
 @media (max-width: 640px) {
   .official-grid.council-directory { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .council-directory .official-portrait { max-width: 200px; }
 }
 
 /* Compact committee directory, including CMS-managed membership. */

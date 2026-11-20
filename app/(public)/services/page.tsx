@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getServices } from "@/lib/api";
-import { PageHero, PreviewNote } from "@/components/shared/ui";
+import { PageHero } from "@/components/shared/ui";
 import { ServiceIcon } from "@/components/shared/ServiceIcon";
 export const metadata: Metadata = {
   title: "Municipal services",
@@ -18,10 +18,6 @@ export default async function Page() {
         description="Find the right office, understand the next step, and connect with your local government."
       />
       <section className="container section">
-        <PreviewNote>
-          Service guides are general placeholders. Confirm requirements, fees,
-          and schedules with the responsible office.
-        </PreviewNote>
         <div className="content-grid">
           {(await getServices()).map((s) => (
             <article className="info-card" key={s.id}>

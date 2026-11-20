@@ -72,6 +72,75 @@
 .staff-error {
   color: #a32626;
 }
+.staff-password-reset {
+  margin-top: 24px;
+  overflow-wrap: anywhere;
+}
+.staff-password-reset h2 {
+  margin-bottom: 12px;
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 600;
+}
+.staff-password-reset h3 {
+  font-size: 17px;
+}
+.staff-password-reset > .button {
+  margin-top: 18px;
+}
+.staff-password-reset a {
+  color: var(--blue);
+  text-decoration: underline;
+}
+.staff-password-reset input[type="checkbox"] {
+  flex-shrink: 0;
+}
+.staff-password-result {
+  display: grid;
+  gap: 16px;
+}
+.staff-password-secret {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--light);
+}
+.staff-password-secret span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.staff-password-secret code {
+  font-size: 18px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.staff-password-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.staff-secondary-button {
+  color: var(--navy);
+  background: white;
+  border-color: #92a2b1;
+}
+.staff-secondary-button:hover {
+  background: var(--light);
+}
+.staff-reset-account {
+  margin-bottom: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.staff-reset-signout {
+  margin-top: 12px;
+}
+.staff-reset-signout .button {
+  width: 100%;
+}
 .staff-nav {
   display: flex;
   flex-wrap: wrap;
@@ -619,8 +688,8 @@ html:has(.admin-shell) {
 }
 
 /* Department editing follows the public profile, with in-place image controls. */
-.department-edit-form { padding: clamp(16px, 3vw, 32px); }
-.department-edit-form fieldset { min-width: 0; }
+.department-edit-form, .profile-edit-form { padding: clamp(16px, 3vw, 32px); }
+.department-edit-form fieldset, .profile-edit-form fieldset { min-width: 0; }
 .department-page-editor { min-width: 0; }
 .department-editor-hero { background: #f4f7f9; padding: clamp(20px, 3vw, 36px); margin: 16px 0 32px; }
 .department-editor-hero h2 { font-family: Georgia, serif; font-size: clamp(26px, 3vw, 40px); font-weight: 400; overflow-wrap: anywhere; }

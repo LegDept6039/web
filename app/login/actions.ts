@@ -1,4 +1,12 @@
 "use server";
+import {
+  passwordResetStatus,
+  resetRecord,
+  setResetProof,
+  clearResetProof,
+  RESET_EXPIRED_MESSAGE,
+} from "@/lib/auth/password-reset";
+import { equalDigest, passwordDigest } from "@/lib/auth/password-reset-crypto";
 import { sessionHash, staffCookieOptions } from "@/lib/auth/staff-session";
 import { STAFF_SESSION_COOKIE, validTabToken } from "@/lib/auth/session-policy";
 import { redirect } from "next/navigation";
@@ -47,26 +55,68 @@ export async function login(
       userId: data.user.id,
       sessionPresent: true,
     });
-    const resolved = await resolveStaff(client, data.user.id);
-    if (!resolved.ok) {
-      try {
+    const reset = await passwordResetStatus(client);
+    if (reset.required) {
+      const { data: profile } = await client
+        .from("staff_accounts")
+        .select("active,deleted_at")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+      if (!profile?.active || profile.deleted_at) {
         await client.auth.signOut({ scope: "local" });
-      } catch {
-        authDiagnostic("signout", { outcome: "cleanup_error" });
+        return "Your staff account is inactive or removed. Contact your administrator.";
       }
-      return resolved.message;
+      const record = await resetRecord(data.user.id);
+      if (record?.expires_at && Date.parse(record.expires_at) <= Date.now()) {
+        await client.auth.signOut({ scope: "local" });
+        await clearResetProof();
+        return RESET_EXPIRED_MESSAGE;
+      }
+      if (
+        !record ||
+        record.state !== "pending" ||
+        record.generation !== reset.generation ||
+        !reset.session_id ||
+        !equalDigest(passwordDigest(password), record.temp_password_hash)
+      ) {
+        await client.auth.signOut({ scope: "local" });
+        await clearResetProof();
+        return "This temporary password is no longer valid. Contact the Superadmin for a new one.";
+      }
+      await setResetProof({
+        userId: data.user.id,
+        generation: record.generation,
+        sessionId: reset.session_id,
+        expiresAt: record.expires_at,
+      });
+      destination = "/change-password";
+    } else {
+      await clearResetProof();
+      const resolved = await resolveStaff(client, data.user.id);
+      if (!resolved.ok) {
+        try {
+          await client.auth.signOut({ scope: "local" });
+        } catch {
+          authDiagnostic("signout", { outcome: "cleanup_error" });
+        }
+        return resolved.message;
+      }
+      if (!reset.ready) {
+        await client.auth.signOut({ scope: "local" });
+        return "Your session is no longer valid. Please sign in again.";
+      }
+      const { data: started, error: sessionError } = await client.rpc(
+        "start_staff_session",
+        { p_hash: sessionHash(tabToken) },
+      );
+      if (sessionError || started !== true) {
+        await client.auth.signOut({ scope: "local" });
+        return "Staff session protection is unavailable. Ask your administrator to verify migration 013.";
+      }
+      (await cookies()).set(STAFF_SESSION_COOKIE, tabToken, staffCookieOptions);
+      destination =
+        resolved.profile.role === "superadmin" ? "/superadmin" : "/admin";
     }
-    const { data: started, error: sessionError } = await client.rpc(
-      "start_staff_session",
-      { p_hash: sessionHash(tabToken) },
-    );
-    if (sessionError || started !== true) {
-      await client.auth.signOut({ scope: "local" });
-      return "Staff session protection is unavailable. Ask your administrator to verify migration 013.";
-    }
-    (await cookies()).set(STAFF_SESSION_COOKIE, tabToken, staffCookieOptions);
-    destination =
-      resolved.profile.role === "superadmin" ? "/superadmin" : "/admin";
   } catch (error) {
     authDiagnostic("login", {
       outcome: "service_error",
@@ -88,6 +138,7 @@ export async function logout() {
   } catch {
     // Clear this browser's session even when the Auth service is unreachable.
   } finally {
+    await clearResetProof();
     (await cookies()).set(STAFF_SESSION_COOKIE, "", {
       ...staffCookieOptions,
       maxAge: 0,

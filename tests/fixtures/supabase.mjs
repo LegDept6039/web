@@ -2,6 +2,9 @@
 if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
   const realFetch = globalThis.fetch;
   const staffSessions = new Map();
+  const authSessions = new Map();
+  const passwords = new Map();
+  const passwordResets = new Map();
   const officeIds = {
     mpdc: "10000000-0000-4000-8000-000000000001",
     assessor: "10000000-0000-4000-8000-000000000002",
@@ -118,6 +121,38 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     office_id: officeIds.sb,
     permission_level: "editor",
   });
+  for (const [index, role] of ["editor", "viewer"].entries()) {
+    const user_id = `60000000-0000-4000-8000-00000000000${index + 1}`;
+    users.push({
+      user_id,
+      email: `service-${role}@example.test`,
+      display_name: `Service ${role}`,
+      role,
+      active: true,
+      deleted_at: null,
+      created_at: now,
+      updated_at: now,
+    });
+    access.push({ user_id, office_id: officeIds.mho, permission_level: role });
+  }
+  // Independent accounts isolate password mutations from other administration tests.
+  for (const [deviceIndex, device] of ["desktop", "mobile"].entries()) {
+    for (const [scenarioIndex, scenario] of ["success", "expired", "replaced", "restricted", "disabled"].entries()) {
+      const user_id = `70000000-0000-4000-8000-${String(deviceIndex * 10 + scenarioIndex + 1).padStart(12, "0")}`;
+      users.push({
+        user_id,
+        email: `reset-${scenario}-${device}@example.test`,
+        display_name: `Reset ${scenario} ${device}`,
+        role: "editor",
+        active: scenario !== "disabled",
+        deleted_at: null,
+        created_at: now,
+        updated_at: now,
+        scenario: `reset-${scenario}`,
+      });
+      access.push({ user_id, office_id: officeIds.mho, permission_level: "editor" });
+    }
+  }
   const departments = Object.entries(officeIds).map(([slug, office_id]) => ({
     ...offices.find((o) => o.id === office_id),
     id: office_id,
@@ -165,6 +200,38 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     resolutions = [],
     municipal_documents = [];
   const programs = [];
+  const services = [
+    {
+      id: "61000000-0000-4000-8000-000000000001",
+      name: "MENRO private service",
+      description: "Private environment service",
+      body: "Private environment service details.",
+      icon: "FileText",
+      office: "MENRO draft",
+      steps: [],
+      office_id: officeIds.menro,
+      content_scope: "executive",
+      published: false,
+      is_sample: false,
+      sort_order: 0,
+      updated_at: now,
+    },
+    {
+      id: "61000000-0000-4000-8000-000000000002",
+      name: "Unpublished department service",
+      description: "Must stay hidden with its department",
+      body: "Service owned by a department that is not public.",
+      icon: "FileText",
+      office: "MPDC draft",
+      steps: [],
+      office_id: officeIds.mpdc,
+      content_scope: "executive",
+      published: true,
+      is_sample: false,
+      sort_order: 1,
+      updated_at: now,
+    },
+  ];
   const document_categories = [
     {
       id: "fixture-bids",
@@ -179,6 +246,18 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     },
   ];
   const department_contacts = [];
+  const municipal_contact_settings = [{
+    id: "municipal",
+    municipality_name: "Municipality of Pinamungajan",
+    address: "Municipal Hall\nPinamungajan, Cebu\nPhilippines",
+    telephone: null,
+    email: null,
+    office_hours: null,
+    social_label: null,
+    social_url: null,
+    map_embed_url: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d635.3927542769925!2d123.58431921186467!3d10.270176820265034!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33a96f90bd4bd703%3A0x7e7ba0656a6eb073!2sPinamungajan%20Municipal%20Hall!5e1!3m2!1sen!2sph!4v1795094335905!5m2!1sen!2sph",
+    updated_at: now,
+  }];
   for (const [i, d] of departments.filter((d) => d.published).entries())
     d.sort_order = i + 1;
   const legislative_terms = [
@@ -200,8 +279,11 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     officials,
     news,
     programs,
+    services,
     departments,
     department_contacts,
+    municipal_contact_settings,
+    audit_logs: [],
   };
   if (process.env.PORTAL_TERM_TEST_FIXTURE === '1') {
     const currentTerm = legislative_terms[0].id, previousTerm = legislative_terms[1].id;
@@ -293,7 +375,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       ? row.department
       : `${row.content_scope}:${row.office_id || "unassigned"}`;
   function reorder(table, old, next) {
-    if (table === "committee_master") return;
+    if (["committee_master", "municipal_contact_settings"].includes(table)) return;
     const all = collections[table];
     if (!all) return;
     if (
@@ -337,7 +419,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     app_metadata: { provider: "email", providers: ["email"] },
     user_metadata: {},
   });
-  const token = (p) =>
+  const token = (p, sessionId) =>
     [
       Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
         "base64url",
@@ -345,6 +427,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       Buffer.from(
         JSON.stringify({
           sub: p.user_id,
+          session_id: sessionId,
+          iat: Math.floor(Date.now() / 1000),
           exp: Math.floor(Date.now() / 1000) + 3600,
           aud: "authenticated",
           role: "authenticated",
@@ -372,18 +456,105 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       init.body && !url.pathname.startsWith("/storage/")
         ? JSON.parse(String(init.body))
         : {};
-    let subject;
+    let subject, claims;
     try {
-      subject = JSON.parse(
+      claims = JSON.parse(
         Buffer.from(
           (headers.get("authorization") || "")
             .replace("Bearer ", "")
             .split(".")[1],
           "base64url",
         ).toString(),
-      ).sub;
+      );
+      subject = claims.sub;
     } catch {}
     const actor = users.find((u) => u.user_id === subject);
+    const authSession = authSessions.get(claims?.session_id);
+    const credentialsReady = (user, session = authSession) => {
+      if (!user?.active || user.deleted_at) return false;
+      const reset = passwordResets.get(user.user_id);
+      return !reset || (reset.state === "complete" && session?.user_id === user.user_id && session.created_at > Date.parse(reset.completed_at));
+    };
+    const serviceRole = headers.get("apikey") === "sb_secret_fixture_test";
+    if (url.pathname === "/rest/v1/rpc/password_reset_status") {
+      if (!actor) return response({ code: "42501" }, 403);
+      const reset = passwordResets.get(subject);
+      return response({
+        required: Boolean(reset && reset.state !== "complete"),
+        ready: credentialsReady(actor),
+        generation: reset?.generation || null,
+        state: reset?.state || null,
+        expires_at: reset?.expires_at || null,
+        session_id: claims?.session_id || null,
+      });
+    }
+    if (url.pathname === "/rest/v1/staff_password_resets") {
+      if (!serviceRole || method !== "GET") return response({ code: "42501" }, 403);
+      const id = url.searchParams.get("user_id")?.replace(/^eq\./, "");
+      const rows = [...passwordResets.values()].filter((reset) => !id || reset.user_id === id);
+      return response(headers.get("accept")?.includes("vnd.pgrst.object") ? rows[0] || null : rows);
+    }
+    if (url.pathname.startsWith("/rest/v1/rpc/") && [
+      "begin_staff_password_reset", "activate_staff_password_reset", "claim_staff_password_change",
+      "finish_staff_password_change", "fail_staff_password_reset", "begin_staff_password_update",
+    ].includes(url.pathname.split("/").pop())) {
+      if (!serviceRole) return response({ code: "42501" }, 403);
+      const name = url.pathname.split("/").pop();
+      const user = users.find((candidate) => candidate.user_id === body.p_user_id);
+      const reset = passwordResets.get(body.p_user_id);
+      const deny = () => response({ code: "42501", message: "Password operation unavailable" }, 403);
+      const addAudit = (user_id, action, description) => collections.audit_logs.push({
+        id: crypto.randomUUID(), user_id, action, entity_type: "staff_accounts",
+        entity_id: body.p_user_id, description, created_at: new Date().toISOString(),
+      });
+      const clearBrowserSessions = () => {
+        for (const key of staffSessions.keys()) if (key.startsWith(`${body.p_user_id}:`)) staffSessions.delete(key);
+      };
+      if (name === "begin_staff_password_reset" || name === "begin_staff_password_update") {
+        if (!user?.active || user.deleted_at || ["issuing", "completing"].includes(reset?.state)) return deny();
+        if (name === "begin_staff_password_reset") {
+          const initiator = users.find((candidate) => candidate.user_id === body.p_actor);
+          const initiatorSession = authSessions.get(body.p_actor_session);
+          if (initiator?.role !== "superadmin" || initiator.user_id === user.user_id ||
+            initiatorSession?.user_id !== initiator.user_id || !credentialsReady(initiator, initiatorSession)) return deny();
+        } else if (!credentialsReady(user, authSessions.get(body.p_session_id))) return deny();
+        passwordResets.set(user.user_id, {
+          user_id: user.user_id, generation: body.p_generation,
+          state: name === "begin_staff_password_reset" ? "issuing" : "completing",
+          operation: name === "begin_staff_password_reset" ? "reset" : "change",
+          initiated_by: body.p_actor || user.user_id,
+          initiated_at: new Date().toISOString(), activated_at: null, expires_at: null,
+          completed_at: null, temp_password_hash: body.p_password_hash,
+        });
+        clearBrowserSessions();
+        if (name === "begin_staff_password_reset") addAudit(body.p_actor, "password_reset_started", "Superadmin initiated a temporary password reset");
+        return response(true);
+      }
+      if (!reset || reset.generation !== body.p_generation) return deny();
+      if (name === "activate_staff_password_reset") {
+        if (reset.state !== "issuing") return deny();
+        reset.state = "pending";
+        reset.activated_at = new Date().toISOString();
+        reset.expires_at = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      } else if (name === "claim_staff_password_change") {
+        const session = authSessions.get(body.p_session_id);
+        if (reset.state !== "pending" || Date.parse(reset.expires_at) <= Date.now() ||
+          !user.active || user.deleted_at || session?.user_id !== user.user_id || session.created_at < Date.parse(reset.activated_at)) return deny();
+        reset.state = "completing";
+      } else if (name === "finish_staff_password_change") {
+        if (reset.state !== "completing" || !user.active || user.deleted_at) return deny();
+        reset.state = "complete";
+        reset.completed_at = new Date().toISOString();
+        reset.temp_password_hash = null;
+        clearBrowserSessions();
+        addAudit(user.user_id, reset.operation === "change" ? "password_changed" : "password_reset_completed", "Staff completed a password change");
+      } else if (name === "fail_staff_password_reset") {
+        if (!["issuing", "completing"].includes(reset.state)) return deny();
+        reset.state = "failed";
+        reset.temp_password_hash = null;
+      }
+      return response(true);
+    }
     if (
       url.pathname.startsWith("/rest/v1/rpc/") &&
       [
@@ -398,7 +569,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         staffSessions.delete(key);
         return response(null);
       }
-      if (!actor?.active || actor.deleted_at) return response(null);
+      if (!credentialsReady(actor)) return response(null);
       if (name === "start_staff_session") {
         staffSessions.set(key, Date.now() + 3600000);
         return response(true);
@@ -463,7 +634,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           400,
         );
       const user = users.find((u) => u.email === body.email);
-      if (!user || body.password !== "TestPassword123!")
+      if (!user || body.password !== (passwords.get(user.user_id) || "TestPassword123!"))
         return response(
           {
             msg: "Invalid login credentials",
@@ -471,20 +642,37 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           },
           400,
         );
+      const sessionId = crypto.randomUUID();
+      authSessions.set(sessionId, { user_id: user.user_id, created_at: Date.now() });
+      // Exercise a deadline passing after valid authentication, without exposing
+      // an application test hook or waiting 30 minutes in browser tests.
+      const reset = passwordResets.get(user.user_id);
+      if (user.scenario === "reset-expired" && reset?.state === "pending")
+        reset.expires_at = new Date(Date.now() - 1000).toISOString();
       return response({
-        access_token: token(user),
+        access_token: token(user, sessionId),
         refresh_token: "fixture-refresh",
         expires_in: 3600,
         token_type: "bearer",
         user: authUser(user),
       });
     }
-    if (url.pathname === "/auth/v1/user")
-      return actor
-        ? response(authUser(actor))
-        : response({ msg: "Unauthorized" }, 401);
-    if (url.pathname === "/auth/v1/logout")
+    if (url.pathname === "/auth/v1/user") {
+      if (!actor) return response({ msg: "Unauthorized" }, 401);
+      if (!authSession || authSession.user_id !== actor.user_id)
+        return response({ msg: "Session from session_id claim in JWT does not exist", error_code: "session_not_found" }, 403);
+      if (method === "PUT" && body.password) passwords.set(actor.user_id, body.password);
+      return response(authUser(actor));
+    }
+    if (url.pathname === "/auth/v1/logout") {
+      if (!authSession || authSession.user_id !== subject)
+        return response({ msg: "Session from session_id claim in JWT does not exist", error_code: "session_not_found" }, 403);
+      for (const [id, session] of authSessions) {
+        if ((url.searchParams.get("scope") || "global") === "global" ? session.user_id === subject : id === claims?.session_id)
+          authSessions.delete(id);
+      }
       return new Response(null, { status: 204 });
+    }
     if (url.pathname.startsWith("/auth/v1/admin/users")) {
       if (headers.get("apikey") !== "sb_secret_fixture_test")
         return response({ msg: "Missing server key" }, 403);
@@ -504,10 +692,17 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           updated_at: now,
         };
         users.push(user);
+        if (body.password) passwords.set(user.user_id, body.password);
         return response({ user: authUser(user) });
       }
       const id = url.pathname.split("/").pop();
       const user = users.find((u) => u.user_id === id);
+      if (user && method === "PUT" && body.password) {
+        passwords.set(user.user_id, body.password);
+        // Auth's admin password update atomically revokes every existing session.
+        for (const [sessionId, session] of authSessions)
+          if (session.user_id === user.user_id) authSessions.delete(sessionId);
+      }
       if (method === "DELETE") {
         const i = users.indexOf(user);
         if (i >= 0) users.splice(i, 1);
@@ -518,7 +713,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         : response({ msg: "Not found" }, 404);
     }
     if (url.pathname === "/rest/v1/rpc/manage_staff") {
-      if (actor?.role !== "superadmin") return response({ code: "42501" }, 403);
+      if (actor?.role !== "superadmin" || !credentialsReady(actor)) return response({ code: "42501" }, 403);
       const target = users.find((u) => u.user_id === body.p_user_id);
       if (!target) return response({ code: "22023" }, 400);
       Object.assign(target, {
@@ -538,6 +733,12 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       return response(null);
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.split("/").pop();
+      if (actor && !credentialsReady(actor) && table !== "staff_accounts")
+        return response({ code: "42501", message: "Password change required" }, 403);
+      if (table === "municipal_contact_settings" && method !== "GET" && method !== "HEAD") {
+        if (method !== "PATCH" || actor?.role !== "superadmin" || !actor.active || actor.deleted_at)
+          return response({ code: "42501", message: "Superadmin access required" }, 403);
+      }
       // Opt-in latency for loading UI tests; ordinary fixture suites stay fast.
       if (
         process.env.PORTAL_TEST_CONTENT_DELAY_MS &&
@@ -565,6 +766,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           "officials",
           "news",
           "programs",
+          "services",
           "departments",
           "department_contacts",
           "sessions",
@@ -585,6 +787,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
               "department_contacts",
               "departments",
               "programs",
+              "services",
             ].includes(table)
               ? { id: crypto.randomUUID() }
               : {}),
@@ -692,7 +895,14 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             (d) => d.published || assigned.includes(d.office_id),
           );
       }
-      if (!actor && table !== "legislative_terms") rows = rows.filter((r) => r.published);
+      if (!actor && !["legislative_terms", "municipal_contact_settings"].includes(table)) rows = rows.filter((r) => r.published);
+      if (!actor && table === "services")
+        rows = rows.filter((service) =>
+          service.office_id == null || departments.some((department) =>
+            department.id === service.office_id && department.department === "executive" &&
+            department.active && department.published && department.archived_at == null,
+          ),
+        );
       for (const [key, val] of url.searchParams) {
         if (val.startsWith("ilike."))
           rows = rows.filter((r) =>
