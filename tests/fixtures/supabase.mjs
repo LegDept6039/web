@@ -202,6 +202,22 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
   const programs = [];
   const services = [
     {
+      id: "61000000-0000-4000-8000-000000000003",
+      name: "Legacy consultation guidance",
+      description: "Existing plain-text service guidance.",
+      body: "Bring your identification.\nPresent your existing records.\n\nStaff will explain the next steps.",
+      rich_body: null,
+      icon: "FileText",
+      office: "MHO draft",
+      steps: [],
+      office_id: officeIds.mho,
+      content_scope: "executive",
+      published: true,
+      is_sample: false,
+      sort_order: 1,
+      updated_at: now,
+    },
+    {
       id: "61000000-0000-4000-8000-000000000001",
       name: "MENRO private service",
       description: "Private environment service",
@@ -268,6 +284,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
   if (process.env.PORTAL_COMMITTEE_MASTER_TEST_FIXTURE === "1")
     for (let index=4; index<=25; index++) committee_master.push({id:`30000000-0000-4000-8000-${String(index).padStart(12,'0')}`, name:index === 4 ? 'Committee for Long Catalog Names, Community Organizations, Public Participation and Administrative Coordination' : `Additional Standing Committee ${index}`,sort_order:index,updated_at:now});
   const collections = {
+    barangays: [],
+    sk_profiles: [],
     committee_master,
     legislative_terms,
     sessions,
@@ -369,6 +387,47 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     for (let index = 1; index <= 27; index++) committees.push({ ...base, id: `pagination-historical-${sequence(index)}`, name: `Preserved Committee ${sequence(index)}`, master_id: null, chair: "", chair_id: "pagination-official-01", vice_chair_id: "pagination-official-02", responsibility: "Existing unlinked composition", sort_order: index + 31 });
     for (let index = 1; index <= 29; index++) legislative_terms.push({ id: `54000000-0000-4000-8000-${String(index).padStart(12, "0")}`, name: `Historical Term ${sequence(index)}`, start_date: `${1900 + index}-01-01`, end_date: `${1900 + index}-12-31`, updated_at: now });
     collections.audit_logs = Array.from({ length: 55 }, (_, index) => ({ id: `pagination-audit-${sequence(index + 1)}`, user_id: users[0].user_id, action: "fixture_review", entity_type: "pagination_fixture", entity_id: String(index + 1), office_id: officeIds.sb, description: `Pagination Audit ${sequence(index + 1)}`, created_at: new Date(Date.UTC(2026, 0, index + 1)).toISOString() }));
+  }
+  // Isolated, read-only dashboard scenarios. Never enabled by other suites or production.
+  if (process.env.PORTAL_LEGISLATIVE_DASHBOARD_TEST_FIXTURE === "1") {
+    const currentTerm = legislative_terms[0].id;
+    const previousTerm = legislative_terms[1].id;
+    const base = { office_id: officeIds.sb, content_scope: "legislative", published: true, is_sample: false, term_id: currentTerm, sort_order: 1, created_at: now, updated_at: now, deleted_at: null };
+    const addOfficial = (id, name, extra = {}) => officials.push({ ...base, id, name, description: "Dashboard fixture official", branch: "legislative", legislative_role: "SANGGUNIANG_BAYAN", role: "Council member", photo_url: null, ...extra });
+    addOfficial("dashboard-a", "Dashboard Official A");
+    addOfficial("dashboard-b", "Dashboard Official B", { sort_order: 2 });
+    addOfficial("dashboard-zero", "Dashboard Zero Official", { sort_order: 3 });
+    addOfficial("dashboard-draft", "Dashboard Draft Official", { sort_order: 4, published: false });
+    addOfficial("dashboard-vice", "Dashboard Vice Mayor", { sort_order: 0, legislative_role: "MUNICIPAL_VICE_MAYOR", role: "Vice Mayor" });
+    addOfficial("dashboard-previous", "Dashboard Previous Official", { term_id: previousTerm });
+    addOfficial("dashboard-unassigned", "Dashboard Unassigned Official", { term_id: null });
+    addOfficial("dashboard-foreign", "Dashboard Foreign Official", { office_id: officeIds.mpdc, content_scope: "executive", branch: "executive", legislative_role: null });
+    const addAct = (rows, id, author_id, co_author_id, extra = {}) => rows.push({ ...base, id, title: `Dashboard ${id}`, number: id, date_approved: "2026-11-17", summary: "Dashboard fixture measure", author: "", co_author: "", author_id, co_author_id, file_url: "", ...extra });
+    addAct(resolutions, "dashboard-resolution-a", "dashboard-a", "dashboard-b");
+    addAct(resolutions, "dashboard-resolution-b", "dashboard-a", null);
+    addAct(resolutions, "dashboard-resolution-c", "dashboard-b", "dashboard-a");
+    addAct(ordinances, "dashboard-ordinance-a", "dashboard-b", "dashboard-a");
+    addAct(ordinances, "dashboard-ordinance-b", "dashboard-b", null);
+    for (const [rows, type] of [[resolutions, "resolution"], [ordinances, "ordinance"]]) {
+      addAct(rows, `dashboard-${type}-draft`, "dashboard-a", "dashboard-b", { published: false });
+      addAct(rows, `dashboard-${type}-foreign`, "dashboard-a", "dashboard-b", { office_id: officeIds.mpdc, content_scope: "executive" });
+      addAct(rows, `dashboard-${type}-wrong-scope`, "dashboard-a", "dashboard-b", { content_scope: "transparency" });
+      addAct(rows, `dashboard-${type}-previous`, "dashboard-previous", null, { term_id: previousTerm, date_approved: "2024-11-17" });
+    }
+    const addSession = (id, extra = {}) => sessions.push({ ...base, id, name: `Dashboard ${id}`, number: id, date: "2026-11-17", type: "Regular session", description: "Dashboard fixture session", agenda: [], image: "/images/department-placeholder.svg", ...extra });
+    addSession("dashboard-session-current");
+    addSession("dashboard-session-draft", { published: false });
+    addSession("dashboard-session-previous", { term_id: previousTerm, date: "2024-11-17" });
+    addSession("dashboard-session-unassigned", { term_id: null });
+    addSession("dashboard-session-foreign", { office_id: officeIds.mpdc, content_scope: "executive" });
+    const addDocument = (id, extra = {}) => municipal_documents.push({ ...base, id, title: `Dashboard ${id}`, date: "2026-11-17", description: "Dashboard fixture document", document_type: "agenda", session_id: null, file_url: "", ...extra });
+    addDocument("dashboard-document-agenda");
+    addDocument("dashboard-document-minutes", { document_type: "minutes" });
+    addDocument("dashboard-document-draft", { published: false });
+    addDocument("dashboard-document-deleted", { deleted_at: now });
+    addDocument("dashboard-document-foreign", { office_id: officeIds.mpdc, content_scope: "executive" });
+    addDocument("dashboard-document-wrong-scope", { content_scope: "transparency" });
+    addDocument("dashboard-document-previous", { term_id: previousTerm, date: "2024-11-17" });
   }
   const scope = (table, row) =>
     table === "departments"
@@ -733,6 +792,9 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       return response(null);
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.split("/").pop();
+      if (["barangays", "sk_profiles"].includes(table) && !["GET", "HEAD"].includes(method) &&
+          (actor?.role !== "superadmin" || !actor.active || actor.deleted_at || method === "DELETE"))
+        return response({code: "42501", message: "Superadmin access required"}, 403);
       if (actor && !credentialsReady(actor) && table !== "staff_accounts")
         return response({ code: "42501", message: "Password change required" }, 403);
       if (table === "municipal_contact_settings" && method !== "GET" && method !== "HEAD") {
@@ -763,6 +825,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         [
           "committee_master",
           "legislative_terms",
+          "barangays",
+          "sk_profiles",
           "officials",
           "news",
           "programs",
@@ -777,12 +841,27 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           "document_categories",
         ].includes(table)
       ) {
+        if (table === "barangays" && (Array.isArray(body) ? body : [body]).some((record) =>
+          collections.barangays.some((existing) => existing.slug === record.slug)))
+          return response({code:"23505",message:'duplicate key value violates unique constraint "barangays_slug_key"'},409);
+        if (table === "sk_profiles") {
+          for (const record of Array.isArray(body) ? body : [body]) {
+            if (!collections.barangays.some((barangay) => barangay.id === record.barangay_id))
+              return response({code:"23503",message:"Invalid barangay"},409);
+            if (collections.sk_profiles.some((existing) => existing.barangay_id === record.barangay_id))
+              return response({code:"23505",message:'duplicate key value violates unique constraint "sk_profiles_barangay_id_key"'},409);
+            if (collections.sk_profiles.some((existing) => existing.slug === record.slug))
+              return response({code:"23505",message:'duplicate key value violates unique constraint "sk_profiles_slug_key"'},409);
+          }
+        }
         const inserted = (Array.isArray(body) ? body : [body]).map((record) => {
           const row = {
             ...record,
             ...([
               "committee_master",
               "legislative_terms",
+              "barangays",
+              "sk_profiles",
               "officials",
               "department_contacts",
               "departments",
@@ -806,7 +885,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
               body: record.body ?? "",
               head_description: record.head_description ?? "",
             });
-          reorder(table, null, row);
+          if (!["barangays", "sk_profiles"].includes(table)) reorder(table, null, row);
           collections[table].push(row);
           return row;
         });
@@ -825,6 +904,13 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
                   ? departments
                   : [];
       if (collections[table]) rows = collections[table];
+      if (table === "barangays" && actor?.role !== "superadmin") rows = rows.filter((row) => row.published);
+      if (table === "sk_profiles") {
+        if (actor?.role !== "superadmin") rows = rows.filter((row) => row.published &&
+          collections.barangays.some((barangay) => barangay.id === row.barangay_id && barangay.published));
+        if (["GET", "HEAD"].includes(method) && url.searchParams.get("select")?.includes("barangay:barangays"))
+          rows = rows.map((row) => ({...row, barangay: collections.barangays.find((barangay) => barangay.id === row.barangay_id) || null}));
+      }
       if (table === "legislative_documents")
         rows = [
           ...ordinances.map((r) => ({
@@ -911,7 +997,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
               .includes(val.slice(6).replaceAll("%", "").toLowerCase()),
           );
         if (val.startsWith("eq."))
-          rows = rows.filter((r) => String(r[key]) === val.slice(3));
+          rows = rows.filter((r) => String(key.split(".").reduce((value, part) => value?.[part], r)) === val.slice(3));
         if (val.startsWith("neq."))
           rows = rows.filter((r) => String(r[key]) !== val.slice(4));
         if (val === "not.is.null") rows = rows.filter((r) => r[key] != null);
@@ -923,9 +1009,15 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         }
       }
       if (method === "PATCH") {
+        if (table === "sk_profiles" && body.barangay_id) {
+          if (!collections.barangays.some((barangay) => barangay.id === body.barangay_id))
+            return response({code:"23503",message:"Invalid barangay"},409);
+          if (collections.sk_profiles.some((existing) => !rows.includes(existing) && existing.barangay_id === body.barangay_id))
+            return response({code:"23505",message:'duplicate key value violates unique constraint "sk_profiles_barangay_id_key"'},409);
+        }
         rows.forEach((r) => {
           const next = { ...r, ...body };
-          reorder(table, r, next);
+          if (!["barangays", "sk_profiles"].includes(table)) reorder(table, r, next);
           Object.assign(r, next, { updated_at: new Date().toISOString() });
         });
         return response(rows);

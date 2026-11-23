@@ -17,7 +17,6 @@ import {
 } from "@/lib/legislative/config";
 import { uploadDocumentPdf } from "@/lib/admin/document-pdf";
 import { definitions } from "@/lib/content/schema";
-import { serviceExcerpt } from "@/lib/content/service";
 
 export async function saveContent(
   _state: string,
@@ -169,7 +168,6 @@ export async function saveContent(
       "icon",
       typeof existing?.icon === "string" ? existing.icon : "file",
     );
-    form.set("description", serviceExcerpt(String(form.get("body") || "")));
     form.set("steps", "");
     form.set("is_sample", existing?.is_sample === true ? "on" : "");
   }

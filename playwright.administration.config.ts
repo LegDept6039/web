@@ -13,6 +13,7 @@ export default defineConfig({
     "department-admin.spec.ts",
     "dynamic-department-admin.spec.ts",
     "municipal-contact-admin.spec.ts",
+    "barangays-admin.spec.ts",
     "department-social-contacts.spec.ts",
     "department-services-admin.spec.ts",
     "password-reset-admin.spec.ts",

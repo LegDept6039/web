@@ -8,9 +8,13 @@ Migration 014 extends the existing tables; it does not create a parallel CMS or 
 
 ## Navigation and dashboard
 
-Legislative Access remains one department assignment with existing role and membership limits. Its collapsible menu has OFFICE OVERVIEW (Officials, Committees, Sessions) and DOCUMENTS (Add Document, Ordinances, Resolutions, Minutes, Agenda, Executive Orders). These labels are headings, not additional modules. Executive offices retain their existing navigation.
+Legislative Access remains one department assignment with existing role and membership limits. Its collapsible menu has OFFICE OVERVIEW (Dashboard, Officials, Committees, Sessions) and DOCUMENTS (Add Document, Ordinances, Resolutions, Minutes, Agenda, Executive Orders). These labels are headings, not additional modules. Executive offices retain their existing navigation.
 
-The Legislative office dashboard shows actual Supabase counts for officials, ordinances, resolutions, sessions, committees, and documents. Document counts include only published records. Staff assigned only to Legislative Access also see this overview at `/admin`; multi-office staff choose their office as before.
+The Dashboard link opens `/admin/content?office=<legislative-office-id>`. Five summary cards show officials, ordinances, resolutions, sessions, and other municipal documents for the selected Legislative Term. Officials and sessions include drafts; document counts include only published records, and municipal documents exclude soft-deleted records. Staff assigned only to Legislative Access also see this overview at `/admin`; multi-office staff choose their office as before.
+
+Below the cards, **Authorship by official** lists officials in the selected office and term, excluding the Municipal Vice-Mayor and including officials with zero documents. The Officials summary card still includes the Vice-Mayor. The switch above the table selects **Resolutions** (initially selected) or **Ordinances**. Authored and co-authored columns count published records by their existing official IDs; numeric headings and cells are centered. Historical free-text names are not guessed into relationships. Both datasets load on the server with pagination; switching the table is immediate. Failed queries show unavailable counts instead of reporting zero. Access uses the existing authenticated staff context and office membership checks, including read-only viewers; no new migration or permission is required.
+
+Dashboard validation: seven data tests passed, including more than 1,000 documents, lower server page limits and failed requests. All 12 desktop/mobile dashboard browser scenarios passed across the suite and focused reruns, including the switch, keyboard access, term filtering, zero rows, permissions and loading feedback. Both existing complete Legislative document workflows also passed. Desktop/mobile screenshots were reviewed; build, TypeScript and lint checks passed. These browser checks use isolated fixture data, and the Windows test-server cleanup was stopped after the assertions completed.
 
 ## Editing
 

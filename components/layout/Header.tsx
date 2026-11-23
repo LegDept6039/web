@@ -73,6 +73,37 @@ export function Header() {
     setMobile(false);
     setOpen(null);
   };
+  const renderDropdown = (
+    label: string,
+    links: string[][],
+    active = pathname.startsWith("/" + label.toLowerCase()),
+  ) => (
+    <div className="nav-dropdown" key={label}>
+      <button
+        className={`nav-link ${active ? "active" : ""}`}
+        aria-expanded={open === label}
+        aria-controls={`menu-${label}`}
+        onClick={() => setOpen(open === label ? null : label)}
+      >
+        {label}
+        <ChevronDown size={14} aria-hidden="true" />
+      </button>
+      {open === label && (
+        <div className="dropdown-menu" id={`menu-${label}`}>
+          {links.map(([name, href]) => (
+            <Link
+              key={href}
+              href={href}
+              onClick={close}
+              aria-current={pathname === href ? "page" : undefined}
+            >
+              {name}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
   return (
     <header
       ref={header}
@@ -150,43 +181,39 @@ export function Header() {
           >
             Home
           </Link>
-          {Object.entries(branches).map(([label, links]) => (
-            <div className="nav-dropdown" key={label}>
-              <button
-                className={`nav-link ${pathname.startsWith("/" + label.toLowerCase()) ? "active" : ""}`}
-                aria-expanded={open === label}
-                aria-controls={`menu-${label}`}
-                onClick={() => setOpen(open === label ? null : label)}
-              >
-                {label}
-                <ChevronDown size={14} />
-              </button>
-              {open === label && (
-                <div className="dropdown-menu" id={`menu-${label}`}>
-                  {links.map(([name, href]) => (
-                    <Link key={href} href={href} onClick={close}>
-                      {name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+          {Object.entries(branches).map(([label, links]) =>
+            renderDropdown(label, links),
+          )}
           {[
             ["News & updates", "/news"],
             ["Public services", "/services"],
             ["Transparency", "/transparency"],
+            ["Barangays", "/barangays"],
             ["Contact", "/contact"],
-          ].map(([label, href]) => (
-            <Link
-              key={href}
-              className={`nav-link ${pathname.startsWith(href) ? "active" : ""}`}
-              href={href}
-              onClick={close}
-            >
-              {label}
-            </Link>
-          ))}
+          ].map(([label, href]) =>
+            href === "/barangays" ? (
+              renderDropdown(
+                label,
+                [
+                  ["Barangay", "/barangays"],
+                  ["Sangguniang Kabataan (SK)", "/sk"],
+                ],
+                pathname === "/barangays" ||
+                  pathname.startsWith("/barangays/") ||
+                  pathname === "/sk" ||
+                  pathname.startsWith("/sk/"),
+              )
+            ) : (
+              <Link
+                key={href}
+                className={`nav-link ${pathname.startsWith(href) ? "active" : ""}`}
+                href={href}
+                onClick={close}
+              >
+                {label}
+              </Link>
+            ),
+          )}
           <Link
             className="nav-search"
             href="/search"

@@ -47,7 +47,11 @@ export async function readSupabaseCollection<K extends Collection>(
     const params = new URLSearchParams({
       select:
         columns +
-        (["news", "programs"].includes(collection) ? ",source,rich_body" : "") +
+        (["news", "programs"].includes(collection)
+          ? ",source,rich_body"
+          : collection === "services"
+            ? ",rich_body"
+            : "") +
         (["ordinances", "resolutions"].includes(collection)
           ? ",author_record:officials!author_id(name),co_author_record:officials!co_author_id(name),committee_record:committees!committee_id(name),session_record:sessions!session_id(name,number)"
           : "") +

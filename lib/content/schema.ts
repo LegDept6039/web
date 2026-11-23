@@ -395,7 +395,10 @@ export function decodeRecord<K extends Collection>(
           : {}),
       };
   }
-  if (["news", "programs"].includes(collection) && row.rich_body != null)
+  if (
+    ["news", "programs", "services"].includes(collection) &&
+    row.rich_body != null
+  )
     output.richBody = validateRichText(row.rich_body);
   for (const [join, key] of [
     ["committee_record", "committeeName"],

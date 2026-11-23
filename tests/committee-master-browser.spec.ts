@@ -10,7 +10,9 @@ async function signIn(page: Page, user: string) {
   await expect(page).toHaveURL(
     user === "superadmin" ? /\/superadmin$/ : /\/admin$/,
   );
-  await expect(page.locator("main .staff-grid").first()).toBeVisible();
+  await expect(
+    page.locator("main .staff-grid, main .legislative-summary-grid").first(),
+  ).toBeVisible();
 }
 async function save(page: Page, publish = false) {
   if (publish) {
@@ -131,7 +133,7 @@ test("Legislative editor manages composition but cannot manage catalog", async (
   await signIn(page, "legislative-editor");
   await page.goto("/superadmin/master-committees");
   await expect(page).toHaveURL(/\/admin$/);
-  await expect(page.locator("main .staff-grid").first()).toBeVisible();
+  await expect(page.locator("main .legislative-summary-grid").first()).toBeVisible();
   await page.goto(`/admin/content/committees?office=${office}&term=${current}`);
   await expect(
     page.getByRole("link", { name: "Manage Master Committees" }),

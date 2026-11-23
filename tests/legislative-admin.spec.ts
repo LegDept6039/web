@@ -92,7 +92,6 @@ test("one Legislative office assigns all features without module checkboxes", as
     "Resolutions",
     "Sessions",
     "Documents",
-    "Committees",
   ])
     await expect(
       page.locator("main").getByRole("heading", { name, exact: true }),

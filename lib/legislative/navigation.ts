@@ -16,6 +16,13 @@ export function legislativeNavigation(context: OfficeContext, office: string) {
     collection,
   });
   return [
+    {
+      key: "overview",
+      label: "Dashboard",
+      section: "OFFICE OVERVIEW",
+      href: `/admin/content?office=${office}`,
+      collection: "officials" as Collection,
+    },
     link("officials", "Officials", "officials", "OFFICE OVERVIEW"),
     link("committees", "Committees", "committees", "OFFICE OVERVIEW"),
     link("sessions", "Sessions", "sessions", "OFFICE OVERVIEW"),

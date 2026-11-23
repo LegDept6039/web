@@ -39,12 +39,11 @@ test("Legislative relationships and all five document types use the existing CMS
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
-  await expect(page.locator("main .staff-grid h2")).toHaveText([
+  await expect(page.locator("main .legislative-summary-grid h2")).toHaveText([
     "Officials",
     "Ordinances",
     "Resolutions",
     "Sessions",
-    "Committees",
     "Documents",
   ]);
   if (suffix === "mobile")
@@ -60,6 +59,7 @@ test("Legislative relationships and all five document types use the existing CMS
   await expect(nav.getByRole("link")).toHaveText([
     "Dashboard",
     "Content management",
+    "Dashboard",
     "Officials",
     "Committees",
     "Sessions",

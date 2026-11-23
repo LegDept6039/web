@@ -58,6 +58,7 @@ export interface Session extends ContentRecord {
   image: string;
 }
 export interface Service extends ContentRecord {
+  richBody?: import("@/lib/content/rich-text").RichNode;
   body?: string;
   officeId?: string;
   contentScope?: "executive" | "legislative";

@@ -6,10 +6,9 @@ export async function uploadOfficialPhoto(
   client: SupabaseClient,
   userId: string,
   file: File,
-  folder: "officials" | "departments" = "officials",
+  folder: "officials" | "departments" | "barangays" | "sk" = "officials",
 ) {
-  if (file.size > PHOTO_LIMIT)
-    throw new Error("Choose an image up to 10 MB.");
+  if (file.size > PHOTO_LIMIT) throw new Error("Choose an image up to 10 MB.");
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type))
     throw new Error("Choose a JPEG, PNG, or WebP image.");
   let bytes: Buffer;
@@ -20,15 +19,21 @@ export async function uploadOfficialPhoto(
     }).metadata();
     if (
       !["jpeg", "png", "webp"].includes(metadata.format || "") ||
-      (metadata.pages || 1) > 1
+      (metadata.pages || 1) > 1 ||
+      !metadata.width ||
+      !metadata.height
     )
       throw new Error("type");
+    const square = folder === "barangays" || folder === "sk";
+    const edge = square
+      ? Math.min(1200, metadata.width, metadata.height)
+      : 1200;
     bytes = await sharp(input, { limitInputPixels: 25000000 })
       .rotate()
       .resize({
-        width: 1200,
-        height: 1200,
-        fit: "inside",
+        width: edge,
+        height: edge,
+        fit: square ? "cover" : "inside",
         withoutEnlargement: true,
       })
       .webp({ quality: 85 })

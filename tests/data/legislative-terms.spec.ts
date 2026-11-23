@@ -8,6 +8,7 @@ import { test, expect } from "@playwright/test";
 import { PGlite } from "@electric-sql/pglite";
 import { readFileSync } from "node:fs";
 import { parseLegislative } from "../../lib/legislative/validation";
+import { parseBulkSessions } from "../../lib/legislative/session-bulk";
 let db: PGlite;
 let offices: Record<string, string>;
 const users = {
@@ -426,4 +427,81 @@ test("Legislative CSV-shaped bulk inserts retain order and terms and roll back a
       ).rows,
     ).toEqual([]);
   });
+});
+
+test("session batches use existing term triggers and RLS and roll back as a single statement", async () => {
+  const rows: Record<string, unknown>[] = parseBulkSessions(
+    [
+      {
+        name: "Bulk SQL regular",
+        number: "101",
+        date: "2026-11-20",
+        type: "Regular session",
+      },
+      {
+        name: "Bulk SQL special",
+        number: "102",
+        date: "2026-11-21",
+        type: "Special session",
+      },
+    ],
+    {
+      id: current,
+      name: "Current",
+      start_date: "2025-07-01",
+      end_date: "2028-06-30",
+    },
+    false,
+  ).map((row) => ({
+    ...row,
+    office_id: offices["legislative-access"],
+    content_scope: "legislative",
+  }));
+  const insert = (batch: Record<string, unknown>[]) =>
+    db.query(
+      `insert into sessions
+      (id,name,number,type,date,description,agenda,image,office_id,content_scope,published,sort_order,is_sample,term_id)
+     select id,name,number,type,date,description,agenda,image,office_id,content_scope,published,sort_order,is_sample,term_id
+     from jsonb_to_recordset($1::jsonb) as batch(
+       id text,name text,number text,type text,date date,description text,agenda text[],image text,
+       office_id uuid,content_scope text,published boolean,sort_order integer,is_sample boolean,term_id uuid)`,
+      [JSON.stringify(batch)],
+    );
+  for (const user of ["mho", "viewer"] as const)
+    await as(user, async () => {
+      await expect(insert(rows)).rejects.toThrow();
+    });
+  await as("legislative", async () => {
+    await insert(rows);
+  });
+  const saved = await db.query<{
+    id: string;
+    term_id: string;
+    published: boolean;
+  }>(
+    "select id,term_id,published from sessions where id in ($1,$2) order by id",
+    [rows[0].id, rows[1].id],
+  );
+  expect(saved.rows).toHaveLength(2);
+  expect(
+    saved.rows.every(
+      (row) => row.term_id === current && row.published === false,
+    ),
+  ).toBe(true);
+  const invalid = rows.map((row, index) => ({
+    ...row,
+    id: crypto.randomUUID(),
+    ...(index === 1 ? { date: "2040-01-01" } : {}),
+  }));
+  await as("legislative", async () => {
+    await expect(insert(invalid)).rejects.toThrow(/No Legislative Term/);
+  });
+  expect(
+    (
+      await db.query("select id from sessions where id in ($1,$2)", [
+        invalid[0].id,
+        invalid[1].id,
+      ])
+    ).rows,
+  ).toEqual([]);
 });

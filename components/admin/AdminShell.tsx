@@ -37,6 +37,28 @@ export async function AdminShell({
                   Master Committees
                 </Link>
                 <Link href="/superadmin/departments">Departments</Link>
+                <OfficesNav
+                  label=""
+                  offices={[
+                    {
+                      id: "barangays",
+                      name: "Barangays",
+                      routePrefix: "/superadmin/barangays",
+                      modules: [
+                        {
+                          key: "barangay",
+                          label: "Barangay",
+                          href: "/superadmin/barangays",
+                        },
+                        {
+                          key: "sk",
+                          label: "SK",
+                          href: "/superadmin/barangays/sk",
+                        },
+                      ],
+                    },
+                  ]}
+                />
                 <Link href="/superadmin/contact">Municipal Contact</Link>
                 <Link href="/superadmin/users">Users & access control</Link>
                 <Link href="/superadmin/audit">Audit log</Link>

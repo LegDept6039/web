@@ -29,7 +29,7 @@ export default async function Page({
           selected={selected}
           today={philippineDate()}
         />
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="session-grid">
           {(await getSessions())
             .filter((s) => inTerm(s, selected))
             .map((s) => (

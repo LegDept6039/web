@@ -38,6 +38,12 @@ Document forms ask for Date immediately after the document type is selected, bef
 
 Date-first workflow verification: typecheck, targeted lint, production build, 15 adapter/term data tests and four desktop/mobile browser scenarios passed. Browser checks cover field order, automatic term recalculation, session publication without a manual position, and date ordering when an older document is added later. Desktop/mobile form screenshots were reviewed. The test server required interruption after all assertions passed during Windows teardown; the user's development server was left running.
 
+## Bulk add sessions
+
+Open **Admin > Sessions > Bulk add sessions** to enter up to 50 sessions for one Legislative Term. The selected list term carries into the form. Each row includes Date, Name, Session Number and Type (Regular or Special); rows can be added or removed before saving.
+
+All dates must fall within the selected term, including its start and end dates. Sessions default to drafts; **Publish all sessions** publishes the entire batch. Validation errors preserve the entered rows. Matching session number/date/type combinations are checked against the batch and existing records in the same office and term. Saving uses one insert statement, so a database validation or permission failure rejects the whole batch. Existing session ordering, date-derived term triggers and staff permissions remain in force. No new migration is required.
+
 ## Current term and browsing
 
 Public and admin term labels append years from the saved start/end dates: `16th 2022-2025`. The current term uses `17th 2025-Current`; previous and upcoming terms show their actual end year. This shared display format does not change stored names, term IDs or date assignments. Superadmin continues to edit the base name and dates separately.
@@ -65,6 +71,10 @@ Older official IDs such as `committees` are preserved database IDs, not the offi
 If an Edit link returns not-found, refresh the page and inspect the server's `[portal-auth]` diagnostic with stage `content_edit:officials`. `missing_or_not_visible` means the authenticated query returned no record; `access_denied` means the record was read but the current account's office permissions rejected it; `query_error` identifies a database request failure. The diagnostic excludes record content and credentials. Do not rename IDs or bypass authorization to resolve a 404.
 
 The legacy-ID regression covers opening an unassigned official from the list, assigning a term, renaming it and reopening its unchanged ID on desktop/mobile. These checks and the existing public roster/dashboard checks passed together (six scenarios). During local debugging, corrupted `.next/dev/types` files caused type-check failures; restarting the development server with a fresh `.next/dev` cache restored valid generated types. Build, lint and a subsequent standalone type check passed. Cache repair does not require a database migration.
+
+The same lookup diagnostics apply to resolutions with stage `content_edit:resolutions`. A browser console's HTTP 404 alone does not identify an authorization failure. If even an anonymous request to the Edit URL returns not-found instead of redirecting to login, check whether `.next/dev/types/routes.d.ts` includes `/admin/content/[collection]/edit/[id]`. During the November 20 resolution investigation, both Edit and View were missing from the running development server's generated routes despite intact source files and a valid published resolution. Stopping that project's development server, preserving `.next/dev` in a backup, and restarting with a fresh cache restored the routes.
+
+The fresh compilation also exposed an empty local `node_modules/sharp` package. Restoring the exact locked version (0.35.5), with archive integrity checked against `package-lock.json`, fixed compilation without changing package versions. The same Resolution Edit URL then reached its expected login guard in an anonymous request. Four routing/PDF validation tests and a fresh production build passed. The desktop Legislative workspace browser regression passed in 50.9 seconds against the isolated transport fixture, including opening/editing/saving a resolution and preserving its PDF; Windows teardown required interruption after assertions passed. This repair changes local generated files/dependencies only; it requires no migration and does not change resolution IDs, attachments or permissions.
 
 ## Verification
 

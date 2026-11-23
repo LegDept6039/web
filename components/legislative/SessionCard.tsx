@@ -1,31 +1,24 @@
-import Image from "next/image";
 import { CalendarDays, FileText } from "lucide-react";
 import type { Session } from "@/types";
 import { formatDate } from "@/lib/utils";
 export function SessionCard({ session }: { session: Session }) {
   return (
     <article className="session-card">
-      <div className="session-image">
-        <Image
-          src={session.image}
-          alt={`${session.number} ${session.type}`}
-          fill
-          sizes="(max-width: 700px) 100vw, 50vw"
-        />
-      </div>
-      <div className="p-6">
+      <div className="session-body">
         <span className="eyebrow">{session.type}</span>
         <h2>{session.name || `${session.number} ${session.type}`}</h2>
         <p className="meta">Sangguniang Bayan</p>
-        <p className="flex items-center gap-2 mt-4 text-sm">
-          <CalendarDays size={16} />
-          {formatDate(session.date)}
+        <p className="session-card-date">
+          <CalendarDays size={15} aria-hidden="true" />
+          <time dateTime={session.date}>{formatDate(session.date)}</time>
         </p>
-        <p className="body-copy mt-3">{session.description}</p>
+        {session.description && (
+          <p className="body-copy session-description">{session.description}</p>
+        )}
         {session.agenda.length > 0 && (
           <details className="agenda">
             <summary>
-              <FileText size={16} />
+              <FileText size={16} aria-hidden="true" />
               View agenda
             </summary>
             <ol>

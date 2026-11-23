@@ -29,14 +29,13 @@ export function OfficialGrid({
             />
           </div>
           <div className="official-info">
-            <Heading>{o.name}</Heading>
-            {!directory && (
-              <p className="official-description">{o.description}</p>
-            )}
-            <p className="eyebrow">
-              {o.legislativeRole ? legislativeRoles[o.legislativeRole] : o.role}
-            </p>
-            {directory && o.description && (
+            <div className="official-identity">
+              <Heading>{o.name}</Heading>
+              <p className="official-role">
+                {o.legislativeRole ? legislativeRoles[o.legislativeRole] : o.role}
+              </p>
+            </div>
+            {o.description && (
               <p className="official-description">{o.description}</p>
             )}
           </div>

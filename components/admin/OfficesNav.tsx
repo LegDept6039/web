@@ -35,7 +35,7 @@ export function OfficesNav({
   }
   return (
     <div className="offices-nav">
-      <span className="admin-nav-label">{label}</span>
+      {label && <span className="admin-nav-label">{label}</span>}
       <div className="offices-scroll">
         {offices.map((o) => (
           <div key={o.id} className="office-nav-item">

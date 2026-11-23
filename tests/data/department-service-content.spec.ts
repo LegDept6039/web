@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { parseContent } from "../../lib/admin/content";
 import { decodeRecord } from "../../lib/content/schema";
+import { readSupabaseCollection } from "../../lib/content/supabase";
+import { legacyDocument, richTextPlain } from "../../lib/content/rich-text";
 import {
   SERVICE_BODY_LIMIT,
   SERVICE_TITLE_LIMIT,
@@ -130,4 +132,111 @@ test("service descriptions stay compact while legacy records decode without a bo
   expect(
     decodeRecord("services", { ...parsed, id: "legacy-service", body: null }),
   ).not.toHaveProperty("body");
+});
+
+test("formatted service saves derive body and preview from validated formatting", () => {
+  const form = serviceForm();
+  const doc = {
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Requirements", marks: [{ type: "bold" }] },
+        ],
+      },
+      {
+        type: "orderedList",
+        content: [
+          {
+            type: "listItem",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Bring your ID.",
+                    marks: [{ type: "italic" }],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "listItem",
+            content: [
+              {
+                type: "paragraph",
+                content: [{ type: "text", text: "Submit the form." }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  form.set("rich_body", JSON.stringify(doc));
+  form.set("body", "Forged unrelated body");
+  form.set("description", "Forged unrelated preview");
+  const parsed = parseContent("services", form);
+  expect(parsed).toMatchObject({
+    rich_body: doc,
+    body: "Requirements\nBring your ID.\nSubmit the form.",
+    description: "Requirements Bring your ID. Submit the form.",
+  });
+  expect(
+    decodeRecord("services", { ...parsed, id: "formatted" }).richBody,
+  ).toEqual(doc);
+  expect(parsed).not.toHaveProperty("date");
+});
+
+test("service formatting rejects unsupported nodes, invalid JSON, empty and oversized bodies", () => {
+  for (const raw of [
+    "not-json",
+    JSON.stringify({ type: "doc", content: [{ type: "iframe" }] }),
+    JSON.stringify({
+      type: "doc",
+      content: [{ type: "paragraph", attrs: { onclick: "alert(1)" } }],
+    }),
+    JSON.stringify(legacyDocument(" ")),
+    JSON.stringify(legacyDocument("x".repeat(30001))),
+    " ".repeat(200001),
+  ]) {
+    const form = serviceForm();
+    form.set("rich_body", raw);
+    expect(() => parseContent("services", form)).toThrow();
+  }
+  const plain = parseContent("services", serviceForm());
+  expect(plain.rich_body).toBeNull();
+  expect(plain.body).toBe(body);
+});
+
+test("legacy service line breaks survive conversion to the shared editor", () => {
+  const legacy = serviceEditorBody({ body });
+  const doc = legacyDocument(legacy.split(/\r?\n/));
+  expect(richTextPlain(doc)).toBe(body);
+  const form = serviceForm();
+  form.set("rich_body", JSON.stringify(doc));
+  expect(parseContent("services", form).body).toBe(body);
+});
+
+test("public services fetch rich formatting through the existing published adapter", async () => {
+  const parsed = parseContent("services", serviceForm());
+  const doc = legacyDocument(["Service instructions"]);
+  const services = await readSupabaseCollection(
+    "services",
+    { url: "https://example.supabase.co", key: "sb_publishable_test" },
+    async (url, init) => {
+      const params = new URL(url).searchParams;
+      expect(params.get("published")).toBe("eq.true");
+      expect(params.get("select")?.split(",")).toContain("rich_body");
+      expect(params.get("select")?.split(",")).not.toContain("source");
+      expect(init.cache).toBe("no-store");
+      return Response.json([{ ...parsed, id: "formatted", rich_body: doc }], {
+        headers: { "content-range": "0-0/1" },
+      });
+    },
+  );
+  expect(services[0].richBody).toEqual(doc);
 });

@@ -29,6 +29,7 @@ export default async function ContentPage({
     office?: string;
     term?: string;
     saved?: string;
+    created?: string;
     type?: string;
     q?: string;
     sort?: string;
@@ -119,6 +120,12 @@ export default async function ContentPage({
         />
       )}
       {saved && <p role="status">Record saved successfully.</p>}
+      {dateOrdered && /^[1-9]\d?$/.test(filters.created || "") && (
+        <p role="status">
+          {filters.created} {filters.created === "1" ? "session" : "sessions"}{" "}
+          added successfully.
+        </p>
+      )}
       <div className="admin-toolbar">
         <Link href="/admin/content">All collections</Link>
         {canCreate && (
@@ -127,6 +134,14 @@ export default async function ContentPage({
             href={`/admin/content/${collection}/new${office ? `?office=${office}` : ""}`}
           >
             Add record
+          </Link>
+        )}
+        {canCreate && dateOrdered && (
+          <Link
+            className="button button-blue"
+            href={`/admin/content/sessions/bulk?${new URLSearchParams({ ...(office ? { office } : {}), ...(terms.some((t) => t.id === selected) ? { term: selected } : {}) })}`}
+          >
+            Bulk add sessions
           </Link>
         )}
       </div>

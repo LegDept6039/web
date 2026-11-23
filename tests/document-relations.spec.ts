@@ -7,7 +7,7 @@ test("member-only authors and same-date session matching survive saving and edit
   await page.getByLabel("Email address").fill("vmo@example.test");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await expect(page.locator("main .staff-grid").first()).toBeVisible();
+  await expect(page.locator("main .legislative-summary-grid").first()).toBeVisible();
   await page.goto(`/admin/content/ordinances/new?office=${office}`);
   await page.getByLabel("Date", { exact: true }).fill("2025-08-08");
   await expect(

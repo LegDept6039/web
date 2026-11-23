@@ -1,5 +1,10 @@
 import { validateBiography } from "@/lib/content/department-biography";
-import { validateService } from "@/lib/content/service";
+import { serviceExcerpt, validateService } from "@/lib/content/service";
+import {
+  richTextPlain,
+  validateRichText,
+  type RichNode,
+} from "@/lib/content/rich-text";
 import { publicationPosition } from "./publication";
 import {
   definitions,
@@ -20,13 +25,23 @@ export function label(value: string) {
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 export function parseContent(collection: Collection, form: FormData) {
+  let serviceDocument: RichNode | null = null;
   if (collection === "services") {
+    if (form.has("rich_body")) {
+      const raw = String(form.get("rich_body"));
+      if (raw.length > 200000) throw new Error("Content is too long.");
+      serviceDocument = validateRichText(JSON.parse(raw), true);
+      // The validated document is authoritative; never trust a second submitted
+      // body or summary that could disagree with its visible formatting.
+      form.set("body", richTextPlain(serviceDocument));
+    }
     const service = validateService(
       String(form.get("name") || ""),
       String(form.get("body") || ""),
     );
     form.set("name", service.name);
     form.set("body", service.body);
+    form.set("description", serviceExcerpt(service.body));
   }
   if (collection === "departments")
     validateBiography(String(form.get("head_description") || ""));
@@ -72,6 +87,9 @@ export function parseContent(collection: Collection, form: FormData) {
     throw new Error(
       "Use lowercase letters, numbers, and single hyphens for the ID or slug.",
     );
+  // Plain-text submissions clear any previously stored formatting instead of
+  // leaving a stale rich document attached to a changed body.
+  if (collection === "services") row.rich_body = serviceDocument;
   decodeRecord(collection, row);
   if (
     ["officials", "contacts", "programs", "news", "services"].includes(

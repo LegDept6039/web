@@ -1,6 +1,5 @@
 import { publicTerm } from "@/lib/legislative/terms-server";
-import { inTerm, philippineDate } from "@/lib/legislative/terms";
-import { TermSelector } from "@/components/legislative/TermSelector";
+import { inTerm } from "@/lib/legislative/terms";
 import { isLegislativeRole } from "@/lib/officials/roles";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -18,7 +17,7 @@ export default async function Page({
 }: {
   searchParams: Promise<{ term?: string }>;
 }) {
-  const { terms, selected } = await publicTerm((await searchParams).term);
+  const { selected } = await publicTerm((await searchParams).term);
   const [officials, sessions] = await Promise.all([
     getOfficials(),
     getSessions(),
@@ -30,12 +29,7 @@ export default async function Page({
         eyebrow="THE LEGISLATIVE BRANCH"
         description="Representing the people through responsive legislation, public deliberation, and accountable local governance."
       />
-      <section className="container section">
-        <TermSelector
-          terms={terms}
-          selected={selected}
-          today={philippineDate()}
-        />
+      <section className="container section legislative-content">
         <nav className="branch-links" aria-label="Legislative pages">
           {[
             ["Council members", "members"],
@@ -55,7 +49,7 @@ export default async function Page({
           eyebrow="YOUR MUNICIPAL COUNCIL"
           title="A voice for every community"
           href={`/legislative/members?term=${selected}`}
-          linkText="Council directory"
+          linkText="View council per terms"
         />
         <OfficialGrid
           officials={officials.filter(

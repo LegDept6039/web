@@ -11,6 +11,7 @@ import {
 import { DepartmentEditorFields } from "@/components/admin/DepartmentEditorFields";
 import { DepartmentContactFields } from "@/components/admin/DepartmentContactFields";
 import { DepartmentServiceFields } from "@/components/admin/DepartmentServiceFields";
+import { serviceEditorBody } from "@/lib/content/service";
 import { OfficialEditorFields } from "@/components/admin/OfficialEditorFields";
 import dynamic from "next/dynamic";
 import { PublicationFields } from "@/components/admin/PublicationFields";
@@ -70,7 +71,9 @@ export function ContentForm({
           ? Array.isArray(row.content)
             ? row.content
             : []
-          : String(row.description || ""),
+          : collection === "services"
+            ? serviceEditorBody(row).split(/\r?\n/)
+            : String(row.description || ""),
       ),
   );
   const rich = useRef(initialRich);
@@ -78,11 +81,12 @@ export function ContentForm({
   const [uploadStatus, setUploadStatus] = useState("");
   const [error, action, pending] = useActionState(
     async (state: string, form: FormData) => {
-      if (["news", "programs"].includes(collection)) {
+      if (["news", "programs", "services"].includes(collection)) {
         try {
           const doc = validateRichText(rich.current, true);
           form.set("rich_body", JSON.stringify(doc));
           if (collection === "news") form.set("content", richTextPlain(doc));
+          if (collection === "services") form.set("body", richTextPlain(doc));
         } catch (error) {
           return error instanceof Error ? error.message : "Invalid content.";
         }
@@ -411,7 +415,19 @@ export function ContentForm({
             />
           )}
           {collection === "contacts" && <DepartmentContactFields row={row} />}
-          {collection === "services" && <DepartmentServiceFields row={row} />}
+          {collection === "services" && (
+            <DepartmentServiceFields row={row}>
+              <RichTextEditor
+                label="Body"
+                initial={initialRich}
+                legacy={[]}
+                disabled={!canWrite || pending}
+                onChange={(doc) => {
+                  rich.current = doc;
+                }}
+              />
+            </DepartmentServiceFields>
+          )}
           {Object.entries(definition.fields).map(([name, field]) => {
             if (collection === "services") return null;
             if (

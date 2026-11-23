@@ -32,8 +32,8 @@ export default async function Page({
         <div className="article">
           <span className="eyebrow">RESPONSIBLE OFFICE</span>
           <h2>{s.office}</h2>
-          {s.body ? (
-            <ServiceBody body={s.body} />
+          {s.body || s.richBody ? (
+            <ServiceBody body={s.body || ""} richBody={s.richBody} />
           ) : (
             <>
               <h3 className="mt-8">Getting started</h3>

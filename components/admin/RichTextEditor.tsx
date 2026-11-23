@@ -39,12 +39,14 @@ export default function RichTextEditor({
   label = "Content",
   onChange,
   disabled = false,
+  required = true,
 }: {
   initial?: RichNode;
   legacy: string | string[];
   label?: string;
   onChange: (value: RichNode) => void;
   disabled?: boolean;
+  required?: boolean;
 }) {
   const [touched, setTouched] = useState(false);
   const editor = useEditor({
@@ -71,7 +73,7 @@ export default function RichTextEditor({
         role: "textbox",
         "aria-label": label,
         "aria-multiline": "true",
-        "aria-required": "true",
+        "aria-required": String(required),
         class: "rich-text rich-editor-content",
       },
       handlePaste(view, event) {
@@ -218,7 +220,9 @@ export default function RichTextEditor({
         </button>
       </div>
       <EditorContent editor={editor} />
-      {touched && state?.empty && <p role="alert">Content is required.</p>}
+      {required && touched && state?.empty && (
+        <p role="alert">Content is required.</p>
+      )}
       <span className="staff-note">
         {richTextPlain(editor.getJSON() as RichNode).length} / 30,000
         characters. Pasted text uses plain formatting.

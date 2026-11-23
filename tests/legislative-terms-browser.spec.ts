@@ -109,13 +109,13 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
   await expect(
-    page.locator(".staff-grid .legislative-count").first(),
+    page.locator(".legislative-summary-grid .legislative-count").first(),
   ).toHaveText("3");
   await page
     .getByLabel("Legislative Term", { exact: true })
     .selectOption(previous);
   await expect(
-    page.locator(".staff-grid .legislative-count").first(),
+    page.locator(".legislative-summary-grid .legislative-count").first(),
   ).toHaveText("1");
   await page.goto(`/admin/content/committees/new?office=${office}`);
   await expect(page.locator('select[name="term_id"]')).toHaveValue(current);

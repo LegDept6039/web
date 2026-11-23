@@ -33,6 +33,10 @@ export default async function Dashboard() {
           <h2>Content management</h2>
           <p>Review drafts, assign ownership, and publish.</p>
         </Link>
+        <Link className="staff-card" href="/superadmin/barangays">
+          <h2>Barangays</h2>
+          <p>Manage barangay captains, square images and public profiles.</p>
+        </Link>
         <Link className="staff-card" href="/superadmin/contact">
           <h2>Municipal Contact</h2>
           <p>Edit contact details and the Municipal Hall location map.</p>

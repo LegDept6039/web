@@ -1,15 +1,27 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { getServices } from "@/lib/api";
+import { getDepartments, getServices } from "@/lib/api";
 import { PageHero } from "@/components/shared/ui";
-import { ServiceIcon } from "@/components/shared/ServiceIcon";
+import { ServiceDirectory } from "@/components/services/ServiceDirectory";
 export const metadata: Metadata = {
   title: "Municipal services",
   description:
     "Find municipal offices and general guidance for local public services.",
 };
 export default async function Page() {
+  const [services, departments] = await Promise.all([
+    getServices(),
+    getDepartments(),
+  ]);
+  const departmentOptions = departments
+    .map((department) => ({
+      id: department.officeId || department.id,
+      name: department.name,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const departmentNames = new Map(
+    departmentOptions.map((department) => [department.id, department.name]),
+  );
+
   return (
     <>
       <PageHero
@@ -17,22 +29,19 @@ export default async function Page() {
         eyebrow="MUNICIPAL SERVICES"
         description="Find the right office, understand the next step, and connect with your local government."
       />
-      <section className="container section">
-        <div className="content-grid">
-          {(await getServices()).map((s) => (
-            <article className="info-card" key={s.id}>
-              <span className="service-icon">
-                <ServiceIcon name={s.icon} />
-              </span>
-              <h2>{s.name}</h2>
-              <p>{s.description}</p>
-              <Link href={`/services/${s.id}`} className="text-link">
-                Learn more
-                <ArrowRight size={16} />
-              </Link>
-            </article>
-          ))}
-        </div>
+      <section className="container section service-directory-section">
+        <ServiceDirectory
+          departments={departmentOptions}
+          services={services.map((service) => ({
+            id: service.id,
+            name: service.name,
+            description: service.description,
+            icon: service.icon,
+            departmentId: service.officeId,
+            departmentName:
+              departmentNames.get(service.officeId || "") || service.office,
+          }))}
+        />
       </section>
     </>
   );
