@@ -29,14 +29,18 @@ export function ContentBreadcrumb({
         <>
           <span>/</span>
           <Link href={`/admin/content?office=${selected.id}`}>
-            {selected.short_name}
+            {selected.short_name || selected.name}
           </Link>
         </>
       )}
       {collection && (
         <>
           <span>/</span>
-          <span>{label(collection)}</span>
+          <span>
+            {collection === "departments" && selected?.parent_department_id
+              ? "Branch Page"
+              : label(collection)}
+          </span>
         </>
       )}
     </nav>

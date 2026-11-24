@@ -6,7 +6,7 @@ import { LegislativeUpdates } from "./LegislativeUpdates";
 export async function HomeLeadership() {
   const [officials, departments] = await Promise.all([
     getCollection("officials", { branch: "legislative" }, 4),
-    getCollection("departments", {}, 4),
+    getCollection("departments", { parent_department_id: null }, 4),
   ]);
   return <LeadershipSection officials={officials} departments={departments} />;
 }

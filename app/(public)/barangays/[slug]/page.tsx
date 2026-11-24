@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { PageHero } from "@/components/shared/ui";
 import { BarangayImage } from "@/components/barangays/BarangayImage";
 import { RichText } from "@/components/shared/RichText";
-import { getBarangays } from "@/lib/barangays/server";
+import { getBarangays, getBarangayNews } from "@/lib/barangays/server";
 import { barangayExcerpt } from "@/lib/barangays/validation";
+import { NewsGrid } from "@/components/news/NewsCard";
 
 export async function generateMetadata({
   params,
@@ -26,6 +27,7 @@ export default async function BarangayPage({
 }) {
   const barangay = (await getBarangays((await params).slug))?.[0];
   if (!barangay) notFound();
+  const news = await getBarangayNews(barangay.id);
   return (
     <>
       <PageHero
@@ -60,6 +62,16 @@ export default async function BarangayPage({
             </p>
           )}
         </div>
+        <section className="mt-16" aria-labelledby="barangay-news-title">
+          <h2 id="barangay-news-title" className="mb-6">
+            Barangay news
+          </h2>
+          {news.length ? (
+            <NewsGrid articles={news} compact />
+          ) : (
+            <p>No news has been published for this barangay yet.</p>
+          )}
+        </section>
       </section>
     </>
   );

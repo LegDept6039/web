@@ -13,18 +13,18 @@ function account(info: TestInfo, scenario: string) {
   const sequence = (info.project.name === "mobile" ? 10 : 0) + index;
   return {
     id: `70000000-0000-4000-8000-${String(sequence).padStart(12, "0")}`,
-    email: `reset-${scenario}-${info.project.name}@example.test`,
+    username: `reset-${scenario}-${info.project.name}`,
     name: `Reset ${scenario} ${info.project.name}`,
   };
 }
 
 async function signIn(
   page: Page,
-  email = "superadmin@example.test",
+  username = "superadmin",
   password = originalPassword,
 ) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Username", { exact: true }).fill(username);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
@@ -36,7 +36,7 @@ async function openReset(page: Page, target: ReturnType<typeof account>) {
     .click();
   const confirmation = page.locator(".staff-password-reset form");
   await expect(confirmation).toContainText(target.name);
-  await expect(confirmation).toContainText(target.email);
+  await expect(confirmation).toContainText(target.username);
   await expect(confirmation.locator('input[type="password"]')).toHaveCount(0);
   await confirmation.locator('[name="confirm_reset"]').check();
   return confirmation;
@@ -115,8 +115,9 @@ test("temporary password requires a new password and preserves the original offi
     page.getByRole("combobox", { name: "Role", exact: true }),
   ).toHaveValue("editor");
   await expect(
-    page.getByRole("listbox", { name: "Office Access", exact: true }),
-  ).toHaveValues([mho]);
+    page.locator(`input[name="office"][value="${mho}"]`),
+  ).toBeChecked();
+  await expect(page.locator('input[name="office"]:checked')).toHaveCount(1);
   await expect(page.locator('[name="active"]')).toBeChecked();
 
   const staffContext = await browser.newContext({
@@ -125,7 +126,7 @@ test("temporary password requires a new password and preserves the original offi
   });
   try {
     const staff = await staffContext.newPage();
-    await signIn(staff, target.email, temporary);
+    await signIn(staff, target.username, temporary);
     await expect(staff).toHaveURL(/\/change-password$/);
     await expect(
       staff.getByRole("heading", {
@@ -162,10 +163,10 @@ test("temporary password requires a new password and preserves the original offi
         { exact: true },
       ),
     ).toBeVisible();
-    await signIn(staff, target.email, temporary);
+    await signIn(staff, target.username, temporary);
     await expect(staff.locator(".staff-error")).toBeVisible();
     await expect(staff).toHaveURL(/\/login(?:\?|$)/);
-    await signIn(staff, target.email, newPassword);
+    await signIn(staff, target.username, newPassword);
     await expect(staff).toHaveURL(/\/admin$/);
     await staff.goto(`/admin/content/departments/edit/${mho}?office=${mho}`);
     await expect(
@@ -208,7 +209,7 @@ test("temporary password requires a new password and preserves the original offi
       .getByRole("button", { name: "Change password", exact: true })
       .click();
     await expect(staff).toHaveURL(/\/login(?:\?|$)/);
-    await signIn(staff, target.email, "SelfServiceReplacement123!");
+    await signIn(staff, target.username, "SelfServiceReplacement123!");
     await expect(staff).toHaveURL(/\/admin$/);
     await page.goto("/superadmin/audit");
     await expect(
@@ -238,7 +239,7 @@ test("expired and replaced temporary passwords cannot complete the reset", async
     const staff = await staffContext.newPage();
     const expired = account(info, "expired");
     const expiredPassword = await issueReset(page, expired);
-    await signIn(staff, expired.email, expiredPassword);
+    await signIn(staff, expired.username, expiredPassword);
     await expect(staff.locator(".staff-error")).toContainText(
       /expired.*Superadmin/i,
     );
@@ -246,7 +247,7 @@ test("expired and replaced temporary passwords cannot complete the reset", async
     await expect(staff).toHaveURL(/\/login(?:\?|$)/);
     const replaced = account(info, "replaced");
     const first = await issueReset(page, replaced);
-    await signIn(staff, replaced.email, first);
+    await signIn(staff, replaced.username, first);
     await expect(staff).toHaveURL(/\/change-password$/);
     const second = await issueReset(page, replaced);
     expect(second).not.toBe(first);
@@ -260,9 +261,9 @@ test("expired and replaced temporary passwords cannot complete the reset", async
     await expect(
       staff.getByRole("navigation", { name: "Administration" }),
     ).toHaveCount(0);
-    await signIn(staff, replaced.email, first);
+    await signIn(staff, replaced.username, first);
     await expect(staff.locator(".staff-error")).toBeVisible();
-    await signIn(staff, replaced.email, second);
+    await signIn(staff, replaced.username, second);
     await expect(staff).toHaveURL(/\/change-password$/);
     await expect(
       staff.getByRole("button", { name: "Save password", exact: true }),
@@ -289,7 +290,7 @@ test("an already-open CMS session and a forged ordinary-staff reset request cann
   });
   try {
     const staff = await staffContext.newPage();
-    await signIn(staff, target.email);
+    await signIn(staff, target.username);
     await expect(staff).toHaveURL(/\/admin$/);
     await expect(
       staff.getByRole("button", { name: "Sign out", exact: true }),
@@ -328,7 +329,7 @@ test("an already-open CMS session and a forged ordinary-staff reset request cann
     expect(await protectedResponse.text()).not.toContain("Add record");
 
     const attacker = await attackerContext.newPage();
-    await signIn(attacker, "editor@example.test");
+    await signIn(attacker, "editor");
     await expect(attacker).toHaveURL(/\/admin$/);
     await attacker.goto(`/superadmin/users/${target.id}`);
     await expect(attacker).toHaveURL(/\/admin$/);
@@ -360,11 +361,11 @@ test("an already-open CMS session and a forged ordinary-staff reset request cann
       await staff
         .getByRole("button", { name: "Sign out", exact: true })
         .click();
-    await signIn(staff, target.email, temporary);
+    await signIn(staff, target.username, temporary);
     await expect(staff).toHaveURL(/\/change-password$/);
     await fillNewPassword(staff, "RestrictedAccountNew123!");
     await expect(staff).toHaveURL(/\/login(?:\?|$)/);
-    await signIn(staff, target.email, "RestrictedAccountNew123!");
+    await signIn(staff, target.username, "RestrictedAccountNew123!");
     await expect(staff).toHaveURL(/\/admin$/);
   } finally {
     await staffContext.close();
@@ -391,14 +392,15 @@ test("resetting a disabled account never enables it", async ({
     page.getByRole("combobox", { name: "Role", exact: true }),
   ).toHaveValue("editor");
   await expect(
-    page.getByRole("listbox", { name: "Office Access", exact: true }),
-  ).toHaveValues([mho]);
+    page.locator(`input[name="office"][value="${mho}"]`),
+  ).toBeChecked();
+  await expect(page.locator('input[name="office"]:checked')).toHaveCount(1);
   const staffContext = await browser.newContext({
     baseURL: new URL(page.url()).origin,
   });
   try {
     const staff = await staffContext.newPage();
-    await signIn(staff, target.email);
+    await signIn(staff, target.username);
     await expect(staff.locator(".staff-error")).toContainText(
       /inactive|disabled/i,
     );

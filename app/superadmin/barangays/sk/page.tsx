@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth/server";
 import { loadAdminPage } from "@/lib/admin/pagination";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminActionLink } from "@/components/admin/AdminActionLink";
 
 export default async function SKManagement({
   searchParams,
@@ -61,7 +62,7 @@ export default async function SKManagement({
                   <th>SK Chairperson</th>
                   <th>Status</th>
                   <th>Display Order</th>
-                  <th>Action</th>
+                  <th className="admin-actions-cell">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -82,10 +83,11 @@ export default async function SKManagement({
                           : "Draft"}
                       </td>
                       <td>{row.sort_order}</td>
-                      <td>
-                        <Link href={`/superadmin/barangays/sk/${row.id}`}>
-                          Edit
-                        </Link>
+                      <td className="admin-actions-cell">
+                        <AdminActionLink
+                          href={`/superadmin/barangays/sk/${row.id}`}
+                          action="edit"
+                        />
                       </td>
                     </tr>
                   );

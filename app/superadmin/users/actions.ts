@@ -33,20 +33,17 @@ export async function saveUser(
   let createdId: string | undefined;
   if (!id) {
     if (deleting) return "Invalid account.";
-    const email = String(form.get("email") || "").trim();
-    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      return "Enter a valid email address.";
     try {
       const password = passwordInput(form);
       const admin = authAdminClient();
       const { data, error } = await admin.auth.admin.createUser({
-        email,
+        email: `${randomUUID()}@staff.pinamungajan.invalid`,
         password,
         email_confirm: true,
         user_metadata: { full_name: values.name },
       });
       if (error || !data.user)
-        return "Could not create account. Check the email, password policy, and server configuration. The email may already be registered.";
+        return "Could not create account. Check the password policy and server configuration.";
       createdId = data.user.id;
     } catch (e) {
       return e instanceof Error && e.message.startsWith("Server account")
@@ -57,17 +54,20 @@ export async function saveUser(
     }
   }
   let failed = false;
+  let duplicateUsername = false;
   try {
-    const { error } = await client.rpc("manage_staff", {
+    const { error } = await client.rpc("manage_staff_account", {
       p_user_id: id || createdId,
       p_role: values.role,
       p_active: values.active,
       p_display_name: values.name,
+      p_username: values.username,
       p_access: values.access,
       p_delete: deleting,
       p_transparency_access: values.transparencyAccess,
     });
     failed = Boolean(error);
+    duplicateUsername = error?.code === "23505";
   } catch {
     failed = true;
   }
@@ -81,6 +81,7 @@ export async function saveUser(
         return "Account creation or access setup could not be confirmed. Review the account in Users before retrying.";
       }
     }
+    if (duplicateUsername) return "That username is already in use.";
     return "Could not save access. Check office assignments and your permissions. You cannot remove your own Super Admin access.";
   }
   revalidatePath("/superadmin", "layout");

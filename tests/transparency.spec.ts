@@ -1,7 +1,7 @@
 ﻿import { test, expect, type Page } from "@playwright/test";
-async function login(page: Page, email: string) {
+async function login(page: Page, username: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Username", { exact: true }).fill(username);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/(superadmin|admin)$/);
@@ -40,7 +40,7 @@ test("dynamic modules, partial quarters, annual years, replacement, filters and 
       headers: { "Access-Control-Allow-Origin": "*" },
     }),
   );
-  await login(page, "superadmin@example.test");
+  await login(page, "superadmin");
   await page.goto("/admin/transparency/modules");
   await page.getByRole("link", { name: "Add module", exact: true }).click();
   await page.getByLabel("Module name", { exact: true }).fill(moduleName);
@@ -205,7 +205,7 @@ test("dynamic modules, partial quarters, annual years, replacement, filters and 
 });
 for (const actor of ["editor", "admin", "vmo"])
   test(actor + " cannot manage Transparency", async ({ page }) => {
-    await login(page, actor + "@example.test");
+    await login(page, actor);
     for (const path of [
       "/admin/transparency",
       "/admin/transparency/reports/new",
@@ -239,13 +239,13 @@ test("Superadmin assigns Transparency-only staff; Editor manages modules and rep
   page,
   browser,
 }, info) => {
-  const email = `transparency-${info.project.name}@example.test`;
+  const username = `transparency-${info.project.name}`;
   const name = `Transparency staff ${info.project.name}`;
   const moduleName = `Assigned module ${info.project.name}`;
-  await login(page, "superadmin@example.test");
+  await login(page, "superadmin");
   await page.goto("/superadmin/users/new");
   await page.getByLabel("Full name", { exact: true }).fill(name);
-  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Username", { exact: true }).fill(username);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page
     .getByLabel("Confirm password", { exact: true })
@@ -253,17 +253,15 @@ test("Superadmin assigns Transparency-only staff; Editor manages modules and rep
   await page
     .getByRole("combobox", { name: "Role", exact: true })
     .selectOption("editor");
-  await page
-    .getByRole("listbox", { name: "Office Access", exact: true })
-    .selectOption("transparency");
+  await page.locator('input[name="office"][value="transparency"]').check();
   await page.getByRole("button", { name: "Create user", exact: true }).click();
   await expect(page).toHaveURL(/\/superadmin\/users$/);
   const accountRow = page
     .getByRole("row")
-    .filter({ has: page.getByRole("cell", { name: email, exact: true }) });
+    .filter({ has: page.getByRole("cell", { name: username, exact: true }) });
   await expect(accountRow).toContainText("Transparency");
   await accountRow
-    .getByRole("link", { name: "View / Edit / Manage access" })
+    .getByRole("link", { name: "Edit", exact: true })
     .click();
   await expect(page).toHaveURL(/\/superadmin\/users\/[0-9a-f-]+$/);
   await expect(
@@ -274,8 +272,9 @@ test("Superadmin assigns Transparency-only staff; Editor manages modules and rep
     fullPage: true,
   });
   await expect(
-    page.getByRole("listbox", { name: "Office Access", exact: true }),
-  ).toHaveValues(["transparency"]);
+    page.locator('input[name="office"][value="transparency"]'),
+  ).toBeChecked();
+  await expect(page.locator('input[name="office"]:checked')).toHaveCount(1);
   const accountUrl = page.url();
   const context = await browser.newContext({ viewport: page.viewportSize() });
   try {
@@ -288,7 +287,7 @@ test("Superadmin assigns Transparency-only staff; Editor manages modules and rep
         headers: { "Access-Control-Allow-Origin": "*" },
       }),
     );
-    await login(staff, email);
+    await login(staff, username);
     await expect(
       staff.getByRole("link", { name: "Users & access control", exact: true }),
     ).toHaveCount(0);
@@ -394,9 +393,7 @@ test("Superadmin assigns Transparency-only staff; Editor manages modules and rep
     );
     expect(status).toBe(403);
     await page.goto(accountUrl);
-    await page
-      .getByRole("listbox", { name: "Office Access", exact: true })
-      .selectOption([]);
+    await page.locator('input[name="office"][value="transparency"]').uncheck();
     await page
       .getByRole("button", { name: "Save changes", exact: true })
       .click();

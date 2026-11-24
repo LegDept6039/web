@@ -1,5 +1,6 @@
 ﻿import { readContentConfig } from "@/lib/content/config";
 import { getCollection } from "@/lib/content/repository";
+import type { Department } from "@/types";
 export async function getOrdinances() {
   return getCollection("ordinances");
 }
@@ -52,8 +53,50 @@ export async function getProgram(slug: string) {
   );
 }
 export async function getDepartments() {
-  return (await getCollection("departments")).filter(
-    (d) => d.contentScope !== "legislative" && d.active !== false,
+  const departments = (await getCollection("departments")).filter(
+    isPublicExecutiveDepartment,
+  );
+  const parentIds = new Set(
+    departments.filter((d) => !d.parentDepartmentId).map((d) => d.id),
+  );
+  return departments.filter(
+    (d) => !d.parentDepartmentId || parentIds.has(d.parentDepartmentId),
+  );
+}
+function isPublicExecutiveDepartment(d: Department) {
+  return d.contentScope !== "legislative" && d.active !== false;
+}
+export async function getDepartmentParent(department: Department) {
+  if (!department.parentDepartmentId) return undefined;
+  const parent = (
+    await getCollection("departments", { id: department.parentDepartmentId })
+  ).find((d) => d.id === department.parentDepartmentId);
+  return parent &&
+    isPublicExecutiveDepartment(parent) &&
+    !parent.parentDepartmentId
+    ? parent
+    : undefined;
+}
+async function publicDepartment(department?: Department) {
+  if (!department || !isPublicExecutiveDepartment(department)) return undefined;
+  if (department.parentDepartmentId && !(await getDepartmentParent(department)))
+    return undefined;
+  return department;
+}
+export async function getDepartmentBranches(parentId: string) {
+  const parent = (await getCollection("departments", { id: parentId })).find(
+    (d) => d.id === parentId,
+  );
+  if (
+    !parent ||
+    !isPublicExecutiveDepartment(parent) ||
+    parent.parentDepartmentId
+  )
+    return [];
+  return (
+    await getCollection("departments", { parent_department_id: parentId })
+  ).filter(
+    (d) => isPublicExecutiveDepartment(d) && d.parentDepartmentId === parentId,
   );
 }
 export async function getDepartmentContactDirectory() {
@@ -84,7 +127,7 @@ export async function getDepartment(slug: string) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return undefined;
   const departments = await getCollection("departments", { slug });
   const current = departments.find((d) => (d.slug || d.id) === slug);
-  if (current) return current;
+  if (current) return publicDepartment(current);
   const config = readContentConfig(process.env);
   if (config.source !== "supabase" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
     return undefined;
@@ -107,7 +150,7 @@ export async function getDepartment(slug: string) {
   const aliases = await response.json();
   const id = aliases[0]?.department_id;
   if (typeof id !== "string") return undefined;
-  return (await getCollection("departments", { id }))[0];
+  return publicDepartment((await getCollection("departments", { id }))[0]);
 }
 export async function getDepartmentContent(officeId?: string) {
   if (!officeId) return { news: [], programs: [], contacts: [], services: [] };

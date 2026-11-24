@@ -60,9 +60,9 @@ export function passwordError(error: {
     return "The sign-in service is temporarily unavailable. Please try again later.";
   switch (error.code) {
     case "invalid_credentials":
-      return "Unable to sign in. Invalid email or password.";
+      return "Unable to sign in. Invalid username or password.";
     case "email_not_confirmed":
-      return "Unable to sign in. Confirm your email address first.";
+      return "Unable to sign in. Ask your administrator to finish setting up your account.";
     case "user_banned":
       return "Unable to sign in. This authentication account is disabled.";
     case "over_request_rate_limit":

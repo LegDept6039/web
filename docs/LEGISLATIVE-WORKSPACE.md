@@ -10,7 +10,7 @@ Migration 014 extends the existing tables; it does not create a parallel CMS or 
 
 Legislative Access remains one department assignment with existing role and membership limits. Its collapsible menu has OFFICE OVERVIEW (Dashboard, Officials, Committees, Sessions) and DOCUMENTS (Add Document, Ordinances, Resolutions, Minutes, Agenda, Executive Orders). These labels are headings, not additional modules. Executive offices retain their existing navigation.
 
-The Dashboard link opens `/admin/content?office=<legislative-office-id>`. Five summary cards show officials, ordinances, resolutions, sessions, and other municipal documents for the selected Legislative Term. Officials and sessions include drafts; document counts include only published records, and municipal documents exclude soft-deleted records. Staff assigned only to Legislative Access also see this overview at `/admin`; multi-office staff choose their office as before.
+The Dashboard link opens `/admin/content?office=<legislative-office-id>`. Five summary cards show officials, ordinances, resolutions, sessions, and other municipal documents for the selected Legislative Term. Officials include drafts; sessions are always published after migration 031. Document counts include only published records, and municipal documents exclude soft-deleted records. Staff assigned only to Legislative Access also see this overview at `/admin`; multi-office staff choose their office as before.
 
 Below the cards, **Authorship by official** lists officials in the selected office and term, excluding the Municipal Vice-Mayor and including officials with zero documents. The Officials summary card still includes the Vice-Mayor. The switch above the table selects **Resolutions** (initially selected) or **Ordinances**. Authored and co-authored columns count published records by their existing official IDs; numeric headings and cells are centered. Historical free-text names are not guessed into relationships. Both datasets load on the server with pagination; switching the table is immediate. Failed queries show unavailable counts instead of reporting zero. Access uses the existing authenticated staff context and office membership checks, including read-only viewers; no new migration or permission is required.
 
@@ -30,6 +30,8 @@ Dropdown options load from the current Legislative office's records, with pagina
 ## Publication and security
 
 The document workspace manages published documents only. A valid new document is published on save, with no Draft/Unpublished controls. Existing unpublished documents are excluded and cannot be published by opening this editor. No migration publishes or deletes them.
+
+Sessions publish on every single or bulk save, with no draft controls. Migration 031 publishes existing draft sessions and rejects future draft writes at the database level. Session IDs, details, relationships and term assignments are preserved; already published positions remain unchanged. Other collections keep their existing publication rules.
 
 `legislative_documents` is a read-only union view of ordinances, resolutions and municipal_documents, using `security_invoker=true` so existing source-table RLS remains authoritative. Server queries explicitly filter by assigned scope and publication. Existing authenticated-session checks, ownership checks, optimistic updated_at checks, audit triggers and publication ordering are retained.
 

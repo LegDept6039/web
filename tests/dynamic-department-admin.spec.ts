@@ -1,8 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 import sharp from "sharp";
-async function login(page: Page, email: string) {
+async function login(page: Page, username: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Username", { exact: true }).fill(username);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/(superadmin|admin)$/);
@@ -12,7 +12,7 @@ test("new department becomes public, assignable and manageable without adding so
 }, info) => {
   const slug = `municipal-agriculture-${info.project.name}`,
     name = `Municipal Agriculture Office ${info.project.name}`,
-    email = `agriculture-${info.project.name}@example.test`;
+    username = `agriculture-${info.project.name}`;
   const photo = await sharp("public/images/logos/seal.png")
     .resize(80, 80)
     .png()
@@ -23,7 +23,7 @@ test("new department becomes public, assignable and manageable without adding so
   await page.route("**/_next/image**", (r) =>
     r.fulfill({ contentType: "image/png", body: photo }),
   );
-  await login(page, "superadmin@example.test");
+  await login(page, "superadmin");
   await page.goto("/superadmin/departments/new");
   await page
     .getByRole("textbox", { name: "Department name", exact: true })
@@ -66,7 +66,7 @@ test("new department becomes public, assignable and manageable without adding so
   const capturedCreation = await creationRequest;
   const row = page.getByRole("row").filter({ hasText: name });
   const href = await row
-    .getByRole("link", { name: "Edit / Deactivate", exact: true })
+    .getByRole("link", { name: "Edit department", exact: true })
     .getAttribute("href");
   const id = href!.split("/").pop()!;
   await page.goto(href!);
@@ -107,12 +107,15 @@ test("new department becomes public, assignable and manageable without adding so
   await expect(page.locator(".department-contact-card")).toHaveCount(0);
   await page.goto("/superadmin/users/new");
   await expect(
-    page.locator('select[name="office"] option').filter({ hasText: name }),
+    page
+      .getByRole("group", { name: "Office access", exact: true })
+      .locator("label")
+      .filter({ hasText: name }),
   ).toHaveCount(1);
   await page
     .getByLabel("Full name", { exact: true })
     .fill("Agriculture Editor");
-  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Username", { exact: true }).fill(username);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page
     .getByLabel("Confirm password", { exact: true })
@@ -120,13 +123,11 @@ test("new department becomes public, assignable and manageable without adding so
   await page
     .getByRole("combobox", { name: "Role", exact: true })
     .selectOption("editor");
-  await page
-    .getByRole("listbox", { name: "Office Access", exact: true })
-    .selectOption(id);
+  await page.locator(`input[name="office"][value="${id}"]`).check();
   await page.getByRole("button", { name: "Create user", exact: true }).click();
   await expect(page).toHaveURL(/\/superadmin\/users$/);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await login(page, email);
+  await login(page, username);
   // Replay the actual Superadmin creation action under the Editor's cookies.
   const headers = capturedCreation.headers();
   const forgedCreation = await page.request.post(capturedCreation.url(), {
@@ -305,7 +306,10 @@ test("new department becomes public, assignable and manageable without adding so
     directoryCard.getByRole("link", { name: "09280000000", exact: true }),
   ).toHaveAttribute("href", "tel:09280000000");
   await expect(
-    directoryCard.getByRole("link", { name: "office@example.test", exact: true }),
+    directoryCard.getByRole("link", {
+      name: "office@example.test",
+      exact: true,
+    }),
   ).toHaveAttribute("href", /mailto:/);
   await expect(
     directoryCard.locator(`a[href="/departments/${slug}"]`),
@@ -344,7 +348,7 @@ test("new department becomes public, assignable and manageable without adding so
   await page.goto("/superadmin/users");
   await expect(page).toHaveURL(/\/admin$/);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await login(page, "superadmin@example.test");
+  await login(page, "superadmin");
   await page.goto(`/superadmin/departments/${id}`);
   await page.getByLabel("Active", { exact: true }).uncheck();
   await page
@@ -358,6 +362,9 @@ test("new department becomes public, assignable and manageable without adding so
   await expect(page.locator(".department-contact-card")).toHaveCount(0);
   await page.goto("/superadmin/users/new");
   await expect(
-    page.locator('select[name="office"] option').filter({ hasText: name }),
+    page
+      .getByRole("group", { name: "Office access", exact: true })
+      .locator("label")
+      .filter({ hasText: name }),
   ).toHaveCount(0);
 });

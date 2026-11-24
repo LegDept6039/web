@@ -4,10 +4,11 @@ const office = "10000000-0000-4000-8000-000000000005";
 async function login(page: Page, user = "mho") {
   await page.context().clearCookies();
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${user}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(user);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/(admin|superadmin)$/);
+  await expect(page.locator("#admin-navigation")).toBeAttached();
 }
 async function fill(page: Page, values: Record<string, string>) {
   for (const [name, value] of Object.entries(values))
@@ -281,7 +282,7 @@ test("publication status and department-page-and-head shortcut preserve editor a
   const row = page
     .getByRole("row")
     .filter({
-      has: page.getByRole("link", { name: "Page, head & images", exact: true }),
+      has: page.getByRole("link", { name: "Edit page, head and images", exact: true }),
     })
     .filter({ hasText: "MHO" });
   await expect(row).toContainText("Unpublished");

@@ -4,7 +4,7 @@ test("member-only authors and same-date session matching survive saving and edit
   page,
 }, info) => {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill("vmo@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("vmo");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page.locator("main .legislative-summary-grid").first()).toBeVisible();

@@ -11,9 +11,9 @@ Deploy the matching migration and application together. If the reset status cann
 ## Superadmin Workflow
 
 1. Verify the staff member's identity privately. Open **Superadmin > Users**, select their existing account, and click **Reset Password**.
-2. Check the account name and email in the confirmation panel, select the identity-verification checkbox, then confirm **Reset Password**.
+2. Check the account name and username in the confirmation panel, select the identity-verification checkbox, then confirm **Reset Password**.
 3. Copy the generated temporary password with **Copy temporary password** and give it to that staff member privately. The panel shows its expiry in Philippine time. **Done** clears the displayed password; it cannot be retrieved through the CMS afterward.
-4. The staff member signs in at `/login` with the temporary password and goes directly to `/change-password`. They enter and confirm their own password, then select **Save password**.
+4. The staff member signs in at `/login` with their username and temporary password and goes directly to `/change-password`. They enter and confirm their own password, then select **Save password**.
 5. On success they return to login with **Password updated. Please sign in with your new password.** Their next login opens the usual workspace with the original role and office permissions.
 
 Temporary passwords expire 30 minutes after activation. Expiry is enforced by the portal's login, password-change action and database authorization gate; this does not rely on a Supabase per-password expiry setting. An expired reset tells the staff member to contact the Superadmin. Issuing another reset replaces the earlier temporary password and reset generation. A password operation already being issued or completed must finish before another can start.

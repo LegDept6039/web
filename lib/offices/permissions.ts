@@ -9,6 +9,7 @@ export interface Office {
   short_name: string;
   slug: string;
   department: "executive" | "legislative";
+  parent_department_id?: string | null;
   description: string;
   active: boolean;
   updated_at: string;

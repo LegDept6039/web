@@ -1,6 +1,7 @@
 import "server-only";
-import { branchAllows } from "./collections";
+import { officeAllowsCollection } from "./collections";
 import type { Collection } from "@/lib/content/schema";
+import { isBarangayAffairsOffice } from "@/lib/barangays/permissions";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireStaff } from "@/lib/auth/server";
 import {
@@ -91,13 +92,15 @@ export function contentAllowed(
   operation: Operation,
 ) {
   if (collection === "departments" && operation === "delete") return false;
+  const owner = context.offices.find((o) => o.id === row.office_id);
+  if (isBarangayAffairsOffice(owner) && collection !== "news") return false;
   if (context.profile.role === "superadmin") return true;
   const office = context.offices.find(
     (o) => o.id === row.office_id && o.department === row.content_scope,
   );
   return Boolean(
     office &&
-    branchAllows(office.department, collection) &&
+    officeAllowsCollection(office, collection) &&
     !(collection === "departments" && operation === "delete") &&
     allowed(
       context,
@@ -132,13 +135,13 @@ export function available(
   if (context.profile.role === "superadmin") {
     if (!officeId) return true;
     const office = context.offices.find((o) => o.id === officeId && o.active);
-    return Boolean(office && branchAllows(office.department, collection));
+    return Boolean(office && officeAllowsCollection(office, collection));
   }
   const branch = workflow(context, officeId);
   return context.offices.some(
     (o) =>
       o.department === branch &&
-      branchAllows(branch, collection) &&
+      officeAllowsCollection(o, collection) &&
       (!officeId || o.id === officeId) &&
       allowed(context, o.id, operation),
   );

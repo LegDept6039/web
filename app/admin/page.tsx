@@ -10,6 +10,17 @@ export default async function Dashboard({
   const { term } = await searchParams;
   const context = await officeContext();
   const { profile, offices, access } = context;
+  const activeOffices = offices.filter((office) => office.active);
+  const officeGroups = [
+    {
+      title: "Your offices",
+      offices: activeOffices.filter((office) => !office.parent_department_id),
+    },
+    {
+      title: "Branches",
+      offices: activeOffices.filter((office) => office.parent_department_id),
+    },
+  ];
   if (
     profile.role !== "superadmin" &&
     !transparencyAccess(profile) &&
@@ -48,27 +59,32 @@ export default async function Dashboard({
           </Link>
         </div>
       )}
-      <h2>Your offices</h2>
-      <div className="staff-grid">
-        {offices
-          .filter((o) => o.active)
-          .map((o) => (
-            <Link
-              className="staff-card"
-              key={o.id}
-              href={`/admin/content?office=${o.id}`}
-            >
-              <p className="eyebrow">{o.department}</p>
-              <h2>{o.short_name || o.name}</h2>
-              <p>{o.name}</p>
-              <small>
-                {profile.role === "superadmin"
-                  ? "Full access"
-                  : access.find((a) => a.office_id === o.id)?.permission_level}
-              </small>
-            </Link>
-          ))}
-      </div>
+      {officeGroups
+        .filter((group) => group.offices.length > 0)
+        .map((group) => (
+          <section key={group.title} aria-label={group.title}>
+            <h2>{group.title}</h2>
+            <div className="staff-grid">
+              {group.offices.map((o) => (
+                <Link
+                  className="staff-card"
+                  key={o.id}
+                  href={`/admin/content?office=${o.id}`}
+                >
+                  <p className="eyebrow">{o.department}</p>
+                  <h2>{o.short_name || o.name}</h2>
+                  <p>{o.name}</p>
+                  <small>
+                    {profile.role === "superadmin"
+                      ? "Full access"
+                      : access.find((a) => a.office_id === o.id)
+                          ?.permission_level}
+                  </small>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
       {!offices.length && (
         <p>
           {transparencyAccess(profile)

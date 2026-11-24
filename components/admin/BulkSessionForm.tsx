@@ -32,7 +32,6 @@ export function BulkSessionForm({
     terms.some((t) => t.id === term) ? term : "",
   );
   const [rows, setRows] = useState([emptyRow(0)]);
-  const [published, setPublished] = useState(false);
   const nextKey = useRef(1);
   const resultPanel = useRef<HTMLDivElement>(null);
   const [result, action, pending] = useActionState(addBulkSessions, {
@@ -89,7 +88,7 @@ export function BulkSessionForm({
         )}
       />
       <fieldset disabled={pending} className="bulk-session-settings">
-        <legend>Term and publication</legend>
+        <legend>Legislative Term</legend>
         {offices.length > 1 && (
           <label>
             Office
@@ -126,18 +125,8 @@ export function BulkSessionForm({
             ? `Session dates must fall between ${selected.start_date} and ${selected.end_date}, inclusive.`
             : "Choose the term these sessions belong to."}
         </p>
-        <label className="bulk-session-publication">
-          <input
-            type="checkbox"
-            name="published"
-            checked={published}
-            onChange={(event) => setPublished(event.target.checked)}
-          />
-          Publish all sessions
-        </label>
         <p className="staff-note">
-          Leave unchecked to save every session as a draft. Sessions are listed
-          by date, newest first.
+          All sessions are published when saved and listed by date, newest first.
         </p>
       </fieldset>
       <div className="bulk-session-count" role="status">

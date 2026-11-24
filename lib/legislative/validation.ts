@@ -43,6 +43,10 @@ export function parseLegislative(
       );
     row.published = true;
     row.sort_order = existing?.sort_order || 1;
+  } else if (collection === "sessions") {
+    // Publication is server-owned; a missing or forged draft flag has no effect.
+    row.published = true;
+    row.sort_order = existing?.sort_order || 1;
   } else {
     row.published = form.get("published") === "on";
     row.sort_order = publicationPosition(form);

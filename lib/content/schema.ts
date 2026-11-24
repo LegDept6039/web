@@ -127,6 +127,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     fields: {
       id: { ...text("id"), optional: true },
       officeId: { ...text("office_id"), optional: true },
+      barangayId: { ...text("barangay_id"), optional: true },
       contentScope: {
         ...text("content_scope"),
         optional: true,
@@ -185,6 +186,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "departments",
     key: "id",
     fields: {
+      parentDepartmentId: { ...text("parent_department_id"), optional: true },
       acronym: { ...text("short_name"), optional: true },
       body: { ...text("body"), optional: true },
       imageUrl: url("image_url", true),

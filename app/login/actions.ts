@@ -14,6 +14,8 @@ import { authClient } from "@/lib/auth/server";
 import { cookies } from "next/headers";
 import { authConfig } from "@/lib/auth/config";
 import { resolveStaff } from "@/lib/auth/resolve-staff";
+import { normalizeUsername } from "@/lib/auth/username";
+import { usernameIdentity } from "@/lib/auth/username-server";
 import {
   authDiagnostic,
   errorCode,
@@ -27,16 +29,24 @@ export async function login(
   const tabToken = String(form.get("tab_token") || "");
   if (!validTabToken(tabToken))
     return "Enable browser storage and JavaScript, then try signing in again.";
-  const email = String(form.get("email") ?? "").trim();
+  let username: string;
+  try {
+    username = normalizeUsername(form.get("username"));
+  } catch {
+    return "Enter your username and password.";
+  }
   const password = String(form.get("password") ?? "");
-  if (!email || email.length > 254 || !password || password.length > 1024)
-    return "Enter your email and password.";
+  if (!password || password.length > 1024)
+    return "Enter your username and password.";
   let destination = "/admin";
   try {
     const client = await authClient(true);
     if (!client) return "Staff login has not been configured yet.";
+    const identity = await usernameIdentity(username);
+    // Unknown names still use the password endpoint and its rate limiting.
+    // No internal Auth identifier is returned to the browser.
     const { data, error } = await client.auth.signInWithPassword({
-      email,
+      email: identity?.email || "unknown-staff@staff.pinamungajan.invalid",
       password,
     });
     if (error || !data.user || !data.session) {
@@ -49,6 +59,10 @@ export async function login(
       return error
         ? passwordError(error)
         : "Unable to sign in. The authentication service returned no session.";
+    }
+    if (!identity || data.user.id !== identity.userId) {
+      await client.auth.signOut({ scope: "local" });
+      return "Unable to sign in. Invalid username or password.";
     }
     authDiagnostic("password", {
       outcome: "ok",

@@ -7,7 +7,7 @@ for (const [user, destination] of [
 ]) {
   test(`active ${user} signs in with current access`, async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Email address").fill(`${user}@example.test`);
+    await page.getByLabel("Username", { exact: true }).fill(user);
     await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${destination}$`));
@@ -37,20 +37,20 @@ for (const [user, destination] of [
 
 for (const [user, message] of [
   ["inactive", "inactive or removed"],
-  ["missing-profile", "no staff profile is available"],
+  ["missing-profile", "Invalid username or password"],
   ["no-membership", "no active department assignment"],
   ["profile-error", "staff profile could not be loaded (42501)"],
   ["membership-error", "department access could not be loaded (42501)"],
   ["invalid-role", "staff role is not recognized"],
-  ["wrong-password", "Invalid email or password"],
+  ["wrong-password", "Invalid username or password"],
 ]) {
   test(`${user} receives a specific denial and cannot retain staff access`, async ({
     page,
   }) => {
     await page.goto("/login");
     await page
-      .getByLabel("Email address")
-      .fill(`${user === "wrong-password" ? "editor" : user}@example.test`);
+      .getByLabel("Username", { exact: true })
+      .fill(`${user === "wrong-password" ? "editor" : user}`);
     await page
       .getByLabel("Password", { exact: true })
       .fill(
@@ -88,19 +88,19 @@ test("stale chunked refresh cookies are cleared and a new password login succeed
     {
       name: "sb-fixture-auth-token.0",
       value: session.slice(0, middle),
-      url: "http://127.0.0.1:3003",
+      url: String(test.info().project.use.baseURL),
       httpOnly: true,
     },
     {
       name: "sb-fixture-auth-token.1",
       value: session.slice(middle),
-      url: "http://127.0.0.1:3003",
+      url: String(test.info().project.use.baseURL),
       httpOnly: true,
     },
     {
       name: "sb-other-auth-token",
       value: "unrelated-project",
-      url: "http://127.0.0.1:3003",
+      url: String(test.info().project.use.baseURL),
     },
   ]);
   await page.goto("/superadmin");
@@ -114,7 +114,7 @@ test("stale chunked refresh cookies are cleared and a new password login succeed
   await expect(
     page.getByRole("heading", { name: "Staff sign in" }),
   ).toBeVisible();
-  await page.getByLabel("Email address").fill("superadmin@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("superadmin");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/superadmin$/);

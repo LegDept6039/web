@@ -5,16 +5,16 @@ import { logout } from "@/app/login/actions";
 import { changeRequiredPassword } from "./actions";
 
 export function ChangePasswordForm({
-  email,
+  username,
   expiresAt,
 }: {
-  email?: string;
+  username?: string;
   expiresAt?: string;
 }) {
   const [message, action, pending] = useActionState(changeRequiredPassword, "");
   return (
     <>
-      {email && <p className="staff-reset-account">{email}</p>}
+      {username && <p className="staff-reset-account">{username}</p>}
       <p>Choose a new password to continue to your municipal staff account.</p>
       <form
         className="staff-form"

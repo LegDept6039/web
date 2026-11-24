@@ -17,6 +17,8 @@ import {
 } from "@/lib/legislative/config";
 import { uploadDocumentPdf } from "@/lib/admin/document-pdf";
 import { definitions } from "@/lib/content/schema";
+import { isBarangayAffairsOffice } from "@/lib/barangays/permissions";
+import { validateNewsBarangay } from "@/lib/barangays/news";
 
 export async function saveContent(
   _state: string,
@@ -75,6 +77,7 @@ export async function saveContent(
       "published",
       "sort_order",
       "is_sample",
+      "parent_department_id",
     ]) {
       const expected =
         typeof department[key] === "boolean"
@@ -152,6 +155,32 @@ export async function saveContent(
       (item) => item.id === office && item.department === scope,
     );
     if (!owner) return "You do not have permission to edit this office.";
+    if (!allowed(context, owner.id, "write"))
+      return "You do not have permission to edit this office.";
+    if (
+      existing &&
+      (existing.barangay_id || isBarangayAffairsOffice(owner)) &&
+      (existing.office_id !== office || existing.content_scope !== scope)
+    )
+      return "Barangay news cannot be transferred to or from an ordinary news workspace.";
+    try {
+      const barangayId = await validateNewsBarangay(
+        form.get("barangay_id"),
+        isBarangayAffairsOffice(owner),
+        async (id) => {
+          const { data, error } = await client
+            .from("barangays")
+            .select("id")
+            .eq("id", id)
+            .maybeSingle();
+          if (error) throw new Error("Unable to check the selected barangay.");
+          return data;
+        },
+      );
+      form.set("barangay_id", barangayId || "");
+    } catch (error) {
+      return error instanceof Error ? error.message : "Choose a barangay.";
+    }
     // Category follows trusted ownership, never a separate client-supplied label.
     form.set("category", owner.name);
   }
@@ -208,6 +237,30 @@ export async function saveContent(
   row.content_scope = scope;
   if (!contentAllowed(context, collection, row, "write"))
     return "You do not have permission to manage content in this office.";
+  if (collection === "sessions") {
+    // Keep a saved session in place. New sessions and historical drafts append
+    // within their trusted owner scope; submitted publication/order is ignored.
+    const keepsPosition =
+      existing?.published === true &&
+      existing.content_scope === scope &&
+      existing.office_id === office;
+    if (existing && keepsPosition) row.sort_order = existing.sort_order;
+    else {
+      let positions = client
+        .from("sessions")
+        .select("id", { count: "exact", head: true })
+        .eq("content_scope", scope)
+        .eq("published", true);
+      positions = office
+        ? positions.eq("office_id", office)
+        : positions.is("office_id", null);
+      const { count, error } = await positions;
+      if (error || count === null)
+        return "Unable to check session ordering. Reload and try again.";
+      row.sort_order = count + 1;
+    }
+    row.published = true;
+  }
   if (scope === "legislative" && collection === "committees") {
     const master = await client
       .from("committee_master")
@@ -416,8 +469,12 @@ export async function saveContent(
   if (!result.data?.length)
     return "This record changed or your access was removed. Reload before saving.";
   revalidatePath("/", "layout");
+  const destination =
+    collection === "departments" && row.parent_department_id
+      ? "/admin/branches"
+      : `/admin/content/${collection}`;
   redirect(
-    `/admin/content/${collection}?saved=${encodeURIComponent(String((result.data[0] as unknown as Record<string, unknown>)[definition.key]))}${office ? `&office=${office}` : ""}${collection === "committees" && row.term_id ? `&term=${encodeURIComponent(String(row.term_id))}` : ""}`,
+    `${destination}?saved=${encodeURIComponent(String((result.data[0] as unknown as Record<string, unknown>)[definition.key]))}${office ? `&office=${office}` : ""}${collection === "committees" && row.term_id ? `&term=${encodeURIComponent(String(row.term_id))}` : ""}`,
   );
 }
 

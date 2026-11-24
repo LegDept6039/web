@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 async function login(page: Page, role: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${role}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(role);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(
@@ -16,7 +16,7 @@ test("standalone login, invalid credentials, logout and protected routes", async
 }) => {
   await page.goto("/login");
   await expect(page.locator("header,footer")).toHaveCount(0);
-  await page.getByLabel("Email address").fill("editor@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("editor");
   await page.getByLabel("Password", { exact: true }).fill("WrongPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page.locator(".staff-error")).toContainText("Unable to sign in");
@@ -107,8 +107,8 @@ test("superadmin creates user from website, assigns offices and resets password"
   await page.goto("/superadmin/users/new");
   await page.getByLabel("Full name", { exact: true }).fill("New Staff");
   await page
-    .getByLabel("Email", { exact: true })
-    .fill(`new-${testInfo.project.name}@example.test`);
+    .getByLabel("Username", { exact: true })
+    .fill(`new-${testInfo.project.name}`);
   await page.getByLabel("Password", { exact: true }).fill("NewPassword123!");
   await page
     .getByLabel("Confirm password", { exact: true })
@@ -116,24 +116,26 @@ test("superadmin creates user from website, assigns offices and resets password"
   await page
     .getByRole("combobox", { name: "Role", exact: true })
     .selectOption("editor");
-  await page
-    .getByRole("listbox", { name: "Office Access", exact: true })
-    .selectOption("10000000-0000-4000-8000-000000000001");
+  const mpdcAccess = page.locator(
+    'input[name="office"][value="10000000-0000-4000-8000-000000000001"]',
+  );
+  await mpdcAccess.check();
   const role = page.getByRole("combobox", { name: "Role", exact: true });
-  const officeAccess = page.locator('select[name="office"]');
+  const officeAccess = page.locator(".account-office-access");
   await role.selectOption("superadmin");
   await expect(officeAccess).toBeHidden();
   await expect(page.getByText(/Super Admin has .*access/i)).toBeVisible();
   await role.selectOption("editor");
   await expect(officeAccess).toBeVisible();
-  await expect(officeAccess).toHaveValues([
-    "10000000-0000-4000-8000-000000000001",
-  ]);
+  await expect(mpdcAccess).toBeChecked();
+  await expect(
+    officeAccess.locator('input[name="office"]:checked'),
+  ).toHaveCount(1);
   await page.getByRole("button", { name: "Create user", exact: true }).click();
   await expect(page).toHaveURL(/\/superadmin\/users$/);
   const row = page
     .getByRole("row")
-    .filter({ hasText: `new-${testInfo.project.name}@example.test` });
+    .filter({ hasText: `new-${testInfo.project.name}` });
   await expect(row).toContainText("MPDC");
   await row.getByRole("link").click();
   await role.selectOption("superadmin");
@@ -156,9 +158,10 @@ test("superadmin creates user from website, assigns offices and resets password"
   });
   await role.selectOption("editor");
   await expect(officeAccess).toBeVisible();
-  await expect(officeAccess).toHaveValues([
-    "10000000-0000-4000-8000-000000000001",
-  ]);
+  await expect(mpdcAccess).toBeChecked();
+  await expect(
+    officeAccess.locator('input[name="office"]:checked'),
+  ).toHaveCount(1);
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
   await expect(page).toHaveURL(/\/superadmin\/users$/);
   await expect(row).toContainText("MPDC");

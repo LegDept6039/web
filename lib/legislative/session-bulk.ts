@@ -33,7 +33,6 @@ export function sessionIdentity(row: Record<string, unknown>) {
 export function parseBulkSessions(
   input: unknown,
   term: LegislativeTerm,
-  published: boolean,
 ): Record<string, unknown>[] {
   if (
     !Array.isArray(input) ||
@@ -57,8 +56,6 @@ export function parseBulkSessions(
           throw new Error(`${key} is required.`);
         form.set(key, fields[key]);
       }
-      form.set("published", published ? "on" : "");
-      form.set("sort_order", published ? "1" : "0");
       const row = parseLegislative("sessions", form, null);
       if (
         String(row.date) < term.start_date ||

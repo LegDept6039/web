@@ -5,8 +5,9 @@ import { TermSelector } from "@/components/legislative/TermSelector";
 import { LegislativeDocuments } from "@/components/admin/LegislativeDocuments";
 import { isDocumentCollection } from "@/lib/legislative/config";
 import { ContentBreadcrumb } from "@/components/admin/ContentBreadcrumb";
+import { DepartmentContentList } from "@/components/admin/DepartmentContentList";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   officeContext,
   allowed,
@@ -17,6 +18,7 @@ import {
 import { collectionName, label } from "@/lib/admin/content";
 import { definitions } from "@/lib/content/schema";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminActionLink } from "@/components/admin/AdminActionLink";
 import { loadAdminPage } from "@/lib/admin/pagination";
 export default async function ContentPage({
   params,
@@ -43,6 +45,22 @@ export default async function ContentPage({
   if (office && !allowed(context, office, "read"))
     return <p role="alert">No access to this office.</p>;
   if (!available(context, collection, office)) notFound();
+  if (collection === "departments") {
+    if (
+      context.offices.find((item) => item.id === office)?.parent_department_id
+    )
+      redirect(
+        `/admin/branches?${new URLSearchParams(Object.entries(filters).filter((entry): entry is [string, string] => entry[1] !== undefined))}`,
+      );
+    return (
+      <DepartmentContentList
+        context={context}
+        mode="departments"
+        office={office}
+        filters={filters}
+      />
+    );
+  }
   const scope = workflow(context, office);
   if (scope === "legislative" && collection === "committees")
     return (
@@ -101,9 +119,7 @@ export default async function ContentPage({
               : selected,
           );
   const { data, error, pagination } = await loadAdminPage(query, raw);
-  const canCreate =
-    collection !== "departments" &&
-    available(context, collection, office, "write");
+  const canCreate = available(context, collection, office, "write");
   return (
     <>
       <ContentBreadcrumb
@@ -176,14 +192,15 @@ export default async function ContentPage({
                     </td>
                     <td>{row.published ? "Published" : "Draft"}</td>
                     <td>{dateOrdered ? row.date : row.sort_order}</td>
-                    <td>
-                      <Link
+                    <td className="admin-actions-cell">
+                      <AdminActionLink
                         href={`/admin/content/${collection}/edit/${encodeURIComponent(row[key])}${row.office_id ? `?office=${encodeURIComponent(row.office_id)}` : ""}`}
-                      >
-                        {contentAllowed(context, collection, row, "write")
-                          ? "Edit"
-                          : "View"}
-                      </Link>
+                        action={
+                          contentAllowed(context, collection, row, "write")
+                            ? "edit"
+                            : "view"
+                        }
+                      />
                     </td>
                   </tr>
                 ))}

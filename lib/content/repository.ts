@@ -15,15 +15,18 @@ async function load<K extends Collection>(
   if (config.source === "mock") {
     const names: Record<string, string> = {
       office_id: "officeId",
+      parent_department_id: "parentDepartmentId",
+      barangay_id: "barangayId",
       category_id: "categoryId",
       content_scope: "contentScope",
     };
     const rows = readMockCollection(collection).filter((row) =>
-      Object.entries(filters).every(
-        ([key, value]) =>
-          (row as unknown as Record<string, unknown>)[names[key] || key] ===
-          value,
-      ),
+      Object.entries(filters).every(([key, value]) => {
+        const actual = (row as unknown as Record<string, unknown>)[
+          names[key] || key
+        ];
+        return value === null ? actual == null : actual === value;
+      }),
     );
     return limit === undefined ? rows : rows.slice(0, limit);
   }

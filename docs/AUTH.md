@@ -8,6 +8,16 @@
 
 The public website has no login link. Enter `/login` directly. Login has a standalone layout. `/admin`, `/superadmin`, and `/account` use a separate sidebar/topbar layout, without the public header or footer.
 
+## Username sign-in
+
+Staff sign in with a username and password. Usernames contain 3 to 40 letters, numbers, periods, underscores or hyphens, start with a letter or number, and are saved in lowercase. The Superadmin assigns or changes them under **Users & access control**. Full names remain separate for account identification and administration.
+
+Apply migration 033 after 032 before deploying the username sign-in changes. Existing Auth identities, passwords, roles, office assignments and content ownership are retained. The migration assigns existing profiles unique usernames; review them in **Users & access control** and share each staff member's username privately. Staff do not enter an email address when signing in or creating an account through the CMS.
+
+The migration returns the assigned usernames in its results. Most existing accounts use the lowercase name before the `@` in their old email. Conflicting or unsuitable names receive a unique suffix or an automatic `staff-…` name. Keep the migration result so you can sign in, then change any username through the account editor if needed.
+
+Supabase Auth retains an internal email identifier for password authentication. The server resolves usernames to that identifier; it is not a recovery address or a login field. Password recovery stays with the Superadmin's temporary-password workflow described in [Staff password reset](STAFF-PASSWORD-RESET.md).
+
 ## Upgrade an existing installation
 
 1. Back up your database. Keep the existing migrations and content; do not drop tables or rerun older migrations.
@@ -31,23 +41,23 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVER_ONLY_KEY
 
 The administration key accepts a modern `sb_secret_...` key or the legacy `service_role` JWT from the **same Supabase project**. It must not have a `NEXT_PUBLIC_` prefix, appear in browser code, be committed to Git, or be placed in the publishable-key field. The publishable content client still rejects privileged keys. Auth is now configured from the Supabase URL and publishable key independently of `CONTENT_SOURCE`; mock public content no longer disables configured authentication.
 
-The privileged client is isolated in `lib/auth/admin.ts` with `server-only`. It is used only for Auth account creation, rollback of failed creation, and administrator password resets, after checking the signed-in user's database Super Admin role. Content and application-profile operations use the user's session and RLS, never the privileged client.
+The privileged client is isolated in `lib/auth/admin.ts` with `server-only`. It resolves usernames for password authentication and performs Auth account creation, rollback of failed creation, and administrator password resets. Account creation and resets require the signed-in user's database Super Admin role. Content and application-profile operations use the user's session and RLS, never the privileged client.
 
 ## Vercel and Supabase configuration
 
 For the current deployment, use `https://legislativedept6039.vercel.app` as Supabase **Authentication > URL Configuration > Site URL**. Keep `http://localhost:3000` for local testing in the redirect allowlist as appropriate. Add an exact trusted preview domain if testing a separate Vercel Preview deployment. Do not allow arbitrary third-party redirect hosts.
 
-This implementation signs in with email/password and resets passwords directly through the authenticated administration server action. It does not send reset emails or use OAuth/PKCE email callbacks, so there is no `/auth/callback` route to configure for these flows. Adding email recovery later will require a verified callback/token flow and matching redirect URLs.
+This implementation signs in with a username and password and resets passwords directly through the authenticated administration server action. It does not send reset emails or use OAuth/PKCE email callbacks, so there is no `/auth/callback` route to configure for these flows. Adding email recovery later will require a verified callback/token flow and matching redirect URLs.
 
 In Vercel **Project > Settings > Environment Variables**, configure the four variables above for **Production** and the Preview/Development environments you actually use. Local `.env.local` is not uploaded to Vercel. Redeploy after changes. Use the same project's URL and keys. HTTPS production responses use Secure, HttpOnly, SameSite=Lax cookies and private/no-store caching. Each proxy request verifies/refreshes Supabase authentication; protected pages and actions independently check current roles.
 
 Deployment inspection during this change found `/login` returned HTTP 200 with an enabled form and the old public header. No specific failed-login response, authenticated production session, or Vercel environment access was available, so the previous production failure's root cause is **not established**. The local project had a URL and publishable key but no administration key. Read-only REST checks returned 401 for the private staff table (expected for anonymous access) and 404 for the not-yet-created office tables. This is not evidence of a password failure.
 
-Run `npm run auth:check` locally for diagnostics without printing credentials or staff records. An absent admin key does not prevent ordinary login, but blocks website user creation and administrator password resets. If login still fails in production, check Vercel Function logs, confirm all migrations exist in the matching project, check the account is active and not deleted, and verify its email is confirmed. Never paste passwords or secret keys into issue reports.
+Run `npm run auth:check` locally for diagnostics without printing credentials or staff records. Username sign-in, website user creation and administrator password resets require the administration key. If login fails in production, check Vercel Function logs, confirm all migrations exist in the matching project, and check the username and active account status. Never paste passwords or secret keys into issue reports.
 
 ## Roles and office levels
 
-`staff_accounts` remains the application profile table, with `user_id` referencing `auth.users`, `display_name`, email, role, active/deleted status, and timestamps. No duplicate profiles table or single-office column is introduced.
+`staff_accounts` remains the application profile table, with `user_id` referencing `auth.users`, `display_name`, unique username, internal Auth email identifier, role, active/deleted status, and timestamps. No duplicate profiles table or single-office column is introduced.
 
 | Global role | Office viewer                   | Office editor        | Office manager               |
 | ----------- | ------------------------------- | -------------------- | ---------------------------- |
@@ -62,9 +72,9 @@ All 12 existing content collections now have nullable `office_id` and `created_b
 
 ## Managing users
 
-At `/superadmin/users` choose **+ Add User**, enter a name, email, password/confirmation, role, enabled status, and office assignments grouped by Executive/Legislative. Accounts are created with confirmed email for administrator-provisioned staff. Share credentials privately. Passwords are handled by Supabase Auth and never stored in application tables or audit logs.
+At `/superadmin/users` choose **+ Add User**, enter a full name, username, password/confirmation, role, enabled status, and office assignments. The server creates the internal Auth identifier automatically. Share credentials privately. Passwords are handled by Supabase Auth and never stored in application tables or audit logs.
 
-Edit an account to change its name, role, status, or office permissions. Email is read-only to preserve Auth/profile consistency. Office assignments are updated in one database transaction. Users cannot grant themselves access, and Super Admins cannot demote, disable, or delete their own account through the portal.
+Edit an account to change its full name, username, role, status, or office permissions. Username changes retain the same Auth identity and password. Office assignments are updated in one database transaction. Users cannot grant themselves access, and Super Admins cannot demote, disable, or delete their own account through the portal.
 
 **Delete account** is a soft delete: disables portal access, removes office assignments, retains Auth identity and historical content authorship. Auth tokens may still exist, but database authorization denies protected access. Public reading remains possible like any visitor. Saving the account without Delete restores it; reassign offices as needed. Permanent deletion is not provided.
 

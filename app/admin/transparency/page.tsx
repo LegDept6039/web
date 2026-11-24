@@ -9,6 +9,7 @@ import { TransparencyDelete } from "@/components/admin/TransparencyDelete";
 import { transparencyAccess } from "@/lib/transparency/permissions";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { pageDetails } from "@/lib/admin/pagination";
+import { AdminActionLink } from "@/components/admin/AdminActionLink";
 export default async function Page({
   searchParams,
 }: {
@@ -93,21 +94,13 @@ export default async function Page({
               <th>Year</th>
               <th>Attachments</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th className="admin-actions-cell">Actions</th>
             </tr>
           </thead>
           <tbody>
             {visibleReports.map((r) => (
               <tr key={String(r.id)}>
-                <td>
-                  {canEdit ? (
-                    <Link href={"/admin/transparency/reports/" + r.id}>
-                      {String(r.title)}
-                    </Link>
-                  ) : (
-                    String(r.title)
-                  )}
-                </td>
+                <td>{String(r.title)}</td>
                 <td>
                   {String(
                     modules.find((m) => m.id === r.category_id)?.name || "",
@@ -152,12 +145,14 @@ export default async function Page({
                     {r.published ? "Published" : "Draft"}
                   </span>
                 </td>
-                <td>
+                <td className="admin-actions-cell">
                   {canEdit ? (
-                    <div className="transparency-row-actions">
-                      <Link href={"/admin/transparency/reports/" + r.id}>
-                        Edit<span className="sr-only"> {String(r.title)}</span>
-                      </Link>
+                    <div className="admin-row-actions">
+                      <AdminActionLink
+                        href={"/admin/transparency/reports/" + r.id}
+                        action="edit"
+                        label={`Edit ${String(r.title)}`}
+                      />
                       <TransparencyDelete
                         kind="documents"
                         id={String(r.id)}

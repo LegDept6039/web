@@ -11,7 +11,15 @@ const RichTextEditor = dynamic(
   { ssr: false },
 );
 
-export function BarangayForm({ barangay }: { barangay?: Barangay }) {
+export function BarangayForm({
+  barangay,
+  canWrite = true,
+  basePath = "/superadmin/barangays",
+}: {
+  barangay?: Barangay;
+  canWrite?: boolean;
+  basePath?: "/admin/barangays" | "/superadmin/barangays";
+}) {
   const [message, action, pending] = useActionState(saveBarangay, "");
   const [name, setName] = useState(barangay?.name || "");
   const [captain, setCaptain] = useState(barangay?.captain_name || "");
@@ -47,7 +55,7 @@ export function BarangayForm({ barangay }: { barangay?: Barangay }) {
           {message}
         </p>
       )}
-      <fieldset disabled={pending}>
+      <fieldset disabled={pending || !canWrite}>
         <legend>Barangay details</legend>
         <label>
           Barangay name
@@ -132,12 +140,12 @@ export function BarangayForm({ barangay }: { barangay?: Barangay }) {
             required={false}
             initial={barangay?.rich_body || undefined}
             legacy={barangay?.body || ""}
-            disabled={pending}
+            disabled={pending || !canWrite}
             onChange={setBody}
           />
         </div>
       </fieldset>
-      <fieldset disabled={pending}>
+      <fieldset disabled={pending || !canWrite}>
         <legend>Publication</legend>
         <label className="barangay-checkbox">
           <input
@@ -166,13 +174,15 @@ export function BarangayForm({ barangay }: { barangay?: Barangay }) {
         </p>
       </fieldset>
       <div className="staff-actions">
-        <button
-          className="button button-blue"
-          disabled={pending || Boolean(photoError)}
-        >
-          {pending ? "Saving..." : "Save barangay"}
-        </button>
-        <Link className="button" href="/superadmin/barangays">
+        {canWrite && (
+          <button
+            className="button button-blue"
+            disabled={pending || Boolean(photoError)}
+          >
+            {pending ? "Saving..." : "Save barangay"}
+          </button>
+        )}
+        <Link className="button" href={basePath}>
           Back to barangays
         </Link>
         {barangay?.published && (

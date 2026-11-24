@@ -37,6 +37,7 @@ export interface NewsArticle extends ContentRecord {
   id?: string;
   source?: { name: string; slug?: string };
   officeId?: string;
+  barangayId?: string;
   contentScope?: "executive" | "legislative";
   slug: string;
   title: string;
@@ -70,6 +71,7 @@ export interface Service extends ContentRecord {
   steps: string[];
 }
 export interface Department extends ContentRecord {
+  parentDepartmentId?: string;
   acronym?: string;
   body?: string;
   imageUrl?: string;

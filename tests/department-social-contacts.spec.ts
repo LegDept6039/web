@@ -4,7 +4,7 @@ const office = "10000000-0000-4000-8000-000000000005";
 
 async function login(page: Page) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill("mho@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("mho");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);

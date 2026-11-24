@@ -16,6 +16,7 @@ import {
 } from "@/lib/offices/server";
 import { collectionName, label } from "@/lib/admin/content";
 import { ContentForm } from "../../ContentForm";
+import { barangayNewsOptions } from "@/lib/barangays/news-options";
 export default async function NewContent({
   params,
   searchParams,
@@ -97,6 +98,8 @@ export default async function NewContent({
       ? await legislativeOptions(context, office, collection === "committees")
       : undefined;
   const { master, term } = await searchParams;
+  const barangayOptions =
+    collection === "news" ? await barangayNewsOptions(context) : undefined;
   if (
     collection === "committees" &&
     master &&
@@ -130,6 +133,7 @@ export default async function NewContent({
         scope={scope}
         offices={offices}
         legislativeOptions={options}
+        barangayOptions={barangayOptions}
         superadmin={superadmin}
         row={{
           office_id: office || "",

@@ -11,7 +11,7 @@ export default async function Account() {
     <div className="staff-card">
       <h1>Your profile</h1>
       <p>{profile.display_name}</p>
-      <p>{profile.email}</p>
+      <p>Username: {profile.username}</p>
       <p>
         Role: <strong>{profile.role}</strong>
       </p>

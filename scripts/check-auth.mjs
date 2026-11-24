@@ -25,8 +25,9 @@ if (!url || !key?.startsWith("sb_publishable_")) {
   const secret = env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!secret) {
     console.log(
-      "Server administration key: missing. Login can work, but account creation and admin password resets cannot.",
+      "Server administration key: missing. Username sign-in, account creation and admin password resets require it.",
     );
+    process.exitCode = 1;
   } else {
     const admin = createClient(url, secret, {
       auth: { persistSession: false, autoRefreshToken: false },
@@ -45,11 +46,13 @@ if (!url || !key?.startsWith("sb_publishable_")) {
       const { error } = await admin
         .from(table)
         .select(
-          table === "staff_accounts" || table === "user_office_access"
-            ? "user_id"
-            : table === "departments"
-              ? "id,archived_at"
-              : "id",
+          table === "staff_accounts"
+            ? "user_id,username,email"
+            : table === "user_office_access"
+              ? "user_id"
+              : table === "departments"
+                ? "id,archived_at"
+                : "id",
         )
         .limit(1);
       console.log(`${table}: ${error ? "unavailable; check migration" : "OK"}`);

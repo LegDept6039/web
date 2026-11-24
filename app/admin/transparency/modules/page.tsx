@@ -5,6 +5,7 @@ import { TransparencyDelete } from "@/components/admin/TransparencyDelete";
 import { transparencyAccess } from "@/lib/transparency/permissions";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 import { pageDetails } from "@/lib/admin/pagination";
+import { AdminActionLink } from "@/components/admin/AdminActionLink";
 export default async function Page({
   searchParams,
 }: {
@@ -53,7 +54,7 @@ export default async function Page({
               <th>Name</th>
               <th>Description</th>
               <th>Documents</th>
-              <th>Actions</th>
+              <th className="admin-actions-cell">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -66,12 +67,14 @@ export default async function Page({
                   </div>
                 </td>
                 <td>{reports.filter((r) => r.category_id === m.id).length}</td>
-                <td>
+                <td className="admin-actions-cell">
                   {canEdit ? (
-                    <div className="transparency-row-actions">
-                      <Link href={"/admin/transparency/modules/" + m.id}>
-                        Edit<span className="sr-only"> {String(m.name)}</span>
-                      </Link>
+                    <div className="admin-row-actions">
+                      <AdminActionLink
+                        href={"/admin/transparency/modules/" + m.id}
+                        action="edit"
+                        label={`Edit ${String(m.name)}`}
+                      />
                       <TransparencyDelete
                         kind="categories"
                         id={String(m.id)}

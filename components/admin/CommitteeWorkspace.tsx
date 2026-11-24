@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContentBreadcrumb } from "./ContentBreadcrumb";
 import { AdminPagination } from "./AdminPagination";
+import { AdminActionLink } from "./AdminActionLink";
 import { pageDetails } from "@/lib/admin/pagination";
 import { TermSelector } from "@/components/legislative/TermSelector";
 import { legislativeOptions } from "@/lib/legislative/server";
@@ -96,11 +97,12 @@ export async function CommitteeWorkspace({
     </>
   );
   const edit = (row: Record<string, unknown>) => (
-    <Link
+    <AdminActionLink
       href={`/admin/content/committees/edit/${encodeURIComponent(String(row.id))}?office=${owner.id}`}
-    >
-      {contentAllowed(context, "committees", row, "write") ? "Edit" : "View"}
-    </Link>
+      action={
+        contentAllowed(context, "committees", row, "write") ? "edit" : "view"
+      }
+    />
   );
   const historical =
     selected === "unassigned" ? rows : rows.filter((r) => !r.master_id);
@@ -169,15 +171,15 @@ export async function CommitteeWorkspace({
                           )}
                         </td>
                         {compositionCells(row)}
-                        <td>
+                        <td className="admin-actions-cell">
                           {row ? (
                             edit(row)
                           ) : canWrite && hasTerm ? (
-                            <Link
+                            <AdminActionLink
                               href={`/admin/content/committees/new?office=${owner.id}&master=${master.id}&term=${selected}`}
-                            >
-                              Edit composition
-                            </Link>
+                              action="edit"
+                              label="Edit composition"
+                            />
                           ) : hasTerm ? (
                             "Read only"
                           ) : (
@@ -233,7 +235,7 @@ export async function CommitteeWorkspace({
                     <tr key={String(row.id)}>
                       <td>{String(row.name)}</td>
                       {compositionCells(row)}
-                      <td>{edit(row)}</td>
+                      <td className="admin-actions-cell">{edit(row)}</td>
                     </tr>
                   ))}
               </tbody>

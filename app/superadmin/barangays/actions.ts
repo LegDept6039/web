@@ -1,5 +1,6 @@
 "use server";
-import { requireStaff } from "@/lib/auth/server";
+import { officeContext } from "@/lib/offices/server";
+import { barangayAffairsAllowed } from "@/lib/barangays/access";
 import { uploadOfficialPhoto } from "@/lib/admin/photo";
 import { uploadFile } from "@/lib/admin/upload-file";
 import { prepareBarangayValues } from "@/lib/barangays/validation";
@@ -10,7 +11,10 @@ export async function saveBarangay(
   _state: string,
   form: FormData,
 ): Promise<string> {
-  const { client, user } = await requireStaff(true, true);
+  const context = await officeContext(true);
+  if (!barangayAffairsAllowed(context, "write"))
+    return "Barangay Affairs editing access is required to save barangays.";
+  const { client, user } = context;
   const id = String(form.get("id") || "");
   let storedSlug: string | undefined;
   let imageUrl: string | null = null;
@@ -76,11 +80,15 @@ export async function saveBarangay(
     if (result.error.code === "23505")
       return "Unable to create a unique page address. Please try saving again.";
     if (result.error.code === "42501")
-      return "Active Superadmin access is required to save barangays.";
+      return "Barangay Affairs editing access is required to save barangays.";
     return "Unable to save the barangay. Check the details and try again.";
   }
   if (!result.data?.length)
     return "This barangay changed. Reload before saving.";
   revalidatePath("/", "layout");
-  redirect("/superadmin/barangays?saved=1");
+  redirect(
+    context.profile.role === "superadmin"
+      ? "/superadmin/barangays?saved=1"
+      : "/admin/barangays?saved=1",
+  );
 }

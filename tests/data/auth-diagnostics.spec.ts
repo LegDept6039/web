@@ -28,10 +28,10 @@ test("diagnostics retain database errors while removing credential-shaped conten
 
 test("authentication failures preserve distinct Supabase error meanings", () => {
   expect(passwordError({ code: "invalid_credentials" })).toContain(
-    "Invalid email or password",
+    "Invalid username or password",
   );
   expect(passwordError({ code: "email_not_confirmed" })).toContain(
-    "Confirm your email",
+    "Ask your administrator",
   );
   expect(passwordError({ code: "over_request_rate_limit" })).toContain(
     "Too many",
@@ -82,6 +82,6 @@ test("network failures are distinct from rejected credentials and missing codes 
   expect(passwordError({ status: 0 })).not.toContain("undefined");
   expect(passwordError({ status: 503 })).toContain("temporarily unavailable");
   expect(passwordError({ status: 400, code: "invalid_credentials" })).toContain(
-    "Invalid email or password",
+    "Invalid username or password",
   );
 });

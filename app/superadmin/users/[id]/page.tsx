@@ -13,7 +13,9 @@ export default async function EditUser({
   const { id } = await params;
   const { data: account, error } = await client
     .from("staff_accounts")
-    .select("*")
+    .select(
+      "user_id,display_name,username,role,active,deleted_at,created_at,updated_at,transparency_access",
+    )
     .eq("user_id", id)
     .maybeSingle();
   if (error) throw new Error("Unable to load account");

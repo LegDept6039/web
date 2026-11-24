@@ -423,6 +423,65 @@
   color: var(--blue);
   text-decoration: underline;
 }
+.admin-table .admin-actions-cell {
+  width: 1%;
+  vertical-align: middle;
+}
+.admin-row-actions {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.admin-row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  border: 1px solid #d5e0ea;
+  border-radius: 8px;
+  color: var(--blue);
+  background: #f8fafc;
+  line-height: 1;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 150ms, border-color 150ms, color 150ms;
+}
+.admin-table a.admin-row-action {
+  text-decoration: none;
+}
+.admin-row-action:hover {
+  border-color: #9db9d4;
+  color: #164a7b;
+  background: #eaf3fc;
+}
+.admin-row-action:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+.admin-row-action svg {
+  flex-shrink: 0;
+}
+summary.admin-row-action::-webkit-details-marker {
+  display: none;
+}
+.admin-table .admin-row-action-danger {
+  border-color: #ead6d2;
+  color: #a13a30;
+  background: #fff8f7;
+}
+.admin-table .admin-row-action-danger:hover {
+  border-color: #d99a92;
+  color: #862b23;
+  background: #ffebe8;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-row-action {
+    transition: none;
+  }
+}
 .access-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(110px, 160px);
@@ -448,6 +507,211 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+.account-form {
+  min-width: 0;
+}
+.staff-form .account-office-access {
+  gap: 20px;
+  padding: clamp(16px, 2.5vw, 24px);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.account-office-access legend {
+  color: var(--navy);
+}
+.account-access-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.account-access-intro p {
+  flex: 1 1 240px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.account-access-count {
+  padding: 5px 11px;
+  border: 1px solid #d5e2ed;
+  border-radius: 999px;
+  color: var(--blue);
+  background: #eef4fa;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.account-office-table-wrap {
+  min-width: 0;
+  border: 1px solid #d9e2eb;
+  border-radius: 10px;
+  background: white;
+}
+.account-office-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.account-office-table th,
+.account-office-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
+}
+.account-office-table thead th {
+  color: var(--navy);
+  background: #f0f4f8;
+  font-size: 13px;
+  font-weight: 600;
+}
+.account-office-table thead th:first-child {
+  border-start-start-radius: 9px;
+}
+.account-office-table thead th:last-child {
+  border-start-end-radius: 9px;
+}
+.account-office-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.account-office-table .account-office-select {
+  width: 76px;
+  text-align: center;
+}
+.account-office-table tbody tr:hover {
+  background: #f7faff;
+}
+.account-office-table tbody tr:has(input:checked) {
+  background: #edf5fd;
+}
+.account-office-table tbody tr:focus-within {
+  outline: 2px solid var(--blue);
+  outline-offset: -2px;
+}
+.account-office-table input {
+  margin: 0;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+.staff-form .account-office-table label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 10px;
+  row-gap: 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.account-office-name {
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.account-office-meta {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.account-office-access > .staff-note {
+  line-height: 1.6;
+}
+.account-delete {
+  padding: 15px 18px;
+  border: 1px solid #eadbd8;
+  border-radius: 10px;
+  background: #fffdfc;
+}
+.account-delete summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #913e34;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.account-delete summary::-webkit-details-marker {
+  display: none;
+}
+.account-delete summary small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.account-delete[open] {
+  display: grid;
+  gap: 16px;
+}
+.account-delete p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.account-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.button.account-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  padding: 12px 20px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-decoration: none;
+  transition: background-color 150ms, border-color 150ms, box-shadow 150ms;
+}
+.account-action-button.button-blue {
+  border-color: var(--blue);
+  background: var(--blue);
+  box-shadow: 0 2px 4px #102a4314;
+}
+.account-action-button.button-blue:hover:not(:disabled) {
+  border-color: var(--navy);
+  background: var(--navy);
+  box-shadow: 0 3px 8px #102a4326;
+}
+.account-action-button.staff-secondary-button {
+  border-color: #ced9e3;
+  background: white;
+  color: var(--navy);
+}
+.account-action-button.staff-secondary-button:hover {
+  border-color: #9ab0c3;
+  background: #f4f7fa;
+}
+@media (max-width: 520px) {
+  .account-office-table .account-office-select {
+    width: 58px;
+  }
+  .account-office-table th,
+  .account-office-table td {
+    padding-inline: 10px;
+  }
+  .account-form-actions .account-action-button {
+    flex: 1 1 150px;
+    padding-inline: 16px;
+    white-space: nowrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .button.account-action-button {
+    transition: none;
+  }
+}
 .bulk-session-form {
   max-width: 1100px;
 }
@@ -470,11 +734,6 @@
   display: grid;
   grid-template-columns: minmax(145px, 1fr) minmax(0, 2fr) minmax(130px, 1fr) minmax(140px, 1fr);
   gap: 16px;
-}
-.staff-form .bulk-session-publication {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 .bulk-session-count {
   color: var(--muted);

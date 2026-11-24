@@ -23,6 +23,7 @@ async function openRecord(authorized: boolean, office: string, exists = true) {
   const dependencies: Record<string, unknown> = {
     "react/jsx-runtime": { jsx: () => null, jsxs: () => null },
     "@/lib/legislative/server": {},
+    "@/lib/barangays/news-options": {},
     "@/lib/legislative/config": {},
     "@/lib/auth/diagnostics": { authDiagnostic: () => undefined },
     "@/components/admin/ContentBreadcrumb": {},

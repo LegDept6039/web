@@ -52,7 +52,12 @@ export default async function Page() {
           href="/departments"
           linkText="View All Departments"
         />
-        <DepartmentGrid portraits departments={departments.slice(0, 3)} />
+        <DepartmentGrid
+          portraits
+          departments={departments
+            .filter((d) => !d.parentDepartmentId)
+            .slice(0, 3)}
+        />
         <div className="mt-16">
           <SectionHeader
             eyebrow="OUR SHARED PRIORITIES"

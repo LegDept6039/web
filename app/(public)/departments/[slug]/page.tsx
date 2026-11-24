@@ -1,10 +1,19 @@
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { getDepartment, getDepartmentContent } from "@/lib/api";
+import {
+  getDepartment,
+  getDepartmentBranches,
+  getDepartmentContent,
+  getDepartmentParent,
+} from "@/lib/api";
 import { PageHero } from "@/components/shared/ui";
 import { OfficialPhoto } from "@/components/officials/OfficialPhoto";
 import { NewsGrid } from "@/components/news/NewsCard";
-import { ProgramGrid } from "@/components/departments/DepartmentGrid";
+import {
+  DepartmentBranchGrid,
+  ProgramGrid,
+} from "@/components/departments/DepartmentGrid";
+import { DepartmentImage } from "@/components/departments/DepartmentImage";
 import { DepartmentContacts } from "@/components/departments/DepartmentContacts";
 import { DepartmentServices } from "@/components/departments/DepartmentServices";
 export async function generateMetadata({
@@ -27,20 +36,39 @@ export default async function Page({
   const d = await getDepartment(slug);
   if (!d) notFound();
   if (d.slug && slug !== d.slug) permanentRedirect(`/departments/${d.slug}`);
-  const { news, programs, contacts, services } = await getDepartmentContent(
-    d.officeId || d.id,
-  );
+  const [{ news, programs, contacts, services }, parent, branches] =
+    await Promise.all([
+      getDepartmentContent(d.officeId || d.id),
+      getDepartmentParent(d),
+      d.parentDepartmentId ? Promise.resolve([]) : getDepartmentBranches(d.id),
+    ]);
   return (
     <>
       <PageHero
         description=""
         title={d.name}
-        eyebrow={d.acronym || "MUNICIPAL DEPARTMENT"}
+        eyebrow={
+          d.acronym ||
+          (d.parentDepartmentId ? "DEPARTMENT BRANCH" : "MUNICIPAL DEPARTMENT")
+        }
       />
       <section className="container section department-detail">
         <Link className="text-link" href="/departments">
           All departments
         </Link>
+        {parent && (
+          <p className="department-parent-link">
+            A branch of{" "}
+            <Link href={`/departments/${parent.slug || parent.id}`}>
+              {parent.name}
+            </Link>
+          </p>
+        )}
+        {d.parentDepartmentId && (
+          <div className="department-branch-image">
+            <DepartmentImage src={d.imageUrl} name={d.name} />
+          </div>
+        )}
         <section
           className="department-profile"
           aria-label="Department head and overview"
@@ -66,7 +94,9 @@ export default async function Page({
           </div>
         </section>
         <section className="mt-16">
-          <h2>About the Department</h2>
+          <h2>
+            {d.parentDepartmentId ? "About the Branch" : "About the Department"}
+          </h2>
           <div className="department-body">
             {(d.body || d.description)
               .split(/\r?\n/)
@@ -76,6 +106,17 @@ export default async function Page({
               ))}
           </div>
         </section>
+        {branches.length > 0 && (
+          <section
+            className="mt-16"
+            aria-labelledby="department-branches-heading"
+          >
+            <h2 className="mb-6" id="department-branches-heading">
+              Branches
+            </h2>
+            <DepartmentBranchGrid branches={branches} />
+          </section>
+        )}
         <DepartmentServices services={services} />
         <section className="mt-16">
           <h2 className="mb-6">Department news</h2>

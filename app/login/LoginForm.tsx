@@ -22,13 +22,17 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
   return (
     <form action={action} className="staff-form">
       <label>
-        Email address
+        Username
         <input
-          name="email"
-          type="email"
+          name="username"
+          type="text"
           autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           required
-          maxLength={254}
+          minLength={3}
+          maxLength={40}
+          pattern={"[A-Za-z0-9][A-Za-z0-9._\\-]{2,39}"}
           disabled={!enabled || pending}
         />
       </label>

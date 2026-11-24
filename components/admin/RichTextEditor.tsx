@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
-import { Extension } from "@tiptap/core";
+import { Extension, type Command } from "@tiptap/core";
 import { closeHistory } from "@tiptap/pm/history";
 import { OrderedList } from "@tiptap/extension-list";
 import StarterKit from "@tiptap/starter-kit";
@@ -33,6 +33,44 @@ const Size = Extension.create({
     ];
   },
 });
+const Indentation = Extension.create({
+  name: "paragraphIndentation",
+  addGlobalAttributes() {
+    return [
+      {
+        types: ["paragraph"],
+        attributes: {
+          indent: {
+            default: 0,
+            parseHTML: (el) => {
+              const value = Number(el.getAttribute("data-indent"));
+              return Number.isInteger(value) && value >= 0 && value <= 6
+                ? value
+                : 0;
+            },
+            renderHTML: (attrs) =>
+              attrs.indent ? { "data-indent": attrs.indent } : {},
+          },
+        },
+      },
+    ];
+  },
+});
+const changeIndent =
+  (direction: -1 | 1): Command =>
+  ({ tr, state, dispatch }) => {
+    let changed = false;
+    state.doc.nodesBetween(tr.selection.from, tr.selection.to, (node, pos) => {
+      if (node.type.name !== "paragraph") return;
+      const indent = Number(node.attrs.indent) || 0;
+      const next = Math.max(0, Math.min(6, indent + direction));
+      if (next === indent) return;
+      changed = true;
+      if (dispatch)
+        tr.setNodeMarkup(pos, undefined, { ...node.attrs, indent: next });
+    });
+    return changed;
+  };
 export default function RichTextEditor({
   initial,
   legacy,
@@ -64,6 +102,7 @@ export default function RichTextEditor({
       }),
       NumberedList,
       Size,
+      Indentation,
     ],
     content: initial || legacyDocument(legacy),
     immediatelyRender: false,
@@ -102,6 +141,12 @@ export default function RichTextEditor({
       empty: editor?.isEmpty,
       undo: editor?.can().undo(),
       redo: editor?.can().redo(),
+      indentMore: editor?.isActive("listItem")
+        ? editor.can().sinkListItem("listItem")
+        : editor?.can().command(changeIndent(1)),
+      indentLess: editor?.isActive("listItem")
+        ? editor.can().liftListItem("listItem")
+        : editor?.can().command(changeIndent(-1)),
     }),
   });
   if (!editor) return <p>Loading editor...</p>;
@@ -154,6 +199,28 @@ export default function RichTextEditor({
             onClick={() => separateEdit(run)}
           >
             {name}
+          </button>
+        ))}
+        {([-1, 1] as const).map((direction) => (
+          <button
+            type="button"
+            key={direction}
+            disabled={
+              disabled ||
+              !(direction === 1 ? state?.indentMore : state?.indentLess)
+            }
+            onClick={() =>
+              separateEdit(() => {
+                if (editor.isActive("listItem")) {
+                  const chain = editor.chain().focus();
+                  if (direction === 1) chain.sinkListItem("listItem").run();
+                  else chain.liftListItem("listItem").run();
+                } else
+                  editor.chain().focus().command(changeIndent(direction)).run();
+              })
+            }
+          >
+            {direction === 1 ? "Increase indent" : "Decrease indent"}
           </button>
         ))}
         <button
@@ -211,7 +278,7 @@ export default function RichTextEditor({
                 .focus()
                 .unsetAllMarks()
                 .clearNodes()
-                .updateAttributes("paragraph", { size: "normal" })
+                .updateAttributes("paragraph", { size: "normal", indent: 0 })
                 .run();
             })
           }

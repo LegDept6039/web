@@ -2855,6 +2855,24 @@ footer {
 .rich-text p {
   white-space: pre-wrap;
 }
+.rich-text p[data-indent="1"] {
+  margin-inline-start: min(1.5rem, 8%);
+}
+.rich-text p[data-indent="2"] {
+  margin-inline-start: min(3rem, 16%);
+}
+.rich-text p[data-indent="3"] {
+  margin-inline-start: min(4.5rem, 24%);
+}
+.rich-text p[data-indent="4"] {
+  margin-inline-start: min(6rem, 32%);
+}
+.rich-text p[data-indent="5"] {
+  margin-inline-start: min(7.5rem, 40%);
+}
+.rich-text p[data-indent="6"] {
+  margin-inline-start: min(9rem, 48%);
+}
 .rich-text [data-size="small"] {
   font-size: 0.875rem;
 }
@@ -3198,4 +3216,35 @@ footer {
   .council-content { padding-block: 24px 40px; }
   .council-toolbar { align-items: stretch; flex-direction: column; gap: 16px; margin-bottom: 20px; }
   .term-selector.term-selector-compact { flex: auto; width: 100%; }
+}
+
+/* Branch pages retain the shared department sections and show their own image. */
+.department-parent-link {
+  margin-top: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.department-parent-link a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.department-branch-image {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  aspect-ratio: 16 / 9;
+  margin-top: 24px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--light);
+}
+.department-branch-grid .info-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.department-branch-grid h3 {
+  font-size: 22px;
+  line-height: 1.35;
 }

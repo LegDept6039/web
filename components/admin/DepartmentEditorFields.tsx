@@ -10,6 +10,7 @@ export function DepartmentEditorFields({
   editable: boolean;
 }) {
   const value = (key: string) => String(row[key] || "");
+  const isBranch = Boolean(row.parent_department_id);
   return (
     <div className="department-page-editor">
       <input type="hidden" name="id" value={value("id")} />
@@ -19,12 +20,12 @@ export function DepartmentEditorFields({
         </span>
         <h2>{value("name")}</h2>
         <p className="staff-note">
-          Edit the information in the same order it appears on your department
-          page.
+          Edit the head, description, body, and picture for this{" "}
+          {isBranch ? "branch" : "department"}.
         </p>
         {row.published === true && row.active !== false && row.slug ? (
           <Link className="text-link" href={`/departments/${value("slug")}`}>
-            View published department page
+            View published {isBranch ? "branch" : "department"} page
           </Link>
         ) : null}
       </header>
@@ -72,7 +73,9 @@ export function DepartmentEditorFields({
         className="department-editor-about"
         aria-labelledby="department-about-label"
       >
-        <h2 id="department-about-label">About the Department</h2>
+        <h2 id="department-about-label">
+          {isBranch ? "About the Branch" : "About the Department"}
+        </h2>
         <label>
           Body (optional)
           <textarea name="body" defaultValue={value("body")} rows={10} />
@@ -83,16 +86,18 @@ export function DepartmentEditorFields({
         aria-label="Department card image"
       >
         <div>
-          <h2>Department image</h2>
+          <h2>{isBranch ? "Branch image" : "Department image"}</h2>
           <p className="staff-note">
-            Public department cards and pages use the head portrait above.
+            {isBranch
+              ? "Shown on the branch page and in the Branches directory."
+              : "Public department cards and pages use the head portrait above."}
           </p>
         </div>
         <ImageEditOverlay
           name="department_image"
           removeName="remove_image"
           current={value("image_url")}
-          label="Department image"
+          label={isBranch ? "Branch image" : "Department image"}
           editable={editable}
         />
       </section>

@@ -105,7 +105,7 @@ export function parseContent(collection: Collection, form: FormData) {
     throw new Error(
       "Use lowercase letters, numbers, and single hyphens for the slug.",
     );
-  row.published = form.get("published") === "on";
-  row.sort_order = publicationPosition(form);
+  row.published = collection === "sessions" || form.get("published") === "on";
+  row.sort_order = collection === "sessions" ? 1 : publicationPosition(form);
   return row;
 }

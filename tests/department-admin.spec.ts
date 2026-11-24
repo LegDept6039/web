@@ -6,7 +6,7 @@ const mho = "10000000-0000-4000-8000-000000000005",
   legislative = "10000000-0000-4000-8000-000000000004";
 async function login(page: Page, name: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${name}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(name);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);

@@ -1,5 +1,7 @@
 import { roles, type Access } from "@/lib/offices/permissions";
+import { normalizeUsername } from "@/lib/auth/username";
 export function parseUser(form: FormData) {
+  const username = normalizeUsername(form.get("username"));
   const name = String(form.get("display_name") || "").trim();
   const role = String(form.get("role") || "");
   if (!name || name.length > 120 || !roles.some((r) => r === role))
@@ -32,6 +34,7 @@ export function parseUser(form: FormData) {
   if (new Set(access.map((a) => a.office_id)).size !== access.length)
     throw new Error("Duplicate office assignments.");
   return {
+    username,
     name,
     role,
     active: form.get("active") === "on",

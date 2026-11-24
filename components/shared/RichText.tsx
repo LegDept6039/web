@@ -30,7 +30,11 @@ export function RichText({
     switch (n.type) {
       case "paragraph":
         return (
-          <p key={index} data-size={n.attrs?.size || "normal"}>
+          <p
+            key={index}
+            data-size={n.attrs?.size || "normal"}
+            data-indent={n.attrs?.indent || undefined}
+          >
             {children}
           </p>
         );

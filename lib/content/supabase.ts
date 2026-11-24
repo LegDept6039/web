@@ -10,6 +10,7 @@ export type ContentFilters = Partial<
     | "slug"
     | "id"
     | "office_id"
+    | "barangay_id"
     | "branch"
     | "content_scope"
     | "role"
@@ -17,7 +18,7 @@ export type ContentFilters = Partial<
     | "category_id",
     string
   >
->;
+> & { parent_department_id?: string | null };
 export type ContentFetch = (
   url: string,
   init: RequestInit,
@@ -75,7 +76,7 @@ export async function readSupabaseCollection<K extends Collection>(
       params.set("department", "eq.executive");
     }
     for (const [key, value] of Object.entries(filters))
-      params.set(key, `eq.${value}`);
+      params.set(key, value === null ? "is.null" : `eq.${value}`);
     let response: Response;
     try {
       response = await request(

@@ -4,7 +4,7 @@ const current = "20000000-0000-4000-8000-000000000001";
 const previous = "20000000-0000-4000-8000-000000000002";
 async function signIn(page: Page, user: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${user}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(user);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(

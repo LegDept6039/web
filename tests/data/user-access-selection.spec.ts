@@ -5,6 +5,7 @@ const office = "00000000-0000-4000-8000-000000000001";
 function form(selections: string[]) {
   const value = new FormData();
   value.set("display_name", "Staff member");
+  value.set("username", "staff.member");
   value.set("role", "editor");
   value.set("active", "on");
   selections.forEach((selection) => value.append("office", selection));
@@ -13,7 +14,9 @@ function form(selections: string[]) {
 
 test("Office Access supports Transparency alone and with a department", () => {
   expect(parseUser(form(["transparency"]))).toMatchObject({
-    role: "editor", transparencyAccess: true, access: [],
+    role: "editor",
+    transparencyAccess: true,
+    access: [],
   });
   expect(parseUser(form([office, "transparency"]))).toMatchObject({
     transparencyAccess: true,
@@ -28,7 +31,10 @@ test("deselecting Transparency revokes it while preserving selected departments"
     transparencyAccess: false,
     access: [{ office_id: office, permission_level: "editor" }],
   });
-  expect(parseUser(form([]))).toMatchObject({ transparencyAccess: false, access: [] });
+  expect(parseUser(form([]))).toMatchObject({
+    transparencyAccess: false,
+    access: [],
+  });
   expect(() => parseUser(form(["transparency", "transparency"]))).toThrow();
   expect(() => parseUser(form(["unknown-scope"]))).toThrow();
 });

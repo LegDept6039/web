@@ -451,7 +451,6 @@ test("session batches use existing term triggers and RLS and roll back as a sing
       start_date: "2025-07-01",
       end_date: "2028-06-30",
     },
-    false,
   ).map((row) => ({
     ...row,
     office_id: offices["legislative-access"],
@@ -485,7 +484,7 @@ test("session batches use existing term triggers and RLS and roll back as a sing
   expect(saved.rows).toHaveLength(2);
   expect(
     saved.rows.every(
-      (row) => row.term_id === current && row.published === false,
+      (row) => row.term_id === current && row.published === true,
     ),
   ).toBe(true);
   const invalid = rows.map((row, index) => ({

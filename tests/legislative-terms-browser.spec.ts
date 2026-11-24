@@ -8,7 +8,7 @@ test("legacy official opens from the historical list and keeps its ID after term
   const id = info.project.name === "mobile" ? "finance" : "committees";
   const name = `Legacy Member ${info.project.name}`;
   await page.goto("/login");
-  await page.getByLabel("Email address").fill("vmo@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("vmo");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
@@ -104,7 +104,7 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   page,
 }, info) => {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill("vmo@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("vmo");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
@@ -180,7 +180,7 @@ test("Superadmin creates and edits terms through the CMS", async ({
   page,
 }, info) => {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill("superadmin@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("superadmin");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/superadmin$/);
@@ -226,7 +226,7 @@ test("dated records save the actual-date term and recalculate when edited", asyn
   page,
 }, info) => {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill("vmo@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("vmo");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
@@ -238,7 +238,7 @@ test("dated records save the actual-date term and recalculate when edited", asyn
       .locator('fieldset input:not([type="hidden"]):not([type="file"])')
       .first(),
   ).toHaveAttribute("name", "date");
-  await page.getByLabel("Published", { exact: true }).check();
+  await expect(page.locator('input[name="published"]')).toHaveCount(0);
   await expect(
     page.getByRole("spinbutton", { name: "Sort order", exact: true }),
   ).toHaveCount(0);
@@ -256,15 +256,42 @@ test("dated records save the actual-date term and recalculate when edited", asyn
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/sessions\?saved=/);
   const id = new URL(page.url()).searchParams.get("saved");
+  await page.goto(`/admin/content/sessions?office=${office}&term=${previous}`);
   await expect(page.locator(".admin-table")).toBeVisible();
+  await expect(
+    page
+      .getByRole("row")
+      .filter({ hasText: `Historical session ${info.project.name}` }),
+  ).toContainText("Published");
+  await page.goto(`/legislative/sessions?term=${previous}`);
+  await expect(
+    page.getByRole("heading", {
+      name: `Historical session ${info.project.name}`,
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.goto(`/admin/content/sessions/edit/${id}?office=${office}`);
   await expect(
     page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
   ).toHaveText("Previous Council 2022-2025");
   await page.getByLabel("Date", { exact: true }).fill("2026-03-01");
+  await expect(page.locator('input[name="published"]')).toHaveCount(0);
+  // A stale client posting the old unchecked value cannot unpublish a session.
+  await page.locator("form.staff-form.staff-card").evaluate((form) => {
+    const published = document.createElement("input");
+    published.type = "hidden";
+    published.name = "published";
+    published.value = "";
+    form.append(published);
+  });
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/sessions\?saved=/);
   await expect(page.locator(".admin-table")).toBeVisible();
+  await expect(
+    page
+      .getByRole("row")
+      .filter({ hasText: `Historical session ${info.project.name}` }),
+  ).toContainText("Published");
   const dates = await page
     .locator(".admin-table tbody tr td:nth-child(4)")
     .allTextContents();

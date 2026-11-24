@@ -3,6 +3,7 @@ import { officeContext, readOfficeAccess } from "@/lib/offices/server";
 import { requireStaff } from "@/lib/auth/server";
 import { loadAdminPage } from "@/lib/admin/pagination";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminActionLink } from "@/components/admin/AdminActionLink";
 export default async function Users({
   searchParams,
 }: {
@@ -19,7 +20,10 @@ export default async function Users({
   } = await loadAdminPage(
     client
       .from("staff_accounts")
-      .select("*", { count: "exact" })
+      .select(
+        "user_id,display_name,username,role,active,deleted_at,created_at,transparency_access",
+        { count: "exact" },
+      )
       .order("created_at", { ascending: false })
       .order("user_id"),
     params.page,
@@ -53,7 +57,7 @@ export default async function Users({
               <tr>
                 {[
                   "Name / User ID",
-                  "Email",
+                  "Username",
                   "Role",
                   "Assigned access",
                   "Department",
@@ -61,7 +65,12 @@ export default async function Users({
                   "Created",
                   "Actions",
                 ].map((h) => (
-                  <th key={h}>{h}</th>
+                  <th
+                    key={h}
+                    className={h === "Actions" ? "admin-actions-cell" : undefined}
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -78,7 +87,7 @@ export default async function Users({
                       {u.display_name || "Unnamed"}
                       <small>{u.user_id}</small>
                     </td>
-                    <td>{u.email}</td>
+                    <td>{u.username}</td>
                     <td>{u.role}</td>
                     <td>
                       {assigned.map((o) => (
@@ -109,10 +118,12 @@ export default async function Users({
                     <td>
                       {new Date(u.created_at).toLocaleDateString("en-PH")}
                     </td>
-                    <td>
-                      <Link href={`/superadmin/users/${u.user_id}`}>
-                        View / Edit / Manage access
-                      </Link>
+                    <td className="admin-actions-cell">
+                      <AdminActionLink
+                        href={`/superadmin/users/${u.user_id}`}
+                        action="edit"
+                        label="Edit"
+                      />
                     </td>
                   </tr>
                 );

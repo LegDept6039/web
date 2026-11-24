@@ -2,12 +2,21 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth/server";
 export default async function Dashboard() {
   const { client } = await requireStaff(true);
-  const [users, offices] = await Promise.all([
+  const [users, offices, branches] = await Promise.all([
     client
       .from("staff_accounts")
       .select("*", { count: "exact", head: true })
       .is("deleted_at", null),
-    client.from("departments").select("*", { count: "exact", head: true }),
+    client
+      .from("departments")
+      .select("*", { count: "exact", head: true })
+      .is("archived_at", null)
+      .is("parent_department_id", null),
+    client
+      .from("departments")
+      .select("*", { count: "exact", head: true })
+      .is("archived_at", null)
+      .not("parent_department_id", "is", null),
   ]);
   return (
     <>
@@ -28,6 +37,11 @@ export default async function Dashboard() {
           <h2>Departments</h2>
           <p>{offices.count ?? "—"} offices</p>
           <p>Manage Executive and Legislative offices.</p>
+        </Link>
+        <Link className="staff-card" href="/superadmin/branches">
+          <h2>Branches</h2>
+          <p>{branches.count ?? "—"} branches</p>
+          <p>Manage branch profiles and their parent departments.</p>
         </Link>
         <Link className="staff-card" href="/admin/content">
           <h2>Content management</h2>

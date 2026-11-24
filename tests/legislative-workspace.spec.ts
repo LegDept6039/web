@@ -9,10 +9,9 @@ async function session(page: Page, name: string) {
     ).toHaveText(name);
 }
 async function save(page: Page, collection: string, publish = false) {
-  if (publish) {
+  if (publish && collection !== "sessions") {
     await page.getByLabel("Published", { exact: true }).check();
-    if (collection !== "sessions")
-      await page.getByLabel("Sort order", { exact: true }).fill("1");
+    await page.getByLabel("Sort order", { exact: true }).fill("1");
   }
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/admin/content/${collection}\\?`));
@@ -35,7 +34,7 @@ test("Legislative relationships and all five document types use the existing CMS
     }),
   );
   await page.goto("/login");
-  await page.getByLabel("Email address").fill("vmo@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("vmo");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);

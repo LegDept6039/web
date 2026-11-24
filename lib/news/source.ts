@@ -14,6 +14,7 @@ export function getNewsSource(
 }
 
 export function newsOfficeId(article: NewsArticle) {
+  if (article.barangayId) return `barangay:${article.barangayId}`;
   return article.officeId || `source:${getNewsSource(article).name}`;
 }
 

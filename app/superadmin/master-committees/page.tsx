@@ -5,6 +5,7 @@ import { getCommitteeMasters } from "@/lib/legislative/committee-master";
 import { MasterForm } from "./MasterForm";
 import { pageDetails, paginationHref } from "@/lib/admin/pagination";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminActionLink } from "@/components/admin/AdminActionLink";
 export default async function Page({
   searchParams,
 }: {
@@ -34,7 +35,7 @@ export default async function Page({
             <tr>
               <th>Committee Name</th>
               <th>Sort Order</th>
-              <th>Action</th>
+              <th className="admin-actions-cell">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -42,15 +43,14 @@ export default async function Page({
               <tr key={c.id}>
                 <td>{c.name}</td>
                 <td>{c.sort_order}</td>
-                <td>
-                  <Link
+                <td className="admin-actions-cell">
+                  <AdminActionLink
                     href={paginationHref(
                       { ...params, edit: c.id },
                       pagination.page,
                     )}
-                  >
-                    Edit
-                  </Link>
+                    action="edit"
+                  />
                 </td>
               </tr>
             ))}

@@ -70,7 +70,11 @@ export function LeadershipSection({
           </Link>
         </div>
         <div className="home-departments">
-          <DepartmentGrid departments={departments.slice(0, 4)} />
+          <DepartmentGrid
+            departments={departments
+              .filter((d) => !d.parentDepartmentId)
+              .slice(0, 4)}
+          />
         </div>
       </section>
     </>

@@ -1,13 +1,19 @@
 "use client";
 import { DepartmentBiography } from "@/components/admin/DepartmentBiography";
 import { useActionState, useRef, useState } from "react";
-import { saveOffice, deleteOffice } from "./actions";
+import { saveOffice, saveBranch, deleteOffice } from "./actions";
 import type { Office } from "@/lib/offices/permissions";
 import { PublicationFields } from "@/components/admin/PublicationFields";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { isBarangayAffairsOffice } from "@/lib/barangays/permissions";
+import type { DepartmentParent } from "@/lib/offices/branch-parents";
 export function OfficeForm({
   office,
+  parents = [],
+  branchMode = false,
 }: {
+  branchMode?: boolean;
+  parents?: DepartmentParent[];
   office?: Office & {
     body?: string;
     head_name?: string;
@@ -25,7 +31,7 @@ export function OfficeForm({
     async (state: string, form: FormData) => {
       for (const [name, file] of Object.entries(selectedFiles.current))
         form.set(name, file);
-      return saveOffice(state, form);
+      return branchMode ? saveBranch(state, form) : saveOffice(state, form);
     },
     "",
   );
@@ -36,11 +42,40 @@ export function OfficeForm({
       <input type="hidden" name="updated_at" value={office?.updated_at || ""} />
     </>
   );
+  if (isBarangayAffairsOffice(office))
+    return (
+      <form className="staff-form staff-card" action={action}>
+        {hidden}
+        <h2>Barangay Affairs</h2>
+        <p>
+          Assign this workspace through Users &amp; access control to grant
+          access to barangay profiles and news.
+        </p>
+        <label>
+          <input
+            type="checkbox"
+            name="active"
+            defaultChecked={office?.active}
+          />{" "}
+          Active
+        </label>
+        <p className="staff-note">
+          Deactivating this workspace removes its staff access and hides
+          barangay news. Profiles, stories, images and staff assignments are
+          retained.
+        </p>
+        {message && <p role="alert">{message}</p>}
+        <button className="button button-blue" disabled={pending}>
+          {pending ? "Saving..." : "Save access settings"}
+        </button>
+      </form>
+    );
   return (
     <>
       <form
         className="staff-form staff-card"
         action={action}
+        onReset={(event) => event.preventDefault()}
         onChange={(event) => {
           const input = event.target;
           if (input instanceof HTMLSelectElement && input.name === "department")
@@ -54,7 +89,7 @@ export function OfficeForm({
       >
         {hidden}
         <label>
-          Department name
+          {branchMode ? "Branch name" : "Department name"}
           <input
             name="name"
             required
@@ -80,19 +115,45 @@ export function OfficeForm({
           />
         </label>
         <label>
-          Branch
+          Government branch
           <select
             name="department"
             required
             defaultValue={office?.department || "executive"}
-            disabled={Boolean(office)}
+            disabled={Boolean(office) || branchMode}
           >
             <option value="executive">Executive</option>
             <option value="legislative">Legislative</option>
           </select>
         </label>
-        {office && (
-          <input type="hidden" name="department" value={office.department} />
+        {(office || branchMode) && (
+          <input
+            type="hidden"
+            name="department"
+            value={office?.department || "executive"}
+          />
+        )}
+        {branch === "executive" && (
+          <label>
+            Parent department
+            <select
+              name="parent_department_id"
+              defaultValue={office?.parent_department_id || ""}
+              required={branchMode && !office}
+            >
+              <option value="">No parent (department)</option>
+              {parents.map((parent) => (
+                <option key={parent.id} value={parent.id}>
+                  {parent.name}
+                  {parent.active ? "" : " (inactive)"}
+                </option>
+              ))}
+            </select>
+            <span className="staff-note">
+              Choose a parent to make this office a branch. Staff access is
+              assigned separately to each office.
+            </span>
+          </label>
         )}
         <label>
           Short description
@@ -125,7 +186,7 @@ export function OfficeForm({
         <DepartmentBiography initial={office?.head_description} />
         <ImageUpload
           name="department_image"
-          label="Department Image"
+          label={branchMode ? "Branch Image" : "Department / Branch Image"}
           current={office?.image_url}
         />
         {office?.image_url && (
@@ -167,12 +228,14 @@ export function OfficeForm({
         </p>
         {message && <p role="alert">{message}</p>}
         <button className="button button-blue" disabled={pending}>
-          {pending ? "Saving..." : "Save department"}
+          {pending ? "Saving..." : branchMode ? "Save branch" : "Save department"}
         </button>
       </form>
       {office && (
         <details className="staff-card">
-          <summary>Deactivate department</summary>
+          <summary>
+            {branchMode ? "Deactivate branch" : "Deactivate department"}
+          </summary>
           <form className="staff-form" action={remove}>
             {hidden}
             <p>
@@ -181,11 +244,11 @@ export function OfficeForm({
             </p>
             <label>
               <input type="checkbox" name="confirm" required />
-              Deactivate this department
+              {branchMode ? "Deactivate this branch" : "Deactivate this department"}
             </label>
             {deleteMessage && <p role="alert">{deleteMessage}</p>}
             <button className="button" disabled={deleting}>
-              Deactivate department
+              {branchMode ? "Deactivate branch" : "Deactivate department"}
             </button>
           </form>
         </details>

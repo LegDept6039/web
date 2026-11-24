@@ -8,7 +8,7 @@ const dashboard = `/admin/content?office=${legislative}`;
 
 async function login(page: Page, account: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${account}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(account);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(
@@ -208,7 +208,7 @@ test("Executive and unassigned users cannot forge the Legislative dashboard URL"
   await expect(page.locator(".legislative-summary-card")).toHaveCount(0);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/login$/);
-  await page.getByLabel("Email address").fill("no-membership@example.test");
+  await page.getByLabel("Username", { exact: true }).fill("no-membership");
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page.locator("main").getByRole("alert")).toContainText(

@@ -3,7 +3,7 @@ import sharp from "sharp";
 
 async function login(page: Page, role = "superadmin") {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${role}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(role);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(

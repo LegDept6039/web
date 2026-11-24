@@ -10,6 +10,7 @@ import { collectionName } from "@/lib/admin/content";
 import { definitions } from "@/lib/content/schema";
 import { authDiagnostic, errorCode } from "@/lib/auth/diagnostics";
 import { ContentForm } from "../../../ContentForm";
+import { barangayNewsOptions } from "@/lib/barangays/news-options";
 export default async function EditContent({
   params,
   searchParams,
@@ -85,6 +86,8 @@ export default async function EditContent({
           collection === "committees",
         )
       : undefined;
+  const barangayOptions =
+    collection === "news" ? await barangayNewsOptions(context) : undefined;
   return (
     <>
       <ContentBreadcrumb
@@ -94,7 +97,11 @@ export default async function EditContent({
       />
       <h1>
         {contentAllowed(context, collection, data, "write") ? "Edit" : "View"}{" "}
-        {collection === "departments" ? "department page" : "record"}
+        {collection === "departments"
+          ? data.parent_department_id
+            ? "branch page"
+            : "department page"
+          : "record"}
       </h1>
       <ContentForm
         key={`${collection}:${data[definition.key]}`}
@@ -104,6 +111,7 @@ export default async function EditContent({
         }
         row={data}
         legislativeOptions={options}
+        barangayOptions={barangayOptions}
         offices={context.offices}
         canWrite={contentAllowed(context, collection, data, "write")}
         canDelete={contentAllowed(context, collection, data, "delete")}

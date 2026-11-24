@@ -1,5 +1,8 @@
 // Test-process transport only. Never imported by application code.
 if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
+  const barangayAffairsFixture = process.env.PORTAL_BARANGAY_AFFAIRS_TEST_FIXTURE === "1";
+  const departmentBranchesFixture = process.env.PORTAL_DEPARTMENT_BRANCHES_TEST_FIXTURE === "1";
+  const barangayAffairsOfficeId = "10000000-0000-4000-8000-000000000008";
   const realFetch = globalThis.fetch;
   const staffSessions = new Map();
   const authSessions = new Map();
@@ -303,6 +306,55 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     municipal_contact_settings,
     audit_logs: [],
   };
+  if (barangayAffairsFixture) {
+    const office = {
+      id: barangayAffairsOfficeId, office_id: barangayAffairsOfficeId,
+      name: "Barangay Affairs", short_name: "Barangay Affairs", slug: "barangay-affairs",
+      department: "executive", content_scope: "executive", active: true,
+      published: false, archived_at: null, is_sample: false, sort_order: 0,
+      description: "Barangay content workspace", body: "", head_description: "",
+      image_url: null, head_name: null, head_title: null, head_photo: null,
+      created_at: now, updated_at: now,
+    };
+    offices.push({...office});
+    departments.push({...office});
+    for (const [index, role] of ["editor", "admin", "viewer"].entries()) {
+      const user_id = `81000000-0000-4000-8000-00000000000${index + 1}`;
+      users.push({user_id,email:`barangay-${role}@example.test`,display_name:`Barangay ${role}`,role,
+        active:true,deleted_at:null,created_at:now,updated_at:now});
+      access.push({user_id,office_id:barangayAffairsOfficeId,permission_level:role === "admin" ? "manager" : role});
+    }
+    for (const [index, name, published] of [[1,"Anislag",true],[2,"Anopog",true],[3,"Draft Community",false]])
+      collections.barangays.push({id:`80000000-0000-4000-8000-00000000000${index}`,name,
+        slug:name.toLowerCase().replaceAll(" ","-"),captain_name:`Captain ${name}`,image_url:null,
+        body:`Information about ${name}.`,rich_body:null,published,sort_order:index,created_at:now,updated_at:now});
+    const base = {category:"Barangay Affairs",date:"2026-11-23",excerpt:"Community news for residents.",
+      image:"/images/news/community.svg",content:["Community news details."],rich_body:null,
+      office_id:barangayAffairsOfficeId,content_scope:"executive",is_sample:false,created_at:now,updated_at:now};
+    for (const [index, slug, title, barangay, published] of [
+      [1,"anislag-community-update","Anislag community update",1,true],
+      [2,"anislag-private-update","Anislag unpublished news",1,false],
+      [3,"anopog-community-update","Anopog community update",2,true],
+      [4,"hidden-community-update","Unpublished community news",3,true],
+    ]) news.push({...base,id:`82000000-0000-4000-8000-00000000000${index}`,slug,title,
+      barangay_id:`80000000-0000-4000-8000-00000000000${barangay}`,published,sort_order:published ? index : 0});
+    news.push({...base,id:"82000000-0000-4000-8000-000000000005",slug:"ordinary-office-update",
+      title:"Ordinary department update",office_id:officeIds.mho,barangay_id:null,published:true,sort_order:1});
+  }
+  const affairsAccess = (actor, write = false) => {
+    if (!actor?.active || actor.deleted_at) return false;
+    if (actor.role === "superadmin") return true;
+    const membership = access.find(a => a.user_id === actor.user_id && a.office_id === barangayAffairsOfficeId);
+    const office = departments.find(d => d.id === barangayAffairsOfficeId);
+    return Boolean(office?.active && !office.archived_at && membership &&
+      (!write || (["admin","editor"].includes(actor.role) && ["editor","manager"].includes(membership.permission_level))));
+  };
+  const newsWriteAllowed = (actor, record) => Boolean(actor?.active && !actor.deleted_at &&
+    (actor.role === "superadmin" || (["admin","editor"].includes(actor.role) && access.some(a =>
+      a.user_id === actor.user_id && a.office_id === record.office_id && ["editor","manager"].includes(a.permission_level)))));
+  const validNewsBarangay = (record) => record.office_id === barangayAffairsOfficeId
+    ? record.content_scope === "executive" && collections.barangays.some(b => b.id === record.barangay_id)
+    : record.barangay_id == null;
   if (process.env.PORTAL_TERM_TEST_FIXTURE === '1') {
     const currentTerm = legislative_terms[0].id, previousTerm = legislative_terms[1].id;
     const base = { office_id: officeIds.sb, content_scope: 'legislative', published: true, is_sample: false, sort_order: 1, updated_at: now, created_at: now };
@@ -429,6 +481,69 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     addDocument("dashboard-document-wrong-scope", { content_scope: "transparency" });
     addDocument("dashboard-document-previous", { term_id: previousTerm, date: "2024-11-17" });
   }
+  // Representative, isolated rows for the CMS action-control presentation audit.
+  if (process.env.PORTAL_ACTION_ICONS_TEST_FIXTURE === "1") {
+    const base = { published: true, is_sample: false, sort_order: 1, created_at: now, updated_at: now };
+    collections.sk_profiles.push({ ...base, id: "93000000-0000-4000-8000-000000000001",
+      barangay_id: "80000000-0000-4000-8000-000000000001", slug: "anislag",
+      chairperson_name: "Fixture SK chairperson", image_url: null, body: "Fixture SK profile", rich_body: null });
+    programs.push({ ...base, id: "94000000-0000-4000-8000-000000000001", name: "CMS community program",
+      description: "Fixture program", category: "Community", status: "Ongoing",
+      office_id: officeIds.mho, content_scope: "executive" });
+    department_contacts.push({ ...base, id: "94000000-0000-4000-8000-000000000002", type: "EMAIL",
+      value: "records@example.test", label: "Records", office_id: officeIds.mho, content_scope: "executive" });
+    collections.hearings = [{ ...base, id: "actions-hearing", title: "CMS public hearing", date: "2026-11-23",
+      venue: "Municipal Hall", sectors: "Residents", related_ordinance: "", status: "Upcoming",
+      office_id: officeIds.sb, content_scope: "legislative" }];
+    municipal_documents.push({ ...base, id: "95000000-0000-4000-8000-000000000001",
+      title: "CMS quarterly report", description: "Fixture report", report_frequency: "quarterly", report_year: 2026,
+      category_id: "fixture-bids", q1_pdf_path: "transparency/00000000-0000-4000-8000-000000000001/00000000-0000-4000-8000-000000000002.pdf",
+      office_id: null, content_scope: "transparency", deleted_at: null });
+    const user_id = "92000000-0000-4000-8000-000000000001";
+    users.push({ user_id, email: "actions-viewer@example.test", display_name: "CMS read-only viewer", role: "viewer",
+      active: true, deleted_at: null, transparency_access: true, created_at: now, updated_at: now });
+    access.push(...[officeIds.sb, barangayAffairsOfficeId].map(office_id => ({user_id, office_id, permission_level: "viewer"})));
+  }
+  if (departmentBranchesFixture) {
+    for (const department of departments) department.parent_department_id = null;
+    const branchRows = [
+      ["001", "Treasury", "TREASURY", "treasury", null, null],
+      ["002", "Engineering", "ENGINEERING", "engineering", null, null],
+      ["003", "Market Affairs", "MARKET", "market-affairs", "001", "/images/news/community.svg"],
+      ["004", "Slaughter House", "SLAUGHTER", "slaughter-house", "001", "/images/news/coast.svg"],
+      ["005", "Waterworks", "WATERWORKS", "waterworks", "002", "/images/news/council.svg"],
+    ];
+    for (const [suffix, name, short_name, slug, parent, image_url] of branchRows) {
+      const id = `97000000-0000-4000-8000-000000000${suffix}`;
+      const department = { id, office_id: id, name, short_name, slug, department: "executive",
+        content_scope: "executive", parent_department_id: parent ? `97000000-0000-4000-8000-000000000${parent}` : null,
+        active: true, archived_at: null, published: true, sort_order: Number(suffix) + 2,
+        description: `${name} community services.`, body: `${name} has its own office information.`,
+        image_url, head_name: `${name} officer`, head_title: "Office head", head_description: "Serving the municipality.",
+        head_photo: "/images/logos/seal.png", is_sample: false, created_at: now, updated_at: now };
+      departments.push(department);
+      offices.push(department);
+    }
+    for (const [index, username, office, permission_level] of [
+      [1, "treasury-editor", "001", "editor"],
+      [2, "market-editor", "003", "editor"],
+      [3, "branch-viewer", "003", "viewer"],
+      [4, "mixed-branch-editor", "003", "editor"],
+    ]) {
+      const user_id = `98000000-0000-4000-8000-${String(index).padStart(12, "0")}`;
+      users.push({ user_id, email: `${username}@example.test`, display_name: username,
+        role: permission_level, active: true, deleted_at: null, created_at: now, updated_at: now });
+      access.push({ user_id, office_id: `97000000-0000-4000-8000-000000000${office}`, permission_level });
+      if (username === "mixed-branch-editor")
+        access.push({ user_id, office_id: officeIds.sb, permission_level: "editor" });
+    }
+  }
+  function publicDepartmentVisible(row) {
+    if (!row.published || !row.active || row.archived_at) return false;
+    if (!row.parent_department_id) return true;
+    const parent = departments.find(item => item.id === row.parent_department_id);
+    return !!parent && parent.published && parent.active && !parent.archived_at;
+  }
   const scope = (table, row) =>
     table === "departments"
       ? row.department
@@ -469,6 +584,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         }
     if (next && !next.published) next.sort_order = 0;
   }
+  // Usernames are staff identities; Auth keeps its private email credential.
+  for (const user of users) user.username = user.email.split("@")[0];
   const authUser = (p) => ({
     id: p.user_id,
     email: p.email,
@@ -743,6 +860,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             "00000000-0000-4000-8000-" +
             String(users.length + 1).padStart(12, "0"),
           email: body.email,
+          username: null,
           display_name: "",
           role: "viewer",
           active: false,
@@ -771,10 +889,18 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         ? response({ user: authUser(user) })
         : response({ msg: "Not found" }, 404);
     }
-    if (url.pathname === "/rest/v1/rpc/manage_staff") {
+    if (["/rest/v1/rpc/manage_staff", "/rest/v1/rpc/manage_staff_account"].includes(url.pathname)) {
       if (actor?.role !== "superadmin" || !credentialsReady(actor)) return response({ code: "42501" }, 403);
       const target = users.find((u) => u.user_id === body.p_user_id);
       if (!target) return response({ code: "22023" }, 400);
+      if (url.pathname.endsWith("/manage_staff_account")) {
+        const username = String(body.p_username || "").trim().toLowerCase();
+        if (!/^[a-z0-9][a-z0-9._-]{2,39}$/.test(username))
+          return response({ code: "22023", message: "Invalid username" }, 400);
+        if (users.some((user) => user !== target && user.username === username))
+          return response({ code: "23505", message: "Username is already in use" }, 409);
+        target.username = username;
+      }
       Object.assign(target, {
         display_name: body.p_display_name,
         role: body.p_role,
@@ -793,7 +919,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.split("/").pop();
       if (["barangays", "sk_profiles"].includes(table) && !["GET", "HEAD"].includes(method) &&
-          (actor?.role !== "superadmin" || !actor.active || actor.deleted_at || method === "DELETE"))
+          ((table === "barangays" && barangayAffairsFixture ? !affairsAccess(actor, true) :
+            actor?.role !== "superadmin" || !actor.active || actor.deleted_at) || method === "DELETE"))
         return response({code: "42501", message: "Superadmin access required"}, 403);
       if (actor && !credentialsReady(actor) && table !== "staff_accounts")
         return response({ code: "42501", message: "Password change required" }, 403);
@@ -841,6 +968,9 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           "document_categories",
         ].includes(table)
       ) {
+        if (barangayAffairsFixture && table === "news" && (Array.isArray(body) ? body : [body]).some(record =>
+          !newsWriteAllowed(actor, record) || !validNewsBarangay(record)))
+          return response({code:"42501",message:"Invalid barangay news ownership"},403);
         if (table === "barangays" && (Array.isArray(body) ? body : [body]).some((record) =>
           collections.barangays.some((existing) => existing.slug === record.slug)))
           return response({code:"23505",message:'duplicate key value violates unique constraint "barangays_slug_key"'},409);
@@ -882,6 +1012,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
               sort_order: record.sort_order ?? 0,
               active: record.active ?? true,
               archived_at: null,
+              ...(departmentBranchesFixture ? { parent_department_id: record.parent_department_id ?? null } : {}),
               body: record.body ?? "",
               head_description: record.head_description ?? "",
             });
@@ -904,7 +1035,12 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
                   ? departments
                   : [];
       if (collections[table]) rows = collections[table];
-      if (table === "barangays" && actor?.role !== "superadmin") rows = rows.filter((row) => row.published);
+      if (departmentBranchesFixture && table === "departments" && ["GET", "HEAD"].includes(method) &&
+          url.searchParams.get("select")?.includes("parent:departments"))
+        return response({ code: "PGRST200", details: "The departments self relationship is absent from the schema cache.",
+          hint: null, message: "Could not find a relationship between 'departments' and 'departments' in the schema cache" }, 400);
+      if (table === "barangays" && actor?.role !== "superadmin" && !(barangayAffairsFixture && affairsAccess(actor)))
+        rows = rows.filter((row) => row.published);
       if (table === "sk_profiles") {
         if (actor?.role !== "superadmin") rows = rows.filter((row) => row.published &&
           collections.barangays.some((barangay) => barangay.id === row.barangay_id && barangay.published));
@@ -955,7 +1091,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           });
       if (table === "published_news")
         rows = news
-          .filter((n) => n.published)
+          .filter((n) => n.published && (!barangayAffairsFixture || !n.barangay_id ||
+            collections.barangays.some(b => b.id === n.barangay_id && b.published)))
           .map((n) => {
             const d = departments.find(
               (d) => d.office_id === n.office_id && d.published,
@@ -963,12 +1100,12 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             return {
               ...n,
               source: {
-                name: d?.name || "Municipal information portal",
+                name: (barangayAffairsFixture && collections.barangays.find(b => b.id === n.barangay_id)?.name) || d?.name || "Municipal information portal",
                 slug: d?.slug,
               },
             };
           });
-      if (actor?.role !== "superadmin") {
+      if (!serviceRole && actor?.role !== "superadmin") {
         const assigned = access
           .filter((a) => a.user_id === actor?.user_id)
           .map((a) => a.office_id);
@@ -981,7 +1118,9 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
             (d) => d.published || assigned.includes(d.office_id),
           );
       }
-      if (!actor && !["legislative_terms", "municipal_contact_settings"].includes(table)) rows = rows.filter((r) => r.published);
+      if (!actor && !serviceRole && !["legislative_terms", "municipal_contact_settings"].includes(table)) rows = rows.filter((r) => r.published);
+      if (departmentBranchesFixture && !actor && !serviceRole && table === "departments")
+        rows = rows.filter(publicDepartmentVisible);
       if (!actor && table === "services")
         rows = rows.filter((service) =>
           service.office_id == null || departments.some((department) =>
@@ -1009,6 +1148,11 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         }
       }
       if (method === "PATCH") {
+        if (barangayAffairsFixture && table === "news") {
+          rows = rows.filter(record => newsWriteAllowed(actor, record));
+          if (rows.some(record => !newsWriteAllowed(actor, {...record,...body}) || !validNewsBarangay({...record,...body})))
+            return response({code:"42501",message:"Invalid barangay news ownership"},403);
+        }
         if (table === "sk_profiles" && body.barangay_id) {
           if (!collections.barangays.some((barangay) => barangay.id === body.barangay_id))
             return response({code:"23503",message:"Invalid barangay"},409);
@@ -1062,6 +1206,13 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         committee_record: committees.find((o) => o.id === r.committee_id),
         session_record: sessions.find((o) => o.id === r.session_id),
       }));
+      if (table === "staff_accounts") {
+        const selected = url.searchParams.get("select");
+        if (selected && selected !== "*") {
+          const fields = selected.split(",");
+          rows = rows.map((row) => Object.fromEntries(fields.map((field) => [field, row[field]])));
+        }
+      }
       const result = headers.get("accept")?.includes("vnd.pgrst.object")
         ? rows[0] || null
         : rows;

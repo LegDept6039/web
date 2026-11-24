@@ -1,7 +1,7 @@
 export type RichNode = {
   type: string;
   text?: string;
-  attrs?: { size?: string; start?: number };
+  attrs?: { size?: string; start?: number; indent?: number };
   marks?: { type: string }[];
   content?: RichNode[];
 };
@@ -59,7 +59,7 @@ export function validateRichText(input: unknown, required = false): RichNode {
         throw new Error("Invalid formatting attributes.");
       const allowed =
         n.type === "paragraph"
-          ? ["size"]
+          ? ["size", "indent"]
           : n.type === "orderedList"
             ? ["start"]
             : [];
@@ -67,9 +67,13 @@ export function validateRichText(input: unknown, required = false): RichNode {
         Object.keys(n.attrs).some((k) => !allowed.includes(k)) ||
         (n.attrs.size !== undefined &&
           !["small", "normal", "large"].includes(n.attrs.size)) ||
+        (n.attrs.indent !== undefined &&
+          (!Number.isInteger(n.attrs.indent) ||
+            n.attrs.indent < 0 ||
+            n.attrs.indent > 6)) ||
         (n.attrs.start !== undefined && n.attrs.start !== 1)
       )
-        throw new Error("Unsupported text size or list format.");
+        throw new Error("Unsupported text size, indentation or list format.");
     }
     if (
       n.marks !== undefined &&

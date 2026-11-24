@@ -6,7 +6,7 @@ const term = "20000000-0000-4000-8000-000000000001";
 const previous = "20000000-0000-4000-8000-000000000002";
 async function login(page: Page, user = "vmo") {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${user}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(user);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
@@ -60,7 +60,10 @@ test("bulk add saves multiple published sessions in the selected historical term
     .getByRole("group", { name: "Session 2", exact: true })
     .getByRole("combobox", { name: "Type", exact: true })
     .selectOption("Special session");
-  await page.getByLabel("Publish all sessions", { exact: true }).check();
+  await expect(page.locator('input[name="published"]')).toHaveCount(0);
+  await expect(
+    page.getByRole("checkbox", { name: "Publish all sessions", exact: true }),
+  ).toHaveCount(0);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -88,15 +91,16 @@ test("bulk add saves multiple published sessions in the selected historical term
         .filter({ hasText: `Bulk ${type} ${info.project.name}` }),
     ).toContainText("Published");
   await page.goto(`/legislative/sessions?term=${previous}`);
-  await expect(
-    page.getByRole("heading", {
-      name: `Bulk regular ${info.project.name}`,
-      exact: true,
-    }),
-  ).toBeVisible();
+  for (const type of ["regular", "special"])
+    await expect(
+      page.getByRole("heading", {
+        name: `Bulk ${type} ${info.project.name}`,
+        exact: true,
+      }),
+    ).toBeVisible();
 });
 
-test("bulk validation preserves rows, rejects mismatched terms and duplicates, and saves drafts", async ({
+test("bulk validation preserves rows and permissions, and forged publication flags cannot save drafts", async ({
   page,
 }, info) => {
   await login(page);
@@ -104,9 +108,9 @@ test("bulk validation preserves rows, rejects mismatched terms and duplicates, a
   await fill(
     page,
     1,
-    `Bulk draft ${info.project.name}`,
+    `Bulk automatic ${info.project.name}`,
     "2026-10-01",
-    `draft-${info.project.name}`,
+    `automatic-${info.project.name}`,
   );
   await page
     .getByRole("button", { name: "Add another session", exact: true })
@@ -125,10 +129,18 @@ test("bulk validation preserves rows, rejects mismatched terms and duplicates, a
     page
       .getByRole("group", { name: "Session 1", exact: true })
       .getByLabel("Name", { exact: true }),
-  ).toHaveValue(`Bulk draft ${info.project.name}`);
+  ).toHaveValue(`Bulk automatic ${info.project.name}`);
   await page
     .getByRole("button", { name: "Remove session 2", exact: true })
     .click();
+  // A stale or forged form cannot restore the removed draft behavior.
+  await page.locator(".bulk-session-form").evaluate((form) => {
+    const published = document.createElement("input");
+    published.type = "hidden";
+    published.name = "published";
+    published.value = "";
+    form.append(published);
+  });
   await page
     .getByRole("button", { name: "Save 1 session", exact: true })
     .click();
@@ -136,20 +148,20 @@ test("bulk validation preserves rows, rejects mismatched terms and duplicates, a
   await expect(
     page
       .getByRole("row")
-      .filter({ hasText: `Bulk draft ${info.project.name}` }),
-  ).toContainText("Draft");
+      .filter({ hasText: `Bulk automatic ${info.project.name}` }),
+  ).toContainText("Published");
   await expect(
     page.getByRole("row").filter({ hasText: "Wrong term" }),
   ).toHaveCount(0);
   await page.goto(`/legislative/sessions?term=${term}`);
   await expect(
     page.getByRole("heading", {
-      name: `Bulk draft ${info.project.name}`,
+      name: `Bulk automatic ${info.project.name}`,
       exact: true,
     }),
-  ).toHaveCount(0);
+  ).toBeVisible();
   await page.goto(`/admin/content/sessions/bulk?office=${office}&term=${term}`);
-  await fill(page, 1, "Duplicate", "2026-10-01", `draft-${info.project.name}`);
+  await fill(page, 1, "Duplicate", "2026-10-01", `automatic-${info.project.name}`);
   await page
     .getByRole("button", { name: "Save 1 session", exact: true })
     .click();

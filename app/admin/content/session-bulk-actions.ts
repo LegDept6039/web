@@ -53,15 +53,13 @@ export async function addBulkSessions(
     } catch {
       throw new BulkSessionError("Check the session rows and try again.");
     }
-    const rows: Record<string, unknown>[] = parseBulkSessions(
-      input,
-      term,
-      form.get("published") === "on",
-    ).map((row) => ({
-      ...row,
-      office_id: officeId,
-      content_scope: "legislative",
-    }));
+    const rows: Record<string, unknown>[] = parseBulkSessions(input, term).map(
+      (row) => ({
+        ...row,
+        office_id: officeId,
+        content_scope: "legislative",
+      }),
+    );
     const existing = new Set<string>();
     for (let offset = 0; ; offset += 500) {
       const { data, error } = await context.client
@@ -96,6 +94,19 @@ export async function addBulkSessions(
         "Check the sessions below. No sessions were added.",
         duplicates,
       );
+    const { count: publishedCount, error: countError } = await context.client
+      .from("sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("office_id", officeId)
+      .eq("content_scope", "legislative")
+      .eq("published", true);
+    if (countError || publishedCount === null)
+      throw new BulkSessionError(
+        "Unable to check session ordering. No sessions were added.",
+      );
+    rows.forEach((row, index) => {
+      row.sort_order = publishedCount + index + 1;
+    });
     // One statement keeps validation, RLS and trigger failures atomic.
     const { error } = await context.client.from("sessions").insert(rows);
     if (error) {

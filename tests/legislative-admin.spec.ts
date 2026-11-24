@@ -5,7 +5,7 @@ const officeIds = {
 };
 async function login(page: Page, name: string) {
   await page.goto("/login");
-  await page.getByLabel("Email address").fill(`${name}@example.test`);
+  await page.getByLabel("Username", { exact: true }).fill(name);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(
@@ -25,19 +25,20 @@ test("one Legislative office assigns all features without module checkboxes", as
   await expect(page.locator('input[name^="module:"]')).toHaveCount(0);
   await expect(
     page
-      .locator('select[name="office"] option')
+      .getByRole("group", { name: "Office access", exact: true })
+      .locator("label")
       .filter({ hasText: "SB draft" }),
   ).toHaveCount(1);
   await page
-    .getByRole("listbox", { name: "Office Access", exact: true })
-    .selectOption(officeIds.legislative);
+    .locator(`input[name="office"][value="${officeIds.legislative}"]`)
+    .check();
   await page
     .getByRole("combobox", { name: "Role", exact: true })
     .selectOption("admin");
   await page.getByLabel("Full name", { exact: true }).fill("Pedro");
   await page
-    .getByLabel("Email", { exact: true })
-    .fill(`legislative-${info.project.name}@example.test`);
+    .getByLabel("Username", { exact: true })
+    .fill(`legislative-${info.project.name}`);
   await page.getByLabel("Password", { exact: true }).fill("TestPassword123!");
   await page
     .getByLabel("Confirm password", { exact: true })
@@ -46,12 +47,13 @@ test("one Legislative office assigns all features without module checkboxes", as
   await expect(page).toHaveURL(/\/superadmin\/users$/);
   await page
     .getByRole("row")
-    .filter({ hasText: `legislative-${info.project.name}@example.test` })
+    .filter({ hasText: `legislative-${info.project.name}` })
     .getByRole("link")
     .click();
-  await expect(page.locator('select[name="office"]')).toHaveValues([
-    officeIds.legislative,
-  ]);
+  await expect(
+    page.locator(`input[name="office"][value="${officeIds.legislative}"]`),
+  ).toBeChecked();
+  await expect(page.locator('input[name="office"]:checked')).toHaveCount(1);
   await expect(page.locator('input[name^="module:"]')).toHaveCount(0);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await login(page, `legislative-${info.project.name}`);

@@ -24,6 +24,8 @@ import {
 import Image from "next/image";
 import { useActionState, useState, useEffect, useRef } from "react";
 import type { Office } from "@/lib/offices/permissions";
+import { isBarangayAffairsOffice } from "@/lib/barangays/permissions";
+import type { BarangayNewsOption } from "@/lib/barangays/news";
 import { definitions, type Collection } from "@/lib/content/schema";
 import { label } from "@/lib/admin/content";
 import { saveContent, deleteContent } from "./actions";
@@ -40,8 +42,10 @@ export function ContentForm({
   superadmin = false,
   scope = "executive",
   legislativeOptions = emptyOptions,
+  barangayOptions = [],
 }: {
   legislativeOptions?: LegislativeOptions;
+  barangayOptions?: BarangayNewsOption[];
   collection: Collection;
   row?: Record<string, unknown>;
   offices: Office[];
@@ -192,6 +196,11 @@ export function ContentForm({
   const legislativeOfficial =
     scope === "legislative" && collection === "officials";
   const definition = definitions[collection];
+  const barangayNews =
+    collection === "news" &&
+    isBarangayAffairsOffice(
+      offices.find((office) => office.id === selectedOffice),
+    );
   const photoColumn = "photo_url";
   const original = String(row[definition.key] || "");
   const hidden = (
@@ -272,20 +281,51 @@ export function ContentForm({
                   disabled={Boolean(original) && !superadmin}
                 >
                   <option value="">Unassigned (Super Admin only)</option>
-                  {offices.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.name}
-                      {o.active ? "" : " (inactive)"}
-                    </option>
-                  ))}
+                  {offices
+                    .filter(
+                      (office) =>
+                        collection === "news" ||
+                        !isBarangayAffairsOffice(office),
+                    )
+                    .map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.name}
+                        {o.active ? "" : " (inactive)"}
+                      </option>
+                    ))}
                 </select>
               </label>
             )
           )}
           {collection === "news" && (
             <p className="staff-note">
-              News is categorized automatically by its owning office.
+              {barangayNews
+                ? "Choose the barangay this news article is about."
+                : "News is categorized automatically by its owning office."}
             </p>
+          )}
+          {barangayNews && (
+            <label>
+              Barangay
+              <select
+                name="barangay_id"
+                defaultValue={String(row.barangay_id || "")}
+                required
+              >
+                <option value="">Choose a barangay...</option>
+                {barangayOptions.map((barangay) => (
+                  <option key={barangay.id} value={barangay.id}>
+                    {barangay.name}
+                    {barangay.published ? "" : " (unpublished)"}
+                  </option>
+                ))}
+              </select>
+              {!barangayOptions.length && (
+                <span className="staff-note">
+                  Add a barangay profile before creating news.
+                </span>
+              )}
+            </label>
           )}
           {legislativeOfficial && (
             <OfficialEditorFields
@@ -400,6 +440,9 @@ export function ContentForm({
               Valid documents are published when saved.
             </p>
           )}
+          {collection === "sessions" && (
+            <p className="staff-note">Sessions are published when saved.</p>
+          )}
           {legislative && (
             <LegislativeFields
               collection={collection}
@@ -455,6 +498,7 @@ export function ContentForm({
             if (
               [
                 "officeId",
+                "barangayId",
                 "contentScope",
                 "headPhoto",
                 "imageUrl",
@@ -574,6 +618,7 @@ export function ContentForm({
             </div>
           )}
           {collection !== "departments" &&
+            collection !== "sessions" &&
             !(legislative && isDocumentCollection(collection)) && (
               <PublicationFields
                 collection={collection}

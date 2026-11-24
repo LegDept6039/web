@@ -6,6 +6,7 @@ import { termDisplayName, termStatus } from "@/lib/legislative/terms";
 import { TermForm } from "./TermForm";
 import { pageDetails, paginationHref } from "@/lib/admin/pagination";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminActionLink } from "@/components/admin/AdminActionLink";
 export default async function Page({
   searchParams,
 }: {
@@ -30,7 +31,7 @@ export default async function Page({
               <th>Start</th>
               <th>End</th>
               <th>Status</th>
-              <th>Action</th>
+              <th className="admin-actions-cell">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -40,15 +41,14 @@ export default async function Page({
                 <td>{t.start_date}</td>
                 <td>{t.end_date}</td>
                 <td>{termStatus(t)}</td>
-                <td>
-                  <Link
+                <td className="admin-actions-cell">
+                  <AdminActionLink
                     href={paginationHref(
                       { ...params, edit: t.id },
                       pagination.page,
                     )}
-                  >
-                    Edit
-                  </Link>
+                    action="edit"
+                  />
                 </td>
               </tr>
             ))}

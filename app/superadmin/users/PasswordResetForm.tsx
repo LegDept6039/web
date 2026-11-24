@@ -8,7 +8,7 @@ import type { Account } from "./UserForm";
 
 type ResetAccount = Pick<
   Account,
-  "user_id" | "display_name" | "email" | "active"
+  "user_id" | "display_name" | "username" | "active"
 >;
 
 function ResetConfirmation({
@@ -42,7 +42,7 @@ function ResetConfirmation({
         <p role="status">{result.message}</p>
         <p>
           Give this password privately to{" "}
-          <strong>{account.display_name}</strong> ({account.email}). It is shown
+          <strong>{account.display_name}</strong> ({account.username}). It is shown
           only here and cannot be retrieved after you close this panel or leave
           this page.
         </p>
@@ -67,14 +67,14 @@ function ResetConfirmation({
         <div className="staff-password-actions">
           <button
             type="button"
-            className="button button-blue"
+            className="button button-blue account-action-button"
             onClick={copyPassword}
           >
             Copy temporary password
           </button>
           <button
             type="button"
-            className="button staff-secondary-button"
+            className="button staff-secondary-button account-action-button"
             onClick={onClose}
           >
             Done
@@ -95,7 +95,7 @@ function ResetConfirmation({
       <h3>Confirm Password Reset</h3>
       <p>
         Reset the password for <strong>{account.display_name}</strong> (
-        {account.email})? Their current password and sessions will no longer
+        {account.username})? Their current password and sessions will no longer
         provide CMS access. Any previous temporary password will be replaced.
       </p>
       <p className="staff-note">
@@ -118,12 +118,15 @@ function ResetConfirmation({
         </p>
       )}
       <div className="staff-password-actions">
-        <button className="button button-blue" disabled={pending}>
+        <button
+          className="button button-blue account-action-button"
+          disabled={pending}
+        >
           {pending ? "Resetting..." : "Reset Password"}
         </button>
         <button
           type="button"
-          className="button staff-secondary-button"
+          className="button staff-secondary-button account-action-button"
           disabled={pending}
           onClick={onClose}
         >
@@ -163,7 +166,7 @@ export function PasswordResetForm({
           </p>
           <button
             type="button"
-            className="button button-blue"
+            className="button button-blue account-action-button"
             onClick={() => setOpen(true)}
           >
             Reset Password

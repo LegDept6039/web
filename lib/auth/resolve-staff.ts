@@ -5,6 +5,7 @@ import { authDiagnostic, errorCode, databaseMessage } from "./diagnostics";
 type Profile = {
   user_id: string;
   email: string;
+  username: string;
   display_name: string;
   role: Role;
   active: boolean;
@@ -26,7 +27,7 @@ export async function resolveStaff(
   } = await client
     .from("staff_accounts")
     .select(
-      "user_id,email,display_name,role,active,deleted_at,transparency_access",
+      "user_id,email,username,display_name,role,active,deleted_at,transparency_access",
     )
     .eq("user_id", userId)
     .maybeSingle();

@@ -1,11 +1,12 @@
 "use client";
 import { useActionState, useState } from "react";
+import Link from "next/link";
 import { saveUser } from "./actions";
 import { roles, type Office, type Access } from "@/lib/offices/permissions";
 export interface Account {
   user_id: string;
   display_name: string;
-  email: string;
+  username: string;
   role: string;
   active: boolean;
   deleted_at: string | null;
@@ -23,8 +24,45 @@ export function UserForm({
 }) {
   const [message, action, pending] = useActionState(saveUser, "");
   const [selectedRole, setSelectedRole] = useState(account?.role || "viewer");
+  const activeOffices = offices.filter((office) => office.active);
+  const [selectedOffices, setSelectedOffices] = useState<string[]>(() => [
+    ...access
+      .filter((assignment) =>
+        activeOffices.some((office) => office.id === assignment.office_id),
+      )
+      .map((assignment) => assignment.office_id),
+    ...(account?.transparency_access ? ["transparency"] : []),
+  ]);
+  function toggleOffice(value: string) {
+    setSelectedOffices((selected) =>
+      selected.includes(value)
+        ? selected.filter((id) => id !== value)
+        : [...selected, value],
+    );
+  }
+  const officeChoices = [
+    {
+      value: "transparency",
+      name: "Transparency",
+      detail: "Modules, reports and PDFs",
+    },
+    ...activeOffices.map((office) => {
+      const shortName = office.short_name?.trim();
+      return {
+        value: office.id,
+        name: office.name,
+        detail:
+          shortName &&
+          shortName.toLowerCase() !== office.name.trim().toLowerCase()
+            ? shortName
+            : office.department === "legislative"
+              ? "Legislative branch"
+              : "Executive office",
+      };
+    }),
+  ];
   return (
-    <form action={action} className="staff-form staff-card">
+    <form action={action} className="staff-form staff-card account-form">
       <input type="hidden" name="user_id" value={account?.user_id || ""} />
       <label>
         Full name
@@ -36,16 +74,25 @@ export function UserForm({
         />
       </label>
       <label>
-        Email
+        Username
         <input
-          name="email"
-          type="email"
+          name="username"
+          type="text"
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           required
-          maxLength={254}
-          readOnly={Boolean(account)}
-          defaultValue={account?.email}
+          minLength={3}
+          maxLength={40}
+          pattern={"[A-Za-z0-9][A-Za-z0-9._\\-]{2,39}"}
+          aria-describedby="username-policy"
+          defaultValue={account?.username}
         />
       </label>
+      <p id="username-policy" className="staff-note">
+        Use 3 to 40 letters, numbers, periods, underscores or hyphens. Start
+        with a letter or number. Usernames are saved in lowercase.
+      </p>
       {!account && (
         <>
           <label>
@@ -108,42 +155,61 @@ export function UserForm({
           assignment is needed.
         </p>
       )}
-      <fieldset hidden={selectedRole === "superadmin"}>
+      <fieldset
+        className="account-office-access"
+        hidden={selectedRole === "superadmin"}
+        aria-describedby="office-access-help office-access-scope"
+      >
         <legend>Office access</legend>
-        <p>
-          Choose the office this user can manage. The selected role determines
-          access. Legislative Access covers the entire Legislative branch.
-          Transparency covers all Transparency modules, reports and PDFs.
-        </p>
-        <label>
-          Office Access
-          <select
-            name="office"
-            multiple
-            size={Math.min(
-              8,
-              Math.max(3, offices.filter((o) => o.active).length + 1),
-            )}
-            defaultValue={[
-              ...access.map((a) => a.office_id),
-              ...(account?.transparency_access ? ["transparency"] : []),
-            ]}
-          >
-            <option value="transparency">Transparency</option>
-            {offices
-              .filter((o) => o.active)
-              .map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                  {o.short_name ? ` (${o.short_name})` : ""}
-                </option>
+        <div className="account-access-intro">
+          <p id="office-access-help">
+            Select one or more offices. The user’s role determines what they can
+            do.
+          </p>
+          <span className="account-access-count" aria-live="polite">
+            {selectedOffices.length} selected
+          </span>
+        </div>
+        <div className="account-office-table-wrap">
+          <table className="account-office-table" aria-label="Office access">
+            <thead>
+              <tr>
+                <th scope="col" className="account-office-select">
+                  Select
+                </th>
+                <th scope="col">Office</th>
+              </tr>
+            </thead>
+            <tbody>
+              {officeChoices.map((office) => (
+                <tr key={office.value}>
+                  <td className="account-office-select">
+                    <input
+                      id={`office-access-${office.value}`}
+                      type="checkbox"
+                      name="office"
+                      value={office.value}
+                      checked={selectedOffices.includes(office.value)}
+                      onChange={() => toggleOffice(office.value)}
+                    />
+                  </td>
+                  <th scope="row">
+                    <label htmlFor={`office-access-${office.value}`}>
+                      <span className="account-office-name">{office.name}</span>{" "}
+                      <span className="account-office-meta">
+                        {office.detail}
+                      </span>
+                    </label>
+                  </th>
+                </tr>
               ))}
-          </select>
-        </label>
-        <p className="staff-note">
-          Select an office. Ctrl/Cmd-click selects multiple offices for staff
-          who need them. For Transparency, Editors and Admins can manage modules
-          and reports; Viewers can only read records and preview PDFs.
+            </tbody>
+          </table>
+        </div>
+        <p id="office-access-scope" className="staff-note">
+          Legislative Access covers the entire Legislative branch. For
+          Transparency, Editors and Admins manage modules, reports and PDFs;
+          Viewers have read-only access.
         </p>
         {access.some((a) =>
           offices.some((o) => o.id === a.office_id && !o.active),
@@ -154,8 +220,12 @@ export function UserForm({
         )}
       </fieldset>
       {account && (
-        <details>
-          <summary>Delete account (preserves history)</summary>
+        <details className="account-delete">
+          <summary>
+            <span>
+              Delete account <small>(preserves history)</small>
+            </span>
+          </summary>
           <p>
             This disables login and removes office assignments. Auth identity
             and content history are retained. Saving again without Delete
@@ -171,10 +241,25 @@ export function UserForm({
           </label>
         </details>
       )}
-      {message && <p role="alert">{message}</p>}
-      <button className="button button-blue" disabled={pending}>
-        {pending ? "Saving..." : account ? "Save changes" : "Create user"}
-      </button>
+      {message && (
+        <p role="alert" className="staff-error">
+          {message}
+        </p>
+      )}
+      <div className="account-form-actions">
+        <button
+          className="button button-blue account-action-button"
+          disabled={pending}
+        >
+          {pending ? "Saving..." : account ? "Save changes" : "Create user"}
+        </button>
+        <Link
+          className="button staff-secondary-button account-action-button"
+          href="/superadmin/users"
+        >
+          Cancel
+        </Link>
+      </div>
     </form>
   );
 }

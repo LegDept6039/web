@@ -7,6 +7,7 @@ import { allowed, available } from "@/lib/offices/server";
 import { documentTypes, isDocumentType } from "@/lib/legislative/config";
 import type { Collection } from "@/lib/content/schema";
 import { AdminPagination } from "./AdminPagination";
+import { AdminActionLink } from "./AdminActionLink";
 import { loadAdminPage } from "@/lib/admin/pagination";
 export interface DocumentQuery {
   term?: string;
@@ -177,28 +178,24 @@ export async function LegislativeDocuments({
                     </td>
                     <td>{r.number || "-"}</td>
                     <td>{r.date}</td>
-                    <td>
-                      <Link
-                        href={`/admin/content/${r.collection}/view/${r.id}?office=${r.office_id}`}
-                      >
-                        View
-                      </Link>
-                      {available(
-                        context,
-                        r.collection,
-                        r.office_id,
-                        "write",
-                      ) && (
-                        <>
-                          {" "}
-                          -{" "}
-                          <Link
+                    <td className="admin-actions-cell">
+                      <div className="admin-row-actions">
+                        <AdminActionLink
+                          href={`/admin/content/${r.collection}/view/${r.id}?office=${r.office_id}`}
+                          action="view"
+                        />
+                        {available(
+                          context,
+                          r.collection,
+                          r.office_id,
+                          "write",
+                        ) && (
+                          <AdminActionLink
                             href={`/admin/content/${r.collection}/edit/${r.id}?office=${r.office_id}`}
-                          >
-                            Edit
-                          </Link>
-                        </>
-                      )}
+                            action="edit"
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

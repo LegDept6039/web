@@ -33,6 +33,7 @@ export function OfficesNav({
     setLast(route);
     setOpen(selected);
   }
+  if (!offices.length) return null;
   return (
     <div className="offices-nav">
       {label && <span className="admin-nav-label">{label}</span>}

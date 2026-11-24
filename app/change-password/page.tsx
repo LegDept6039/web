@@ -15,7 +15,7 @@ export default async function Page() {
   if (!status.required) redirect("/login");
   const { data: profile } = await client
     .from("staff_accounts")
-    .select("active,deleted_at")
+    .select("active,deleted_at,username")
     .eq("user_id", user.id)
     .maybeSingle();
   const expired = resetIsExpired(status.expires_at);
@@ -32,7 +32,7 @@ export default async function Page() {
         <h1>Create a new password</h1>
         {allowed ? (
           <ChangePasswordForm
-            email={user.email}
+            username={profile.username}
             expiresAt={status.expires_at || undefined}
           />
         ) : (

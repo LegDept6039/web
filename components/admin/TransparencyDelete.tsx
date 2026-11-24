@@ -1,6 +1,7 @@
 "use client";
 import { useActionState } from "react";
 import { deleteTransparency } from "@/app/superadmin/transparency/actions";
+import { AdminActionIcon } from "./AdminActionLink";
 export function TransparencyDelete({
   kind,
   id,
@@ -14,9 +15,22 @@ export function TransparencyDelete({
 }) {
   const [error, action, pending] = useActionState(deleteTransparency, "");
   return (
-    <details className="transparency-delete">
-      <summary>
-        Delete<span className="sr-only"> {title}</span>
+    <details
+      className="transparency-delete"
+      onToggle={(event) => {
+        if (!event.currentTarget.open) return;
+        const actions = event.currentTarget.closest(".admin-row-actions");
+        requestAnimationFrame(() =>
+          actions?.scrollIntoView({ block: "nearest", inline: "nearest" }),
+        );
+      }}
+    >
+      <summary
+        className="admin-row-action admin-row-action-danger"
+        aria-label={`Delete ${title}`}
+        title={`Delete ${title}`}
+      >
+        <AdminActionIcon action="delete" />
       </summary>
       <form action={action}>
         <input type="hidden" name="kind" value={kind} />
