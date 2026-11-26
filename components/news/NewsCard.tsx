@@ -33,7 +33,7 @@ export function NewsCard({
         <NewsSource article={article} />
         <p>{article.excerpt}</p>
         <Link href={`/news/${article.slug}`} className="text-link">
-          Read story
+          Read full story
           <ArrowUpRight size={16} />
         </Link>
       </div>

@@ -92,7 +92,11 @@ export async function CommitteeWorkspace({
         )}
       </td>
       <td>
-        {row ? (row.published ? "Published" : "Draft") : "Unassigned template"}
+        {row
+          ? row.published === true
+            ? "Published"
+            : "Database update required"
+          : "Composition unavailable"}
       </td>
     </>
   );
@@ -139,10 +143,25 @@ export async function CommitteeWorkspace({
       {selected !== "unassigned" && (
         <>
           <p className="staff-note">
-            The shared catalog appears in every term. Unassigned templates are
-            not verified historical compositions and are not displayed publicly.
-            Saving creates a record for the selected term only.
+            Every term has a published composition for each Master Committee.
+            Edit a composition to assign this term’s officials. Unfilled
+            positions remain unassigned.
           </p>
+          {hasTerm && rows.some((row) => row.published !== true) && (
+            <p role="alert" className="staff-note">
+              Some committee compositions are unpublished. Ask Superadmin to
+              apply the automatic committee publication update.
+            </p>
+          )}
+          {hasTerm &&
+            masters.some(
+              (master) => !rows.some((row) => row.master_id === master.id),
+            ) && (
+              <p role="alert" className="staff-note">
+                Some committee compositions are missing. Restore them below or
+                ask Superadmin to finish automatic committee setup.
+              </p>
+            )}
           <div className="admin-table-wrap">
             <table className="admin-table committee-composition-table">
               <thead>
@@ -178,10 +197,10 @@ export async function CommitteeWorkspace({
                             <AdminActionLink
                               href={`/admin/content/committees/new?office=${owner.id}&master=${master.id}&term=${selected}`}
                               action="edit"
-                              label="Edit composition"
+                              label="Restore composition"
                             />
                           ) : hasTerm ? (
-                            "Read only"
+                            "Unavailable"
                           ) : (
                             "Select a term"
                           )}

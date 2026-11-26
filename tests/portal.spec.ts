@@ -114,7 +114,7 @@ test("news department, keyword, article and site search", async ({ page }) => {
   ).toBeVisible();
   await page.getByRole("button", { name: "Reset" }).click();
   await page.getByRole("textbox", { name: "Search news" }).fill("coastline");
-  await page.getByRole("link", { name: "Read story" }).click();
+  await page.getByRole("link", { name: "Read full story" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "coastline",
   );

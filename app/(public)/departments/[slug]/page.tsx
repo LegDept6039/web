@@ -70,16 +70,18 @@ export default async function Page({
           </div>
         )}
         <section
-          className="department-profile"
+          className={`department-profile${d.showHeadPhotoOnPage === false ? " department-profile-without-photo" : ""}`}
           aria-label="Department head and overview"
         >
-          <div className="department-photo">
-            <OfficialPhoto
-              src={d.headPhoto}
-              name={d.headName || "Department head"}
-              sizes="(max-width: 600px) 85vw, 300px"
-            />
-          </div>
+          {d.showHeadPhotoOnPage !== false && (
+            <div className="department-photo">
+              <OfficialPhoto
+                src={d.headPhoto}
+                name={d.headName || "Department head"}
+                sizes="(max-width: 600px) 85vw, 300px"
+              />
+            </div>
+          )}
           <div>
             {d.headTitle && (
               <p className="department-head-title">{d.headTitle}</p>

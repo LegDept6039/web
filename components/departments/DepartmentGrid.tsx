@@ -70,7 +70,7 @@ export function ProgramGrid({ programs }: { programs: Program[] }) {
   return (
     <div className="content-grid">
       {programs.map((p) => (
-        <article className="info-card" key={p.id}>
+        <article className="info-card program-card" key={p.id}>
           <span className="eyebrow">{p.category}</span>
           <h3>
             <Link href={`/programs/${p.slug || p.id}`}>{p.name}</Link>
@@ -78,7 +78,7 @@ export function ProgramGrid({ programs }: { programs: Program[] }) {
           <p>{p.description}</p>
           <small>{p.status}</small>
           <Link className="text-link" href={`/programs/${p.slug || p.id}`}>
-            View program
+            View more
           </Link>
         </article>
       ))}

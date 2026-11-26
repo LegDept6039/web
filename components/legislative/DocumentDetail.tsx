@@ -35,10 +35,16 @@ export function DocumentDetail({
               <dd>{d.status}</dd>
             </div>
             <div>
-              <dt>Author</dt>
-              <dd>{d.author}</dd>
+              <dt>
+                {d.approvalMode === "mass_motion"
+                  ? "Approval method"
+                  : "Author"}
+              </dt>
+              <dd>
+                {d.approvalMode === "mass_motion" ? "Mass motion" : d.author}
+              </dd>
             </div>
-            {d.coAuthor && (
+            {d.approvalMode !== "mass_motion" && d.coAuthor && (
               <div>
                 <dt>Co-author</dt>
                 <dd>{d.coAuthor}</dd>
@@ -53,7 +59,18 @@ export function DocumentDetail({
             {d.sessionName && (
               <div>
                 <dt>Session</dt>
-                <dd>{d.sessionName}</dd>
+                <dd>
+                  {d.sessionId ? (
+                    <Link
+                      className="text-link"
+                      href={`/legislative/sessions/${encodeURIComponent(d.sessionId)}`}
+                    >
+                      {d.sessionName}
+                    </Link>
+                  ) : (
+                    d.sessionName
+                  )}
+                </dd>
               </div>
             )}
           </dl>

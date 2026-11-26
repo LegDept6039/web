@@ -274,10 +274,16 @@ test("homepage reads stop at four with stable ordering and publication filters",
       const u = new URL(url);
       expect(u.searchParams.get("branch")).toBe("eq.legislative");
       expect(u.searchParams.get("legislative_role")).toBe("not.is.null");
+      expect(u.searchParams.get("term_id")).toBe(
+        "eq.20000000-0000-4000-8000-000000000001",
+      );
       expect(u.searchParams.get("limit")).toBe("4");
       return Response.json([]);
     },
-    { branch: "legislative" },
+    {
+      branch: "legislative",
+      term_id: "20000000-0000-4000-8000-000000000001",
+    },
     4,
   );
 });

@@ -29,7 +29,17 @@ export default async function Page({
       />
       <article className="container section">
         <div className="article">
-          {session && <p>Session: {session.name || session.number}</p>}
+          {session && (
+            <p>
+              Session:{" "}
+              <Link
+                className="text-link"
+                href={`/legislative/sessions/${encodeURIComponent(session.id)}`}
+              >
+                {session.name || `${session.number} ${session.type}`}
+              </Link>
+            </p>
+          )}
           <p className="whitespace-pre-wrap">{d.description}</p>
           {d.fileUrl && (
             <p>

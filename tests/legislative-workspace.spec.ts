@@ -9,7 +9,7 @@ async function session(page: Page, name: string) {
     ).toHaveText(name);
 }
 async function save(page: Page, collection: string, publish = false) {
-  if (publish && collection !== "sessions") {
+  if (publish && !["sessions", "committees"].includes(collection)) {
     await page.getByLabel("Published", { exact: true }).check();
     await page.getByLabel("Sort order", { exact: true }).fill("1");
   }
@@ -111,9 +111,16 @@ test("Legislative relationships and all five document types use the existing CMS
   await page.getByLabel("No. (Session Number)", { exact: true }).fill("23");
   await save(page, "sessions");
   await page.goto(`/admin/content/committees/new?office=${office}`);
+  await expect(page).toHaveURL(
+    new RegExp(`/admin/content/committees\\?office=${office}`),
+  );
   await page
-    .getByRole("combobox", { name: "Master Committee", exact: true })
-    .selectOption({ label: `Committee ${suffix}` });
+    .getByRole("row")
+    .filter({
+      has: page.getByRole("cell", { name: `Committee ${suffix}`, exact: true }),
+    })
+    .getByRole("link", { name: "Edit", exact: true })
+    .click();
   await page
     .getByLabel("Chairperson", { exact: true })
     .selectOption({ label: `Member 1 ${suffix}` });

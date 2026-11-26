@@ -1010,6 +1010,11 @@ html:has(.admin-shell) {
 .department-editor-hero { background: #f4f7f9; padding: clamp(20px, 3vw, 36px); margin: 16px 0 32px; }
 .department-editor-hero h2 { font-family: Georgia, serif; font-size: clamp(26px, 3vw, 40px); font-weight: 400; overflow-wrap: anywhere; }
 .department-editor-profile { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: clamp(20px, 3vw, 40px); align-items: start; }
+.department-editor-photo { min-width: 0; }
+.department-photo-visibility { margin-top: 18px; }
+.staff-form .department-photo-visibility label { align-items: flex-start; }
+.department-photo-visibility input[type="checkbox"] { flex-shrink: 0; margin-top: 2px; }
+.department-photo-visibility .staff-note { margin-top: 8px; font-size: 12px; line-height: 1.6; }
 .department-editor-fields { display: grid; gap: 20px; min-width: 0; }
 .department-editor-fields .department-editor-name { font-size: 24px; font-family: Georgia, serif; }
 .department-page-editor textarea { text-align: justify; line-height: 1.8; font-weight: 400; }
@@ -1032,7 +1037,7 @@ html:has(.admin-shell) {
 .image-edit-control .image-edit-remove { font-size: 13px; margin-top: 12px; }
 @media(max-width: 1000px) {
  .department-editor-profile { grid-template-columns: minmax(0,1fr); }
- .department-editor-profile > .image-edit-control { width: min(100%,300px); justify-self: center; }
+ .department-editor-profile > .department-editor-photo { width: min(100%,300px); justify-self: center; }
 }
 @media(max-width: 600px) {
  .department-editor-image { grid-template-columns: minmax(0,1fr); }

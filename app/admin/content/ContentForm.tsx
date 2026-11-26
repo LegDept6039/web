@@ -443,6 +443,12 @@ export function ContentForm({
           {collection === "sessions" && (
             <p className="staff-note">Sessions are published when saved.</p>
           )}
+          {collection === "committees" && (
+            <p className="staff-note">
+              Committees are always published. Assign officials for this term
+              below; unfilled positions remain unassigned.
+            </p>
+          )}
           {legislative && (
             <LegislativeFields
               collection={collection}
@@ -619,6 +625,7 @@ export function ContentForm({
           )}
           {collection !== "departments" &&
             collection !== "sessions" &&
+            collection !== "committees" &&
             !(legislative && isDocumentCollection(collection)) && (
               <PublicationFields
                 collection={collection}

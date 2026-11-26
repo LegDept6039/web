@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { DepartmentBiography } from "./DepartmentBiography";
 import { ImageEditOverlay } from "./ImageEditOverlay";
+import { DepartmentPhotoVisibility } from "./DepartmentPhotoVisibility";
 export function DepartmentEditorFields({
   row,
   editable,
@@ -33,14 +34,20 @@ export function DepartmentEditorFields({
         className="department-editor-profile"
         aria-label="Department head and overview"
       >
-        <ImageEditOverlay
-          name="photo"
-          removeName="remove_photo"
-          current={value("head_photo")}
-          label="Profile photo"
-          portrait
-          editable={editable}
-        />
+        <div className="department-editor-photo">
+          <ImageEditOverlay
+            name="photo"
+            removeName="remove_photo"
+            current={value("head_photo")}
+            label="Profile photo"
+            portrait
+            editable={editable}
+          />
+          <DepartmentPhotoVisibility
+            visible={row.show_head_photo_on_page !== false}
+            editable={editable}
+          />
+        </div>
         <div className="department-editor-fields">
           <label>
             Head Title (optional)
@@ -90,7 +97,7 @@ export function DepartmentEditorFields({
           <p className="staff-note">
             {isBranch
               ? "Shown on the branch page and in the Branches directory."
-              : "Public department cards and pages use the head portrait above."}
+              : "Directory cards use the head portrait above. Its page visibility can be changed beside the portrait."}
           </p>
         </div>
         <ImageEditOverlay

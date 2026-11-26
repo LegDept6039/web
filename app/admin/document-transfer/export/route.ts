@@ -1,5 +1,6 @@
 import { officeContext } from "@/lib/offices/server";
 import {
+  DOCUMENT_CSV_HEADERS,
   serializeDocumentCsv,
   serializeCsvTable,
 } from "@/lib/legislative/document-csv";
@@ -31,14 +32,22 @@ export async function GET(request: Request) {
     const references = params.get("references") === "1";
     if (template && references)
       throw new DocumentTransferError("Choose a template or reference list.");
+    const templateHeaders = DOCUMENT_CSV_HEADERS.filter(
+      (header) =>
+        (header !== "session_id" ||
+          (type !== "ordinance" && type !== "resolution")) &&
+        (header !== "approval_mode" ||
+          type === "ordinance" ||
+          type === "resolution"),
+    );
     const body = references
       ? serializeCsvTable(
           ["record_type", "id", "name", "term_id", "term_name"],
           await readDocumentReferences(context, office),
         )
-      : serializeDocumentCsv(
-          template ? [] : await readDocumentExport(context, office, type),
-        );
+      : template
+        ? serializeCsvTable(templateHeaders, [])
+        : serializeDocumentCsv(await readDocumentExport(context, office, type));
     if (new TextEncoder().encode(body).byteLength > DOCUMENT_EXPORT_MAX_BYTES)
       throw new DocumentTransferError(
         "This export exceeds 10 MB. No partial file was downloaded.",

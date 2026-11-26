@@ -25,8 +25,9 @@ export default async function Page({
     <>
       <h1>Master Committees</h1>
       <p className="staff-note">
-        Shared standing committee catalog. Officials and publication are managed
-        separately for each Legislative Term.
+        Shared standing committee catalog. Adding a Master Committee creates a
+        published composition in every Legislative Term. Officials are assigned
+        separately for each term.
       </p>
       {params.saved && <p role="status">Master committee saved.</p>}
       <div className="admin-table-wrap">

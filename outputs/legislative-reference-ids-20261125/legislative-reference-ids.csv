@@ -1,0 +1,37 @@
+﻿record_type,id,name,term_id,term_name
+officials,secretariat,Hon. Annette J. Navarro,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,59eb27cb-9ceb-483f-8d6b-743edc4afb58,Hon. Jesus M. Managaytay,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,68b345a0-5fdb-4cd8-b37d-4e26ec29dc0d,Hon. Joey D. Indino,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,9aa9da00-088b-4889-9979-c3f13616e1d7,Hon. Jose A. Alqueza,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,1,Hon. Julius Erwin Alpas,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,de235c12-edc3-4150-b01e-f58c1cb5f757,Hon. Lorenzo P. Niñal,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,dd825b49-debc-480d-b39d-c446d43fb700,Hon. Maria Elena C. Limocon,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,be37cee2-944d-415f-8a50-ed057b5c388a,Hon. Marmie Jeanne B. Albillar,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,members,Hon. Marvin M. Miralles,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,committees,Hon. Richard M. Canillo,4a551127-9393-41b8-8b55-e42c88279751,17th
+officials,a9fbf2b3-a217-48a8-a69b-5f5523431d87,MARCELO T. GERONGCO,a6382efa-a440-41a1-b848-e9780f768bbf,16th
+committees,0bbdba79-987a-4c3f-9b56-e9ae3367e41d,Committee on Agriculture,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,c5d73a01-8c58-4473-b9aa-1bd61027a92f,Committee on Barangay Affairs,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,78da58ef-3bbd-4be6-96db-0d20f694935a,"Committee on Cooperatives, Peoples Organization, Associations and Non-Government Organizations",4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,04fe7c22-dcf6-476c-8e7c-4b14f93de146,Committee on Disaster Resilience,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,72d63d78-c248-4b55-83d6-77ae02f70fef,Committee on Education,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,e18c20d8-38a2-431e-8d92-ba3225e7d26c,Committee on Environmental Protection,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,645f51a4-fd0a-44af-a6a4-226b48737ff9,"Committee on Finance, Budget and Appropriation",4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,542d5a63-d9ce-48ba-a194-5762d2756598,Committee on Games and Amusements,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,7fa6d6b1-cbc9-4c3b-bae9-c2a6080a9abe,"Committee on Good Governance, Public Ethics and Accountability",4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,32d35bb8-942d-4dd1-a0dd-c28397eae0ab,Committee on Health and Sanitation,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,09998e75-2a95-4c52-b208-65b14a725a79,Committee on Infrastructure and Public Works,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,2ab4f85d-0a8b-42fd-b8c4-562106b08d0c,Committee on Justice and Human Rights,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,0d7ce7fd-b97c-446e-8e21-3893e5c81b1f,Committee on Labor and Employment,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,ed9ae1aa-3111-4b24-bdb7-d35963a689d3,Committee on Ordinances and Legal Matters,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,723216de-9e5b-4ad3-9ca2-dd6300c6a7b0,Committee on Peace and Order and Public Safety,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,4d28440d-c219-471e-b9dd-09769532ff9b,Committee on Personnel and Civil Service,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,2d03dd01-c427-4a30-9155-1f949e7666c6,Committee on Rules and Privileges,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,742193e0-54e2-4261-8286-cf89d9d1d929,"Committee on Science, Technology and Innovation (STI)",4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,finance,COMMITTEE ON TOURISM AND HERITAGE/ CULTURE AND THE ARTS,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,0b8ceceb-2fad-455c-9a55-b2b52d0d0c02,"Committee on Trade, Commerce and Industry, Transportation and Communication",4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,e7c2bbac-86d3-484b-be4b-29602e7c9d3d,"Committee on Ways and Means, Public Facilities",4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,368103f8-6799-4782-ad88-2a9271acefc5,"Committee on Women and Family Concerns, Social Services, Marginalized Sectors",4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,2dd9ca96-7ad1-465a-8f70-64b0f1c5b9bc,Committee on Youth and Sports Development,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,83c05c03-0310-4de9-85c5-f6d67be6766b,Committee on Zoning and Land Use,4a551127-9393-41b8-8b55-e42c88279751,17th
+committees,23d58d7d-e07c-4c60-8a5c-6f628a5beba0,Oversight/Accountability,4a551127-9393-41b8-8b55-e42c88279751,17th

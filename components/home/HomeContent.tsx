@@ -1,13 +1,22 @@
 import { getCollection } from "@/lib/content/repository";
+import { publicTerm } from "@/lib/legislative/terms-server";
 import { LeadershipSection } from "./LeadershipSection";
 import { LatestNews } from "./LatestNews";
 import { ServicesSection } from "./ServicesSection";
 import { LegislativeUpdates } from "./LegislativeUpdates";
 export async function HomeLeadership() {
-  const [officials, departments] = await Promise.all([
-    getCollection("officials", { branch: "legislative" }, 4),
+  const [{ selected }, departments] = await Promise.all([
+    publicTerm(),
     getCollection("departments", { parent_department_id: null }, 4),
   ]);
+  const officials =
+    selected === "none"
+      ? []
+      : await getCollection(
+          "officials",
+          { branch: "legislative", term_id: selected },
+          4,
+        );
   return <LeadershipSection officials={officials} departments={departments} />;
 }
 export async function HomeNews() {

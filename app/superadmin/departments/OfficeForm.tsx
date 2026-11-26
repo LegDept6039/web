@@ -1,5 +1,6 @@
 "use client";
 import { DepartmentBiography } from "@/components/admin/DepartmentBiography";
+import { DepartmentPhotoVisibility } from "@/components/admin/DepartmentPhotoVisibility";
 import { useActionState, useRef, useState } from "react";
 import { saveOffice, saveBranch, deleteOffice } from "./actions";
 import type { Office } from "@/lib/offices/permissions";
@@ -20,6 +21,7 @@ export function OfficeForm({
     head_title?: string;
     head_description?: string;
     head_photo?: string;
+    show_head_photo_on_page?: boolean;
     image_url?: string;
     published?: boolean;
     sort_order?: number;
@@ -200,6 +202,9 @@ export function OfficeForm({
           label="Department Head Photo"
           current={office?.head_photo}
           portrait
+        />
+        <DepartmentPhotoVisibility
+          visible={office?.show_head_photo_on_page !== false}
         />
         {office?.head_photo && (
           <label>

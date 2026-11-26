@@ -35,6 +35,13 @@ export function TermForm({ term }: { term?: LegislativeTerm }) {
         Displayed years are added automatically from the dates. Status follows
         Philippine time automatically. Dates cannot overlap another term.
       </p>
+      {!term && (
+        <p className="staff-note">
+          Creating a term automatically publishes its committees from Master
+          Committees. Assign chairpersons and members in the Committees
+          workspace.
+        </p>
+      )}
       {message && <p role="alert">{message}</p>}
       <button className="button button-blue" disabled={pending}>
         {pending ? "Saving..." : "Save term"}

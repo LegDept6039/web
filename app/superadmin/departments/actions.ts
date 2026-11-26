@@ -7,6 +7,7 @@ import { requireStaff } from "@/lib/auth/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isBarangayAffairsOffice } from "@/lib/barangays/permissions";
+import { departmentHeadPhotoVisibility } from "@/lib/admin/department-photo-visibility";
 export async function saveOffice(
   _state: string,
   form: FormData,
@@ -77,6 +78,7 @@ async function saveDepartment(
       String(form.get("head_description") || ""),
     ).trim(),
     head_photo: null as string | null,
+    show_head_photo_on_page: departmentHeadPhotoVisibility(form),
     image_url: null as string | null,
   };
   if (
@@ -119,6 +121,10 @@ async function saveDepartment(
     existingParent = existing.parent_department_id || null;
     row.head_photo =
       form.get("remove_photo") === "on" ? null : existing.head_photo;
+    row.show_head_photo_on_page = departmentHeadPhotoVisibility(
+      form,
+      existing.show_head_photo_on_page !== false,
+    );
     row.image_url =
       form.get("remove_image") === "on" ? null : existing.image_url;
   }

@@ -11,6 +11,7 @@ export const DOCUMENT_CSV_HEADERS = [
   "committee_id",
   "session_id",
   "attachment_url",
+  "approval_mode",
 ] as const;
 
 export type DocumentCsvHeader = (typeof DOCUMENT_CSV_HEADERS)[number];

@@ -226,7 +226,11 @@ test("department editors create date-free services and publish multiline bodies 
     );
     await expect(
       department.locator(`option[value="${otherOffice}"]`),
-    ).toHaveText("MENRO draft");
+    ).toHaveCount(0);
+    await expect(department.locator("option")).toHaveText([
+      "All departments",
+      "MHO draft",
+    ]);
     await expect(
       department.getByRole("option", { name: "MPDC draft", exact: true }),
     ).toHaveCount(0);
@@ -234,7 +238,7 @@ test("department editors create date-free services and publish multiline bodies 
     await expect(publishedHeading).toBeVisible();
     await department.selectOption(office);
     await expect(publishedHeading).toBeVisible();
-    await department.selectOption(otherOffice);
+    await search.fill("service-with-no-matching-title");
     await expect(publishedHeading).toHaveCount(0);
     await expect(
       publicPage.getByRole("heading", { name: "No matching results", exact: true }),

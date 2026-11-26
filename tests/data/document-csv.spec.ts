@@ -20,6 +20,7 @@ test("CSV preserves Unicode, quoted commas, quotes, multiline text and reference
     committee_id: "legacy-committee",
     session_id: "legacy-session",
     attachment_url: "https://example.test/reference.pdf",
+    approval_mode: "authored",
   };
   const csv = serializeDocumentCsv([record]);
   expect(
@@ -41,8 +42,36 @@ test("CSV accepts reordered optional columns and common newline formats", () => 
       description: "First, second",
       id: "",
       attachment_url: "",
+      approval_mode: "",
     });
   }
+});
+
+test("CSV preserves Mass motion approval with empty attribution and accepts older headers", () => {
+  const rows = parseDocumentCsv(
+    serializeDocumentCsv([
+      {
+        title: "Resolution approved by the council",
+        number: "2026-101",
+        date: "2026-11-18",
+        description: "Approved by Mass motion.",
+        committee_id: "term-committee",
+        approval_mode: "mass_motion",
+      },
+    ]),
+  );
+  expect(rows[0]).toMatchObject({
+    approval_mode: "mass_motion",
+    author_id: "",
+    co_author_id: "",
+  });
+  const older = parseDocumentCsv(
+    "title,date,description,author_id\nOlder CSV,2026-11-18,Body,term-author\n",
+  );
+  expect(older[0]).toMatchObject({
+    approval_mode: "",
+    author_id: "term-author",
+  });
 });
 
 test("CSV refuses ambiguous headers and malformed records instead of dropping values", () => {

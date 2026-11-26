@@ -7,7 +7,7 @@ import {
 import { DocumentTypeSelector } from "@/components/admin/DocumentTypeSelector";
 import { DocumentTransferControls } from "@/components/admin/DocumentTransferControls";
 import { ContentBreadcrumb } from "@/components/admin/ContentBreadcrumb";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   officeContext,
   allowed,
@@ -35,6 +35,41 @@ export default async function NewContent({
   const office = (await searchParams).office;
   const scope = workflow(context, office);
   if (!available(context, collection, office, "write")) notFound();
+  if (scope === "legislative" && collection === "committees") {
+    const { master, term } = await searchParams;
+    const owner = context.offices.find(
+      (item) =>
+        item.active &&
+        item.department === "legislative" &&
+        (!office || item.id === office) &&
+        allowed(context, item.id, "write"),
+    );
+    if (!owner) notFound();
+    if (master && term) {
+      const { data, error } = await context.client
+        .from("committees")
+        .select("id")
+        .eq("office_id", owner.id)
+        .eq("content_scope", "legislative")
+        .eq("master_id", master)
+        .eq("term_id", term)
+        .maybeSingle();
+      if (error)
+        return <p role="alert">Unable to load committee composition.</p>;
+      if (data)
+        redirect(
+          `/admin/content/committees/edit/${encodeURIComponent(data.id)}?office=${owner.id}`,
+        );
+    }
+    // Keep specific bookmarks usable for restoring an intentionally removed
+    // composition. The normal Add route always opens the generated workspace;
+    // existing slots above resolve to their stable editor instead of duplicates.
+    if (!master || !term) {
+      const query = new URLSearchParams({ office: owner.id });
+      if (term) query.set("term", term);
+      redirect(`/admin/content/committees?${query}`);
+    }
+  }
   const offices = context.offices.filter(
     (o) => o.department === scope && allowed(context, o.id, "write"),
   );

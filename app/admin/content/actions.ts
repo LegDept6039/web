@@ -19,6 +19,7 @@ import { uploadDocumentPdf } from "@/lib/admin/document-pdf";
 import { definitions } from "@/lib/content/schema";
 import { isBarangayAffairsOffice } from "@/lib/barangays/permissions";
 import { validateNewsBarangay } from "@/lib/barangays/news";
+import { departmentHeadPhotoVisibility } from "@/lib/admin/department-photo-visibility";
 
 export async function saveContent(
   _state: string,
@@ -206,6 +207,11 @@ export async function saveContent(
       scope === "legislative" && usesLegislativeFields(collection)
         ? parseLegislative(collection, form, existing)
         : parseContent(collection, form);
+    if (collection === "departments")
+      row.show_head_photo_on_page = departmentHeadPhotoVisibility(
+        form,
+        existing?.show_head_photo_on_page !== false,
+      );
     if (collection === "services")
       row.steps = Array.isArray(existing?.steps) ? existing.steps : [];
     if (["news", "programs"].includes(collection) && form.has("rich_body")) {
@@ -237,8 +243,8 @@ export async function saveContent(
   row.content_scope = scope;
   if (!contentAllowed(context, collection, row, "write"))
     return "You do not have permission to manage content in this office.";
-  if (collection === "sessions") {
-    // Keep a saved session in place. New sessions and historical drafts append
+  if (collection === "sessions" || collection === "committees") {
+    // Keep saved records in place. New records and historical drafts append
     // within their trusted owner scope; submitted publication/order is ignored.
     const keepsPosition =
       existing?.published === true &&
@@ -247,7 +253,7 @@ export async function saveContent(
     if (existing && keepsPosition) row.sort_order = existing.sort_order;
     else {
       let positions = client
-        .from("sessions")
+        .from(collection)
         .select("id", { count: "exact", head: true })
         .eq("content_scope", scope)
         .eq("published", true);
@@ -256,7 +262,7 @@ export async function saveContent(
         : positions.is("office_id", null);
       const { count, error } = await positions;
       if (error || count === null)
-        return "Unable to check session ordering. Reload and try again.";
+        return "Unable to check record ordering. Reload and try again.";
       row.sort_order = count + 1;
     }
     row.published = true;

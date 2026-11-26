@@ -19,6 +19,9 @@ async function load<K extends Collection>(
       barangay_id: "barangayId",
       category_id: "categoryId",
       content_scope: "contentScope",
+      term_id: "termId",
+      session_id: "sessionId",
+      date_approved: "dateApproved",
     };
     const rows = readMockCollection(collection).filter((row) =>
       Object.entries(filters).every(([key, value]) => {

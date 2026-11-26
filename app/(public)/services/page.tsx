@@ -12,7 +12,11 @@ export default async function Page() {
     getServices(),
     getDepartments(),
   ]);
+  const serviceDepartmentIds = new Set(services.map((service) => service.officeId));
   const departmentOptions = departments
+    .filter((department) =>
+      serviceDepartmentIds.has(department.officeId || department.id),
+    )
     .map((department) => ({
       id: department.officeId || department.id,
       name: department.name,

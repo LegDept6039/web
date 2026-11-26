@@ -169,6 +169,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       : null,
     head_title: null,
     head_photo: null,
+    show_head_photo_on_page: true,
     name: `${slug.toUpperCase()} draft`,
     description: "Private test content",
     office_id,
@@ -203,6 +204,21 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     resolutions = [],
     municipal_documents = [];
   const programs = [];
+  if (process.env.PORTAL_EXECUTIVE_PREVIEW_TEST_FIXTURE === "1") {
+    const base = { office_id: officeIds.mho, content_scope: "executive", published: true,
+      is_sample: false, sort_order: 1, created_at: now, updated_at: now, rich_body: null };
+    const longPreview = "Residents can learn about coordinated health services, livelihood assistance, environmental protection, and neighborhood development through their municipal offices. ".repeat(8);
+    news.push({ ...base, id: "executive-preview-news", slug: "executive-preview-news",
+      title: "Municipal offices coordinate community health, livelihood assistance, environmental protection and neighborhood development services for households throughout Pinamungajan",
+      category: "Executive", date: "2026-11-26", excerpt: longPreview,
+      image: "/images/news/community.svg", content: [longPreview, "EXECUTIVE NEWS FULL DETAILS END."] });
+    programs.push({ ...base, id: "executive-preview-program", slug: "executive-preview-program",
+      name: "Community health, livelihood assistance, environmental protection and resilient neighborhood development support for households throughout Pinamungajan",
+      description: `${longPreview}\n\nEXECUTIVE PROGRAM FULL DETAILS END.`,
+      category: "Community programs and coordinated municipal public services",
+      status: "Ongoing neighborhood outreach and community implementation across participating barangays",
+      image: "/images/news/community.svg" });
+  }
   const services = [
     {
       id: "61000000-0000-4000-8000-000000000003",
@@ -313,7 +329,7 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       department: "executive", content_scope: "executive", active: true,
       published: false, archived_at: null, is_sample: false, sort_order: 0,
       description: "Barangay content workspace", body: "", head_description: "",
-      image_url: null, head_name: null, head_title: null, head_photo: null,
+      image_url: null, head_name: null, head_title: null, head_photo: null, show_head_photo_on_page: true,
       created_at: now, updated_at: now,
     };
     offices.push({...office});
@@ -358,8 +374,9 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
   if (process.env.PORTAL_TERM_TEST_FIXTURE === '1') {
     const currentTerm = legislative_terms[0].id, previousTerm = legislative_terms[1].id;
     const base = { office_id: officeIds.sb, content_scope: 'legislative', published: true, is_sample: false, sort_order: 1, updated_at: now, created_at: now };
+    const officialPositions = new Map([['committees',1],['finance',2],['term-previous-a',3],['term-unassigned',4],['term-current-a',5],['term-current-b',6],['term-draft',0]]);
     for (const [id, name, term_id, published] of [['term-current-a','Current Member A',currentTerm,true],['term-current-b','Current Member B',currentTerm,true],['term-previous-a','Previous Member',previousTerm,true],['term-draft','Draft Member',currentTerm,false],['term-unassigned','Unassigned Member',null,true],['committees','Legacy Member desktop',null,true],['finance','Legacy Member mobile',null,true]])
-      officials.push({...base,id,name,term_id,published,branch:'legislative',legislative_role:'SANGGUNIANG_BAYAN',role:'Council member',description:'Member description',photo_url:null});
+      officials.push({...base,id,name,term_id,published,sort_order:officialPositions.get(id),branch:'legislative',legislative_role:'SANGGUNIANG_BAYAN',role:'Council member',description:'Member description',photo_url:null});
     committees.push({...base,id:'term-committee',name:'Current Committee',term_id:currentTerm,responsibility:'Current responsibilities',chair:'',chair_id:'term-current-a',vice_chair_id:'term-current-b'});
     sessions.push({...base,id:'term-session',name:'Current Session',term_id:currentTerm,number:'1',date:'2026-11-16',type:'Regular session',description:'Session description',agenda:[],image:'/images/department-placeholder.svg'});
     sessions.push({...base,id:'term-old-session',name:'Previous Session',term_id:previousTerm,number:'1',date:'2024-11-16',type:'Regular session',description:'Session description',agenda:[],image:'/images/department-placeholder.svg'});
@@ -481,6 +498,88 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     addDocument("dashboard-document-wrong-scope", { content_scope: "transparency" });
     addDocument("dashboard-document-previous", { term_id: previousTerm, date: "2024-11-17" });
   }
+  // Opt-in authored and collective measures for Mass motion browser coverage.
+  // Other suites retain their original records and historical behavior.
+  if (process.env.PORTAL_MASS_MOTION_TEST_FIXTURE === "1") {
+    const base = { office_id: officeIds.sb, content_scope: "legislative", term_id: legislative_terms[0].id,
+      published: true, is_sample: false, sort_order: 1, created_at: now, updated_at: now };
+    for (const [index, name] of ["Motion Member A", "Motion Member B"].entries())
+      officials.push({ ...base, id: `motion-member-${index + 1}`, name, branch: "legislative",
+        legislative_role: "SANGGUNIANG_BAYAN", role: "Council member", description: "Council member",
+        photo_url: null, sort_order: index + 1 });
+    committees.push({ ...base, id: "motion-committee", master_id: committee_master[0].id,
+      name: "Current Committee", responsibility: "Current responsibilities", chair: "", chair_id: "motion-member-1" });
+    sessions.push({ ...base, id: "motion-session", name: "Motion Session", number: "18",
+      date: "2026-11-18", type: "Regular session", description: "Council session", agenda: [],
+      image: "/images/department-placeholder.svg" });
+    for (const [rows, kind] of [[ordinances, "ordinance"], [resolutions, "resolution"]]) {
+      for (const [index, approval_mode] of ["authored", "mass_motion"].entries())
+        rows.push({ ...base, id: `motion-${kind}-${approval_mode}`, title: `${kind} ${approval_mode} existing record`,
+          number: `M-${index + 1}`, year: 2026, status: "Approved", date_approved: "2026-11-18", summary: "Existing complete record body.",
+          approval_mode, author: "", co_author: "", author_id: approval_mode === "authored" ? "motion-member-1" : null,
+          co_author_id: approval_mode === "authored" ? "motion-member-2" : null,
+          committee_id: "motion-committee", session_id: "motion-session", file_url: "", sort_order: index + 1 });
+    }
+  }
+  // Public session-page records stay isolated from existing CMS fixtures.
+  if (process.env.PORTAL_SESSION_DETAIL_TEST_FIXTURE === "1") {
+    const base = { office_id: officeIds.sb, content_scope: "legislative", term_id: legislative_terms[0].id,
+      published: true, is_sample: false, sort_order: 1, created_at: now, updated_at: now };
+    for (const [index, name] of ["Session Member A", "Session Member B"].entries())
+      officials.push({ ...base, id: `session-detail-member-${index + 1}`, name, branch: "legislative",
+        legislative_role: "SANGGUNIANG_BAYAN", role: "Council member", description: "Council member",
+        photo_url: null, sort_order: index + 1 });
+    committees.push({ ...base, id: "session-detail-committee", name: "Committee on Public Services",
+      master_id: committee_master[0].id, chair: "", chair_id: "session-detail-member-1", responsibility: "Public services" });
+    const main = { ...base, id: "session-detail-main", name: "66th Regular Session", number: "66",
+      date: "2026-11-09", type: "Regular session", description: "Council deliberations and approved municipal measures.",
+      agenda: ["Call to order and roll call", "Consideration of proposed municipal measures"],
+      image: "/images/department-placeholder.svg" };
+    sessions.push(main,
+      { ...main, id: "session-detail-empty", name: "67th Regular Session", number: "67", date: "2026-11-16", agenda: [] },
+      { ...main, id: "session-detail-same-day", name: "Special Session on the Same Day", number: "7", type: "Special session", agenda: [] },
+      { ...main, id: "session-detail-hidden", name: "Unpublished Session", published: false },
+      { ...main, id: "session-detail-foreign", name: "Executive Session", office_id: officeIds.mho, content_scope: "executive" });
+    const ordinance = { ...base, id: "session-detail-ordinance", number: "129-2026", year: 2026,
+      title: "AN ORDINANCE APPROVING AND AUTHORIZING THE PARTIAL BREAKDOWN OF THE\nLUMPED APPROPRIATION FOR COORDINATED PUBLIC SERVICE DELIVERY, COMMUNITY\nDISASTER PREPAREDNESS, ENVIRONMENTAL PROTECTION, AND ESSENTIAL MUNICIPAL\nFACILITIES THROUGHOUT PINAMUNGAJAN, CEBU; PROVIDING IMPLEMENTING GUIDELINES\nFOR THE MUNICIPAL OFFICES AND PARTICIPATING BARANGAYS, DEFINING THE DUTIES\nAND RESPONSIBILITIES OF THE CONCERNED PERSONNEL, ESTABLISHING REPORTING\nAND MONITORING PROCEDURES, AND AUTHORIZING THE MUNICIPAL MAYOR TO ENTER\nINTO THE CONTRACTS NECESSARY FOR THE TIMELY IMPLEMENTATION OF THE PROGRAM;\nAPPROPRIATING FUNDS SUBJECT TO APPLICABLE BUDGETING, ACCOUNTING, AND AUDIT\nRULES, ENSURING PUBLIC ACCESS TO INFORMATION ABOUT THE IMPLEMENTATION,\n  AND PROVIDING FOR REGULAR REVIEW OF THE RESULTS AND CONTINUED MUNICIPAL SUPPORT",
+      date_approved: main.date, status: "Approved", summary: "Full approved ordinance text for the session record.",
+      author: "", co_author: "", author_id: "session-detail-member-1", co_author_id: "session-detail-member-2",
+      committee_id: "session-detail-committee", session_id: main.id, approval_mode: "authored",
+      pdf_url: "https://records.example.test/session-detail-ordinance.pdf" };
+    ordinances.push(ordinance);
+    resolutions.push({ ...ordinance, id: "session-detail-resolution", number: "239-2026",
+      title: "A resolution approving the municipal community development program through collective approval",
+      summary: "Full resolution text adopted through collective approval.", approval_mode: "mass_motion",
+      author_id: null, co_author_id: null, pdf_url: null });
+    for (const [suffix, extra] of [
+      ["draft", { published: false }], ["pending", { status: "Pending" }],
+      ["wrong-date", { date_approved: "2026-11-16" }],
+      ["wrong-term", { term_id: legislative_terms[1].id }],
+      ["wrong-office", { office_id: officeIds.mho }],
+      ["wrong-scope", { content_scope: "executive" }],
+      ["other-session", { session_id: "session-detail-same-day" }],
+      ["unlinked", { session_id: null }],
+    ]) ordinances.push({ ...ordinance, ...extra, id: `session-detail-${suffix}`, number: `EXCLUDED-${suffix}`,
+      title: `Excluded measure ${suffix}` });
+    const agenda = { ...base, id: "session-detail-agenda", title: "Agenda for the 66th Regular Session",
+      description: "Agenda circulated in advance of the meeting.", date: "2026-11-08", document_type: "agenda",
+      session_id: main.id, file_url: "https://records.example.test/session-detail-agenda.pdf", deleted_at: null };
+    municipal_documents.push(agenda,
+      { ...agenda, id: "session-detail-minutes", title: "Minutes of the 66th Regular Session", document_type: "minutes",
+        description: "Official minutes published following the meeting.", date: "2026-11-12",
+        file_url: "https://records.example.test/session-detail-minutes.pdf" },
+      { ...agenda, id: "session-detail-minutes-awaiting-pdf", title: "Supplementary session minutes", document_type: "minutes",
+        description: "The supplementary minutes attachment is awaiting publication.", file_url: null });
+    for (const [suffix, extra] of [
+      ["draft", { published: false }], ["deleted", { deleted_at: now }],
+      ["wrong-term", { term_id: legislative_terms[1].id }],
+      ["wrong-office", { office_id: officeIds.mho }],
+      ["wrong-scope", { content_scope: "transparency" }],
+      ["other-session", { session_id: "session-detail-same-day" }],
+      ["unlinked", { session_id: null }], ["executive-order", { document_type: "executive-order" }],
+    ]) municipal_documents.push({ ...agenda, ...extra, id: `session-detail-file-${suffix}`,
+      title: `Excluded attachment ${suffix}` });
+  }
   // Representative, isolated rows for the CMS action-control presentation audit.
   if (process.env.PORTAL_ACTION_ICONS_TEST_FIXTURE === "1") {
     const base = { published: true, is_sample: false, sort_order: 1, created_at: now, updated_at: now };
@@ -520,7 +619,8 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         active: true, archived_at: null, published: true, sort_order: Number(suffix) + 2,
         description: `${name} community services.`, body: `${name} has its own office information.`,
         image_url, head_name: `${name} officer`, head_title: "Office head", head_description: "Serving the municipality.",
-        head_photo: "/images/logos/seal.png", is_sample: false, created_at: now, updated_at: now };
+        head_photo: "/images/logos/seal.png", show_head_photo_on_page: true,
+        is_sample: false, created_at: now, updated_at: now };
       departments.push(department);
       offices.push(department);
     }
@@ -584,6 +684,22 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         }
     if (next && !next.published) next.sort_order = 0;
   }
+  // Mirror migration 036: every term owns published, initially unassigned
+  // compositions. Existing snapshots and assignments are never rewritten.
+  function seedCommitteeCompositions(terms = legislative_terms, masters = committee_master) {
+    for (const term of terms) {
+      for (const master of [...masters].sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))) {
+        if (committees.some(row => row.term_id === term.id && row.master_id === master.id)) continue;
+        const position = Math.max(0, ...committees.filter(row => row.published && row.office_id === officeIds.sb && row.content_scope === "legislative").map(row => row.sort_order || 0)) + 1;
+        committees.push({ id: crypto.randomUUID(), master_id: master.id, term_id: term.id,
+          name: master.name, responsibility: "", chair: "", chair_id: null, vice_chair_id: null,
+          member_1_id: null, member_2_id: null, member_3_id: null, member_4_id: null,
+          office_id: officeIds.sb, content_scope: "legislative", published: true,
+          is_sample: false, sort_order: position, created_at: now, updated_at: now });
+      }
+    }
+  }
+  seedCommitteeCompositions();
   // Usernames are staff identities; Auth keeps its private email credential.
   for (const user of users) user.username = user.email.split("@")[0];
   const authUser = (p) => ({
@@ -968,6 +1084,14 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
           "document_categories",
         ].includes(table)
       ) {
+        if (table === "committees") {
+          for (const record of Array.isArray(body) ? body : [body]) {
+            if (record.published === false)
+              return response({code:"23514",message:"Committees must be published"},409);
+            if (record.term_id && record.master_id && committees.some(existing => existing.term_id === record.term_id && existing.master_id === record.master_id))
+              return response({code:"23505",message:"Composition already exists for this term"},409);
+          }
+        }
         if (barangayAffairsFixture && table === "news" && (Array.isArray(body) ? body : [body]).some(record =>
           !newsWriteAllowed(actor, record) || !validNewsBarangay(record)))
           return response({code:"42501",message:"Invalid barangay news ownership"},403);
@@ -1015,9 +1139,12 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
               ...(departmentBranchesFixture ? { parent_department_id: record.parent_department_id ?? null } : {}),
               body: record.body ?? "",
               head_description: record.head_description ?? "",
+              show_head_photo_on_page: record.show_head_photo_on_page ?? true,
             });
           if (!["barangays", "sk_profiles"].includes(table)) reorder(table, null, row);
           collections[table].push(row);
+          if (table === "legislative_terms") seedCommitteeCompositions([row]);
+          if (table === "committee_master") seedCommitteeCompositions(legislative_terms, [row]);
           return row;
         });
         return response(inserted);
@@ -1148,6 +1275,14 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
         }
       }
       if (method === "PATCH") {
+        if (table === "committees") {
+          if (body.published === false)
+            return response({code:"23514",message:"Committees must be published"},409);
+          if (rows.some(record => {
+            const next = {...record,...body};
+            return next.master_id && next.term_id && committees.some(existing => existing.id !== record.id && existing.term_id === next.term_id && existing.master_id === next.master_id);
+          })) return response({code:"23505",message:"Composition already exists for this term"},409);
+        }
         if (barangayAffairsFixture && table === "news") {
           rows = rows.filter(record => newsWriteAllowed(actor, record));
           if (rows.some(record => !newsWriteAllowed(actor, {...record,...body}) || !validNewsBarangay({...record,...body})))

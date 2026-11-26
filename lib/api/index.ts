@@ -1,6 +1,10 @@
 ﻿import { readContentConfig } from "@/lib/content/config";
 import { getCollection } from "@/lib/content/repository";
-import type { Department } from "@/types";
+import {
+  loadSession,
+  loadSessionRecords,
+} from "@/lib/legislative/session-records";
+import type { Department, Session } from "@/types";
 export async function getOrdinances() {
   return getCollection("ordinances");
 }
@@ -39,6 +43,12 @@ export async function getArticle(slug: string) {
 }
 export async function getSessions() {
   return getCollection("sessions");
+}
+export async function getSession(id: string) {
+  return loadSession(id, getCollection);
+}
+export async function getSessionRecords(session: Session) {
+  return loadSessionRecords(session, getCollection);
 }
 export async function getServices() {
   return getCollection("services");

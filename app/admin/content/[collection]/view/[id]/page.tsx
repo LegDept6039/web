@@ -38,14 +38,27 @@ export default async function Page({
           ["Document number", r.number],
           ["Date", r.date_approved || r.date],
           ["Year", r.year],
-          ["Author", r.author_id ? official(r.author_id) : r.author],
+          [
+            "Approval method",
+            r.approval_mode === "mass_motion" ? "Mass motion" : null,
+          ],
+          [
+            "Author",
+            r.approval_mode === "mass_motion"
+              ? null
+              : r.author_id
+                ? official(r.author_id)
+                : r.author,
+          ],
           [
             "Co-author",
-            r.co_author_id
-              ? official(r.co_author_id)
-              : r.author_id
-                ? null
-                : r.co_author,
+            r.approval_mode === "mass_motion"
+              ? null
+              : r.co_author_id
+                ? official(r.co_author_id)
+                : r.author_id
+                  ? null
+                  : r.co_author,
           ],
           [
             "Category",

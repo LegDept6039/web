@@ -46,3 +46,33 @@ test("committee names and IDs are preserved; new compositions use UUIDs", () => 
   form.set("name", "Renamed Committee");
   expect(parseLegislative("committees", form, created).id).toBe(created.id);
 });
+
+test("committee publication and ordering ignore omitted or forged client values", () => {
+  const form = new FormData();
+  form.set("master_id", "catalog-id");
+  expect(parseLegislative("committees", form, null).published).toBe(true);
+  form.set("published", "");
+  form.set("sort_order", "-999");
+  const existing = {
+    id: "saved",
+    name: "Saved committee",
+    master_id: "catalog-id",
+    published: true,
+    sort_order: 7,
+  };
+  expect(parseLegislative("committees", form, existing)).toMatchObject({
+    id: "saved",
+    published: true,
+    sort_order: 7,
+  });
+  expect(
+    parseLegislative("committees", form, {
+      ...existing,
+      published: false,
+      sort_order: 0,
+    }),
+  ).toMatchObject({
+    published: true,
+    sort_order: 1,
+  });
+});

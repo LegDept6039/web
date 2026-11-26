@@ -87,7 +87,7 @@ export async function readDocumentExport(
   authorizeDocumentTransfer(context, officeId, type, "read");
   const table = definitions[documentCollection(type)].table;
   const columns = numbered(type)
-    ? "id,title,number,date_approved,summary,author_id,co_author_id,committee_id,session_id,pdf_url"
+    ? "id,title,number,date_approved,summary,author_id,co_author_id,committee_id,session_id,pdf_url,approval_mode"
     : "id,title,date,description,session_id,file_url";
   const rows: DocumentCsvRow[] = [];
   let bytes = 0;
@@ -133,6 +133,9 @@ export async function readDocumentExport(
         committee_id: text(item.committee_id),
         session_id: text(item.session_id),
         attachment_url: text(item.pdf_url ?? item.file_url),
+        approval_mode: numbered(type)
+          ? text(item.approval_mode || "authored")
+          : "",
       };
       bytes += new TextEncoder().encode(JSON.stringify(row)).byteLength;
       if (
@@ -253,10 +256,11 @@ export async function prepareDocumentImport(
           input.author_id,
           input.co_author_id,
           input.committee_id,
+          input.approval_mode,
         ].some((value) => value.trim())
       )
         throw new Error(
-          "Number, author, co-author and committee fields apply only to ordinances and resolutions.",
+          "Number, author, co-author, committee and approval mode fields apply only to ordinances and resolutions.",
         );
       if (type === "executive-order" && input.session_id.trim())
         throw new Error(
@@ -270,6 +274,7 @@ export async function prepareDocumentImport(
         "co_author_id",
         "committee_id",
         "session_id",
+        "approval_mode",
       ] as const)
         form.set(key, input[key]);
       form.set(numbered(type) ? "date_approved" : "date", input.date);

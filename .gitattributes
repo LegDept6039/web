@@ -1,0 +1,2 @@
+# Preserve the supplied GIS export bytes and its documented SHA-256.
+data/gis/pinamungajan-barangays.utm51n.geojson -text

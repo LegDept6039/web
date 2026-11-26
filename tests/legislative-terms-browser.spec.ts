@@ -2,6 +2,48 @@ import { test, expect } from "@playwright/test";
 const office = "10000000-0000-4000-8000-000000000004";
 const current = "20000000-0000-4000-8000-000000000001",
   previous = "20000000-0000-4000-8000-000000000002";
+test("homepage leadership shows only the current term before applying its card limit", async ({
+  page,
+}, info) => {
+  await page.goto("/");
+  const leadership = page.locator("section").filter({
+    has: page.getByRole("heading", {
+      name: "Legislative leadership",
+      exact: true,
+    }),
+  });
+  const cards = leadership.locator(".official-card");
+  // Four historical/unassigned officials sort ahead of current officials.
+  // Filtering after the four-card limit would omit both current members.
+  await expect(cards).toHaveCount(2);
+  await expect(cards.getByRole("heading")).toHaveText([
+    "Current Member A",
+    "Current Member B",
+  ]);
+  await expect(leadership).not.toContainText("Previous Member");
+  await expect(leadership).not.toContainText("Unassigned Member");
+  await expect(leadership).not.toContainText("Legacy Member");
+  await expect(leadership).not.toContainText("Draft Member");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await leadership.locator(".official-grid").screenshot({
+    path: info.outputPath("homepage-current-council.png"),
+  });
+
+  await leadership.getByRole("link", { name: "Meet the council" }).click();
+  await expect(page).toHaveURL(/\/legislative\/members$/);
+  await page
+    .getByLabel("Legislative Term", { exact: true })
+    .selectOption(previous);
+  await expect(
+    page.getByRole("table", { name: "Council directory", exact: true }),
+  ).toContainText("Previous Member");
+  await expect(page.locator(".official-card")).toHaveCount(0);
+});
+
 test("legacy official opens from the historical list and keeps its ID after term assignment", async ({
   page,
 }, info) => {
@@ -26,9 +68,9 @@ test("legacy official opens from the historical list and keeps its ID after term
   ).toBeVisible();
   await expect(page.getByLabel("Name", { exact: true })).toHaveValue(name);
   await page.locator('select[name="term_id"]').selectOption(current);
-  await expect(page.locator('select[name="term_id"] option:checked')).toHaveText(
-    "Current Council 2025-Current",
-  );
+  await expect(
+    page.locator('select[name="term_id"] option:checked'),
+  ).toHaveText("Current Council 2025-Current");
   await page
     .getByLabel("Name", { exact: true })
     .fill("Renamed Historical Member");
@@ -58,9 +100,13 @@ test("public terms show the current roster, historical roster and committee memb
 }, info) => {
   await page.goto("/legislative/members");
   await expect(
-    page.getByLabel("Legislative Term", { exact: true }).locator("option:checked"),
+    page
+      .getByLabel("Legislative Term", { exact: true })
+      .locator("option:checked"),
   ).toHaveText("Current Council 2025-Current");
   await expect(page.locator(".official-card")).toHaveCount(2);
+  await expect(page.locator(".official-portrait")).toHaveCount(2);
+  await expect(page.locator(".council-roster-table")).toHaveCount(0);
   await expect(
     page.getByText("Current Member A", { exact: true }),
   ).toBeVisible();
@@ -73,23 +119,73 @@ test("public terms show the current roster, historical roster and committee memb
     .getByLabel("Legislative Term", { exact: true })
     .selectOption(previous);
   await expect(
-    page.getByLabel("Legislative Term", { exact: true }).locator("option:checked"),
+    page
+      .getByLabel("Legislative Term", { exact: true })
+      .locator("option:checked"),
   ).toHaveText("Previous Council 2022-2025");
-  await expect(page.locator(".official-card")).toHaveCount(1);
+  const roster = page.getByRole("table", {
+    name: "Council directory",
+    exact: true,
+  });
+  await expect(roster).toBeVisible();
+  await expect(roster.getByRole("columnheader")).toHaveText([
+    "Official",
+    "Position",
+  ]);
+  await expect(roster.locator("tbody tr")).toHaveCount(1);
+  await expect(roster.locator("tbody tr")).toContainText("Sangguniang Bayan");
+  await expect(page.locator(".official-card, .official-portrait")).toHaveCount(
+    0,
+  );
+  await expect(page.locator(".council-content img")).toHaveCount(0);
   await expect(
     page.getByText("Previous Member", { exact: true }),
   ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: info.outputPath("historical-council-directory.png"),
+    fullPage: true,
+  });
   await page
     .getByLabel("Legislative Term", { exact: true })
     .selectOption("unassigned");
   await expect(
     page.getByText("Unassigned Member", { exact: true }),
   ).toBeVisible();
+  await expect(roster).toBeVisible();
+  await expect(
+    page.locator(".official-card, .council-content img"),
+  ).toHaveCount(0);
+  await page
+    .getByLabel("Legislative Term", { exact: true })
+    .selectOption(current);
+  await expect(page.locator(".official-card")).toHaveCount(2);
+  await expect(page.locator(".official-portrait")).toHaveCount(2);
+  await expect(roster).toHaveCount(0);
   await page.goto("/legislative/committees");
-  await page.locator("summary").click();
-  await expect(page.locator(".committee-membership")).toContainText(
+  await expect(page.locator(".committee-entry")).toHaveCount(3);
+  const currentCommittee = page.locator(".committee-entry").filter({
+    has: page.getByRole("heading", { name: "Current Committee", exact: true }),
+  });
+  await currentCommittee.locator("summary").click();
+  await expect(currentCommittee.locator(".committee-membership")).toContainText(
     "Current Member B",
   );
+  await expect(
+    page
+      .locator(".committee-entry")
+      .filter({
+        hasNot: page.getByRole("heading", {
+          name: "Current Committee",
+          exact: true,
+        }),
+      })
+      .filter({ hasText: "Current Member B" }),
+  ).toHaveCount(0);
   await page.screenshot({
     path: info.outputPath("public-terms.png"),
     fullPage: true,
@@ -118,10 +214,18 @@ test("staff forms filter relationships by term and dashboard counts follow selec
     page.locator(".legislative-summary-grid .legislative-count").first(),
   ).toHaveText("1");
   await page.goto(`/admin/content/committees/new?office=${office}`);
-  await expect(page.locator('select[name="term_id"]')).toHaveValue(current);
-  await expect(page.locator('select[name="term_id"] option:checked')).toHaveText(
-    "Current Council 2025-Current",
+  await expect(page).toHaveURL(
+    new RegExp(`/admin/content/committees\\?office=${office}`),
   );
+  await page
+    .getByRole("row")
+    .filter({ hasText: "Current Committee" })
+    .getByRole("link", { name: "Edit", exact: true })
+    .click();
+  await expect(page.locator('select[name="term_id"]')).toHaveValue(current);
+  await expect(
+    page.locator('select[name="term_id"] option:checked'),
+  ).toHaveText("Current Council 2025-Current");
   await expect(page.locator('select[name="chair_id"]')).not.toContainText(
     "Previous Member",
   );
@@ -140,7 +244,10 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   ).toHaveAttribute("name", "date_approved");
   await page.getByLabel("Date", { exact: true }).fill("2024-11-16");
   await expect(
-    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    page.getByRole("status", {
+      name: "Assigned Legislative Term",
+      exact: true,
+    }),
   ).toHaveText("Previous Council 2022-2025");
   await expect(page.locator('select[name="author_id"]')).toContainText(
     "Previous Member",
@@ -151,7 +258,10 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   );
   await page.getByLabel("Date", { exact: true }).fill("2040-11-16");
   await expect(
-    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    page.getByRole("status", {
+      name: "Assigned Legislative Term",
+      exact: true,
+    }),
   ).toHaveText("No matching term");
   await page.goto(`/admin/content/documents/new?office=${office}&type=agenda`);
   await expect(
@@ -161,7 +271,10 @@ test("staff forms filter relationships by term and dashboard counts follow selec
   ).toHaveAttribute("name", "date");
   await page.getByLabel("Date", { exact: true }).fill("2024-11-16");
   await expect(
-    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    page.getByRole("status", {
+      name: "Assigned Legislative Term",
+      exact: true,
+    }),
   ).toHaveText("Previous Council 2022-2025");
   await expect(page.locator('input[name="session_id"]')).toHaveValue(
     "term-old-session",
@@ -251,7 +364,10 @@ test("dated records save the actual-date term and recalculate when edited", asyn
     .getByLabel("Type", { exact: true })
     .selectOption("Regular session");
   await expect(
-    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    page.getByRole("status", {
+      name: "Assigned Legislative Term",
+      exact: true,
+    }),
   ).toHaveText("Previous Council 2022-2025");
   await page.getByRole("button", { name: "Save record", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/content\/sessions\?saved=/);
@@ -272,7 +388,10 @@ test("dated records save the actual-date term and recalculate when edited", asyn
   ).toBeVisible();
   await page.goto(`/admin/content/sessions/edit/${id}?office=${office}`);
   await expect(
-    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    page.getByRole("status", {
+      name: "Assigned Legislative Term",
+      exact: true,
+    }),
   ).toHaveText("Previous Council 2022-2025");
   await page.getByLabel("Date", { exact: true }).fill("2026-03-01");
   await expect(page.locator('input[name="published"]')).toHaveCount(0);
@@ -299,7 +418,10 @@ test("dated records save the actual-date term and recalculate when edited", asyn
   expect(dates).toEqual([...dates].sort().reverse());
   await page.goto(`/admin/content/sessions/edit/${id}?office=${office}`);
   await expect(
-    page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+    page.getByRole("status", {
+      name: "Assigned Legislative Term",
+      exact: true,
+    }),
   ).toHaveText("Current Council 2025-Current");
   await page.screenshot({
     path: info.outputPath("session-date-first.png"),
@@ -311,7 +433,10 @@ test("dated records save the actual-date term and recalculate when edited", asyn
     );
     await page.getByLabel("Date", { exact: true }).fill(date);
     await expect(
-      page.getByRole("status", { name: "Assigned Legislative Term", exact: true }),
+      page.getByRole("status", {
+        name: "Assigned Legislative Term",
+        exact: true,
+      }),
     ).toHaveText("Current Council 2025-Current");
     await page
       .getByLabel("Title", { exact: true })

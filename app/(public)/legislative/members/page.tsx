@@ -1,7 +1,7 @@
 import { publicTerm } from "@/lib/legislative/terms-server";
-import { inTerm, philippineDate } from "@/lib/legislative/terms";
+import { inTerm, philippineDate, termStatus } from "@/lib/legislative/terms";
 import { TermSelector } from "@/components/legislative/TermSelector";
-import { isLegislativeRole } from "@/lib/officials/roles";
+import { isLegislativeRole, legislativeRoles } from "@/lib/officials/roles";
 import type { Metadata } from "next";
 import { getOfficials } from "@/lib/api";
 import { PageHero } from "@/components/shared/ui";
@@ -19,6 +19,10 @@ export default async function Page({
   const officials = allOfficials.filter(
     (o) => isLegislativeRole(o.legislativeRole) && inTerm(o, selected),
   );
+  const today = philippineDate();
+  const selectedTerm = terms.find((term) => term.id === selected);
+  const isCurrentTerm =
+    selectedTerm && termStatus(selectedTerm, today) === "Current";
   return (
     <div className="council-page">
       <PageHero
@@ -42,12 +46,43 @@ export default async function Page({
           <TermSelector
             terms={terms}
             selected={selected}
-            today={philippineDate()}
+            today={today}
             compact
           />
         </div>
         {officials.length ? (
-          <OfficialGrid officials={officials} directory />
+          isCurrentTerm ? (
+            <OfficialGrid officials={officials} directory />
+          ) : (
+            <div className="council-roster">
+              <table
+                className="council-roster-table"
+                aria-labelledby="council-directory-title"
+              >
+                <thead>
+                  <tr>
+                    <th scope="col">Official</th>
+                    <th scope="col">Position</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {officials.map((official) => (
+                    <tr key={official.id}>
+                      <th scope="row">
+                        <span>{official.name}</span>
+                        {official.description && <p>{official.description}</p>}
+                      </th>
+                      <td>
+                        {official.legislativeRole
+                          ? legislativeRoles[official.legislativeRole]
+                          : official.role}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
           <p className="council-empty">
             No officials are published for this selection. Choose another

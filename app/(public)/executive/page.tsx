@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getDepartments, getNews, getPrograms } from "@/lib/api";
 import { PageHero, SectionHeader } from "@/components/shared/ui";
-import { DepartmentGrid } from "@/components/departments/DepartmentGrid";
+import {
+  DepartmentGrid,
+  ProgramGrid,
+} from "@/components/departments/DepartmentGrid";
 import { NewsGrid } from "@/components/news/NewsCard";
 export const metadata: Metadata = {
   title: "Executive Department",
@@ -56,7 +59,7 @@ export default async function Page() {
           portraits
           departments={departments
             .filter((d) => !d.parentDepartmentId)
-            .slice(0, 3)}
+            .slice(0, 4)}
         />
         <div className="mt-16">
           <SectionHeader
@@ -64,19 +67,11 @@ export default async function Page() {
             title="Programs & projects"
             href="/executive/programs"
           />
-          <div className="content-grid">
-            {programs
+          <ProgramGrid
+            programs={programs
               .filter((p) => p.contentScope !== "legislative")
-              .slice(0, 3)
-              .map((p) => (
-                <article className="info-card" key={p.id}>
-                  <span className="eyebrow">{p.category}</span>
-                  <h3>{p.name}</h3>
-                  <p>{p.description}</p>
-                  <small>{p.status}</small>
-                </article>
-              ))}
-          </div>
+              .slice(0, 3)}
+          />
         </div>
         <div className="mt-16">
           <SectionHeader

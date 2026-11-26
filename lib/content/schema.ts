@@ -4,6 +4,7 @@ import {
   validateSocialContact,
 } from "./department-contact";
 import { legislativeRoles } from "@/lib/officials/roles";
+import { documentApprovalModes } from "@/lib/legislative/approval";
 import type {
   DepartmentContact,
   Official,
@@ -63,6 +64,17 @@ const date = (column: string): Field => ({ column, kind: "date" });
 const list = (column: string): Field => ({ column, kind: "list" });
 const sample: Field = { column: "is_sample", kind: "boolean" };
 const documentFields = {
+  officeId: { ...text("office_id"), optional: true },
+  contentScope: {
+    ...text("content_scope"),
+    optional: true,
+    values: ["executive", "legislative"],
+  },
+  approvalMode: {
+    ...text("approval_mode"),
+    optional: true,
+    values: [...documentApprovalModes],
+  },
   termId: { ...text("term_id"), optional: true },
   authorId: { ...text("author_id"), optional: true },
   coAuthorId: { ...text("co_author_id"), optional: true },
@@ -147,6 +159,12 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "sessions",
     key: "id",
     fields: {
+      officeId: { ...text("office_id"), optional: true },
+      contentScope: {
+        ...text("content_scope"),
+        optional: true,
+        values: ["executive", "legislative"],
+      },
       termId: { ...text("term_id"), optional: true },
       name: { ...text("name"), optional: true },
       id: text("id"),
@@ -196,6 +214,11 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
       headName: { ...text("head_name"), optional: true },
       headTitle: { ...text("head_title"), optional: true },
       headPhoto: url("head_photo", true),
+      showHeadPhotoOnPage: {
+        column: "show_head_photo_on_page",
+        kind: "boolean",
+        optional: true,
+      },
       officeId: { ...text("office_id"), optional: true },
       contentScope: {
         ...text("content_scope"),
@@ -280,6 +303,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "municipal_documents",
     key: "id",
     fields: {
+      officeId: { ...text("office_id"), optional: true },
       termId: { ...text("term_id"), optional: true },
       contentScope: {
         ...text("content_scope"),

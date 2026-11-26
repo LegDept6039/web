@@ -192,11 +192,18 @@ function TransferForm({
             <p className="staff-note">
               Up to 100 records and 2 MB per file. Use YYYY-MM-DD dates.
               {selectedType === "ordinance" || selectedType === "resolution"
-                ? " A number, author, committee and session are required. Use Reference IDs for records in the same term."
+                ? " A number and committee are required. Use approval_mode=authored with an author, or approval_mode=mass_motion with both author and co-author blank. Download Reference IDs for officials and committees in the same term. The date automatically links the matching session; no session ID is needed when there is one match."
                 : selectedType === "executive-order"
                   ? " The issuance date determines the Legislative Term."
-                  : " A session ID is required. Use Reference IDs to find the session."}
+                  : " The date automatically links the matching session; no session ID is needed when there is one match."}
             </p>
+            {selectedType !== "executive-order" && (
+              <p className="staff-note">
+                The session must already exist in the same office and term. If
+                multiple sessions share the date, add a session_id column with
+                the correct ID from Reference IDs.
+              </p>
+            )}
             <p className="staff-note">
               Leave id blank. Attach PDFs through Edit after importing;
               attachment_url is reference-only.

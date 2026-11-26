@@ -6,6 +6,7 @@ import {
   type RichNode,
 } from "@/lib/content/rich-text";
 import { publicationPosition } from "./publication";
+import { departmentHeadPhotoVisibility } from "./department-photo-visibility";
 import {
   definitions,
   decodeRecord,
@@ -83,6 +84,8 @@ export function parseContent(collection: Collection, form: FormData) {
             : raw;
     }
   }
+  if (collection === "departments")
+    row.show_head_photo_on_page = departmentHeadPhotoVisibility(form);
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(String(row[definition.key])))
     throw new Error(
       "Use lowercase letters, numbers, and single hyphens for the ID or slug.",

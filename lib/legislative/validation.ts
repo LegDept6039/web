@@ -1,5 +1,6 @@
 import type { Collection } from "@/lib/content/schema";
 import { publicationPosition } from "@/lib/admin/publication";
+import { documentApprovalMode } from "./approval";
 import {
   COMMITTEE_DESCRIPTION_MAX_LENGTH,
   isDocumentCollection,
@@ -33,6 +34,8 @@ export function parseLegislative(
     form.getAll("co_author_id").length > 1
   )
     throw new Error("Choose exactly one author and at most one co-author.");
+  if (form.getAll("approval_mode").length > 1)
+    throw new Error("Choose one approval method.");
   const row: Record<string, unknown> = {
     id: existing?.id || crypto.randomUUID(),
   };
@@ -43,7 +46,7 @@ export function parseLegislative(
       );
     row.published = true;
     row.sort_order = existing?.sort_order || 1;
-  } else if (collection === "sessions") {
+  } else if (collection === "sessions" || collection === "committees") {
     // Publication is server-owned; a missing or forged draft flag has no effect.
     row.published = true;
     row.sort_order = existing?.sort_order || 1;
@@ -108,12 +111,26 @@ export function parseLegislative(
   } else {
     row.title = text("title");
     if (collection === "ordinances" || collection === "resolutions") {
+      const approvalMode = documentApprovalMode(
+        form.has("approval_mode")
+          ? text("approval_mode", false)
+          : existing?.approval_mode,
+      );
+      const authorId = text("author_id", false) || null;
+      const coAuthorId = text("co_author_id", false) || null;
+      if (approvalMode === "mass_motion" && (authorId || coAuthorId))
+        throw new Error(
+          "Mass motion cannot have an individual author or co-author.",
+        );
+      if (approvalMode === "authored" && !authorId)
+        throw new Error("Choose an author or select Mass motion.");
       Object.assign(row, {
         number: text("number"),
         date_approved: date("date_approved"),
         year: Number(text("year")),
-        author_id: text("author_id"),
-        co_author_id: text("co_author_id", false) || null,
+        approval_mode: approvalMode,
+        author_id: authorId,
+        co_author_id: coAuthorId,
         committee_id: text("committee_id"),
         session_id: text("session_id", false) || null,
         summary: text("summary"),
@@ -123,8 +140,10 @@ export function parseLegislative(
         row.year !== Number(String(row.date_approved).slice(0, 4))
       )
         throw new Error("Year must match the document date.");
-      if (row.author_id === row.co_author_id)
+      if (row.author_id && row.author_id === row.co_author_id)
         throw new Error("Author and co-author must be different officials.");
+      if (approvalMode === "mass_motion")
+        Object.assign(row, { author: "", co_author: null });
       if (!existing)
         Object.assign(row, {
           author: "",

@@ -1,0 +1,265 @@
+.page :global(.page-hero) {
+  padding: 16px 0 20px;
+}
+.page :global(.breadcrumb) {
+  margin-bottom: 10px;
+}
+.page :global(.page-hero .eyebrow) {
+  margin-bottom: 6px;
+}
+.page :global(.page-hero h1) {
+  font-size: clamp(28px, 3vw, 36px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.page :global(.page-hero p) {
+  margin-top: 8px;
+  font-size: 13px;
+}
+.content {
+  padding-block: 20px 40px;
+  min-width: 0;
+}
+.description {
+  margin-top: 14px;
+  max-width: 80ch;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+}
+.jumpLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 16px 20px;
+}
+.jumpLinks a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 6px 11px;
+  font-size: 12px;
+  color: var(--navy);
+}
+.jumpLinks a:hover {
+  background: var(--light);
+}
+.jumpLinks span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.recordSection {
+  min-width: 0;
+  margin-top: 22px;
+  scroll-margin-top: 24px;
+}
+.sectionHeading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+.sectionHeading h2 {
+  font-size: 24px;
+}
+.sectionHeading > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.records {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+.records th {
+  background: #eaf0f5;
+  text-align: left;
+  font-size: 12px;
+}
+.records th,
+.records td {
+  border-bottom: 1px solid var(--line);
+  padding: 9px 12px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.records th:first-child {
+  width: 104px;
+}
+.records th:last-child {
+  width: 128px;
+}
+.records td:first-child {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.documentTitle {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: normal;
+}
+.authorship {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.empty {
+  padding: 14px 16px;
+  background: var(--light);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.fileSections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+.files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.file {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.fileHeading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.fileHeading svg {
+  margin-top: 3px;
+  color: var(--blue);
+}
+.fileHeading h3 {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.fileDate {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.preview {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-line;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.fileLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 14px;
+}
+.agendaItems {
+  padding: 14px;
+  background: var(--light);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-bottom: 14px;
+  overflow-wrap: anywhere;
+}
+.agendaItems h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.agendaItems ol {
+  list-style: decimal;
+  padding-left: 22px;
+  margin: 0;
+  font-size: 14px;
+}
+.agendaItems li + li {
+  margin-top: 6px;
+}
+.cardTitle:hover {
+  color: var(--blue);
+}
+.cardPreview {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cardAction {
+  margin-top: 16px;
+}
+@media (max-width: 760px) {
+  .fileSections {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .records th:first-child {
+    width: 94px;
+  }
+  .records th:last-child {
+    width: 118px;
+  }
+  .records th,
+  .records td {
+    padding: 8px 10px;
+  }
+}
+@media (max-width: 540px) {
+  .content {
+    padding-block: 16px 32px;
+  }
+  .sectionHeading h2 {
+    font-size: 22px;
+  }
+  .records,
+  .records tbody,
+  .records tr,
+  .records td {
+    display: block;
+    width: 100%;
+  }
+  .records thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .records tr {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .records td {
+    border: 0;
+    padding: 4px 0;
+  }
+  .records td:first-child::before {
+    content: "No. ";
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .file {
+    padding: 14px;
+  }
+}

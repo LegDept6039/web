@@ -3,6 +3,7 @@ import { termDisplayName, termForDate } from "@/lib/legislative/terms";
 
 import { useState } from "react";
 import { COMMITTEE_DESCRIPTION_MAX_LENGTH } from "@/lib/legislative/config";
+import { documentApprovalMode } from "@/lib/legislative/approval";
 import type { Collection } from "@/lib/content/schema";
 import type {
   LegislativeOptions,
@@ -39,6 +40,9 @@ export function LegislativeFields({
     String(row.date_approved || row.date || ""),
   );
   const [sessionId, setSessionId] = useState(String(row.session_id || ""));
+  const [approvalMode, setApprovalMode] = useState(() =>
+    documentApprovalMode(row.approval_mode),
+  );
   const termId =
     collection === "committees"
       ? manualTerm
@@ -292,13 +296,40 @@ export function LegislativeFields({
         {termControl}
         {input("title", "Title")}
         {input("number", "Document Number")}
-        {select("author_id", "Author", authors)}
-        {select("co_author_id", "Co-author", authors, false)}
-        {Boolean(row.author && !row.author_id) && (
-          <p className="staff-note">
-            Existing author: {String(row.author)}. Select the matching official.
-          </p>
+        <label>
+          Approval method
+          <select
+            name="approval_mode"
+            aria-label="Approval method"
+            aria-describedby="approval-method-help"
+            required
+            value={approvalMode}
+            onChange={(event) =>
+              setApprovalMode(documentApprovalMode(event.target.value))
+            }
+          >
+            <option value="authored">Individual author</option>
+            <option value="mass_motion">Mass motion</option>
+          </select>
+          <span id="approval-method-help" className="staff-note">
+            {approvalMode === "mass_motion"
+              ? "Approved collectively, without an individual author or co-author."
+              : "Choose the Sangguniang Bayan author and optional co-author."}
+          </span>
+        </label>
+        {approvalMode === "authored" && (
+          <>
+            {select("author_id", "Author", authors)}
+            {select("co_author_id", "Co-author", authors, false)}
+          </>
         )}
+        {approvalMode === "authored" &&
+          Boolean(row.author && !row.author_id) && (
+            <p className="staff-note">
+              Existing author: {String(row.author)}. Select the matching
+              official.
+            </p>
+          )}
         {input("year", "Year", "number")}
         {select("committee_id", "Category", options.committees)}
         {body("summary")}

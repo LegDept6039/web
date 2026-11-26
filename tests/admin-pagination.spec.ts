@@ -187,7 +187,7 @@ test("committee catalog and preserved compositions page independently and reset 
   expect(new URL(page.url()).searchParams.has("page")).toBe(false);
   expect(new URL(page.url()).searchParams.has("historicalPage")).toBe(false);
   await expect(tables.nth(0).locator("tbody tr").first()).toContainText(
-    "Unassigned template",
+    "Published",
   );
 });
 

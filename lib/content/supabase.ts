@@ -14,11 +14,13 @@ export type ContentFilters = Partial<
     | "branch"
     | "content_scope"
     | "role"
+    | "session_id"
+    | "date_approved"
     | "document_type"
     | "category_id",
     string
   >
-> & { parent_department_id?: string | null };
+> & { parent_department_id?: string | null; term_id?: string | null };
 export type ContentFetch = (
   url: string,
   init: RequestInit,

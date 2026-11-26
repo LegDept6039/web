@@ -31,7 +31,9 @@ export async function saveTerm(
     return result.error.code === "23P01"
       ? "Term dates overlap an existing term. Choose a non-overlapping date range."
       : result.error.code === "23514"
-        ? "These dates are invalid or exclude linked records. Keep dates covering the assigned records."
+        ? id
+          ? "These dates are invalid or exclude linked records. Keep dates covering the assigned records."
+          : "Unable to create the term and its committees. Check the dates, Master Committee catalog and Legislative Access office."
         : "Unable to save the term. Check your access and try again.";
   if (!result.data?.length) return "This term changed. Reload before saving.";
   revalidatePath("/", "layout");

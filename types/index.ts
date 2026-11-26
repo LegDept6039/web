@@ -12,6 +12,9 @@ export interface Official extends ContentRecord {
   description: string;
 }
 export interface LegislativeDocument extends ContentRecord {
+  officeId?: string;
+  contentScope?: "executive" | "legislative";
+  approvalMode?: import("@/lib/legislative/approval").DocumentApprovalMode;
   termId?: string;
   authorId?: string;
   coAuthorId?: string;
@@ -48,6 +51,8 @@ export interface NewsArticle extends ContentRecord {
   content: string[];
 }
 export interface Session extends ContentRecord {
+  officeId?: string;
+  contentScope?: "executive" | "legislative";
   termId?: string;
   name?: string;
   id: string;
@@ -81,6 +86,7 @@ export interface Department extends ContentRecord {
   headName?: string;
   headTitle?: string;
   headPhoto?: string;
+  showHeadPhotoOnPage?: boolean;
   officeId?: string;
   contentScope?: "executive" | "legislative";
   id: string;
@@ -131,6 +137,7 @@ export interface DocumentCategory extends ContentRecord {
   href?: string;
 }
 export interface MunicipalDocument extends ContentRecord {
+  officeId?: string;
   termId?: string;
   reportFrequency?: "annual" | "quarterly";
   reportYear?: number;

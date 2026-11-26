@@ -20,15 +20,17 @@ The migration adds `legislative_terms` with generated UUIDs, dates, and a databa
 
 ## Setup workflow
 
-Migration 020 adds a shared [Master Committee List](MASTER-COMMITTEES.md). Committee names are managed by Superadmin; the existing records retain their term-specific compositions and document links. Review historical associations before saving them.
+Migration 020 adds a shared [Master Committee List](MASTER-COMMITTEES.md). Migration 036 makes committees always published and creates the catalog's term-specific compositions automatically when a term is created. Adding a Master Committee populates existing terms too. Names are managed by Superadmin; existing compositions and document links are preserved. Review historical associations before saving them.
 
 1. In **Superadmin > Legislative Terms**, create the verified historical and current terms with their exact start/end dates. A term ending June 30 and a following term starting July 1 are adjacent, not overlapping.
 2. Choose **Unassigned historical records** in the Legislative CMS to find existing content.
-3. Assign officials first, then committees. Committee officials must already belong to the selected term. Officials serving multiple terms use separate existing-style Official records.
+3. Assign officials first, then edit the automatically created committee compositions. Committee officials must already belong to the selected term. Officials serving multiple terms use separate existing-style Official records; membership is not copied between terms.
 4. Edit/save sessions using their actual dates. The server assigns their term.
 5. Edit/save ordinances and resolutions using their approval dates and matching-term author, optional co-author, committee and session. Agenda/Minutes inherit their session's term. Executive Orders use their issuance date.
 
-New Officials and Committees default to the current term. Existing unassigned records require deliberate selection. Description edits do not silently rewrite historical membership. Date-based forms show an automatically derived read-only term and fail clearly when no term covers the date.
+New Officials default to the current term. Committees are created for their specific term from the Master Committee catalog and publish immediately, with empty memberships ready to edit. Existing unassigned records require deliberate review. Description edits do not silently rewrite historical membership. Date-based forms show an automatically derived read-only term and fail clearly when no term covers the date.
+
+The homepage Legislative leadership preview reads only published officials from the term covering today's Philippine date. Its database query filters by that term before applying the four-card limit and keeps the saved official order. Previous and unassigned officials remain available through the council directory's term selector; they do not fill an empty current-term preview.
 
 Automatically assigned terms and matched sessions appear as labeled information panels, not text inputs. They update when the record date changes and announce updates to assistive technology. When several sessions share a date, the existing session dropdown still allows staff to select the correct one.
 

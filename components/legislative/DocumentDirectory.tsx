@@ -20,7 +20,7 @@ export function DocumentDirectory({
   const filtered = documents.filter(
     (d) =>
       (year === "all" || String(d.year) === year) &&
-      `${d.number} ${d.title} ${d.author} ${d.coAuthor ?? ""}`
+      `${d.number} ${d.title} ${d.approvalMode === "mass_motion" ? "Mass motion" : `${d.author} ${d.coAuthor ?? ""}`}`
         .toLowerCase()
         .includes(query.toLowerCase().trim()),
   );
@@ -88,8 +88,9 @@ export function DocumentDirectory({
                 <td className="record-title">
                   <h2>{d.title}</h2>
                   <p>
-                    Author: {d.author}
-                    {d.coAuthor ? ` | Co-author: ${d.coAuthor}` : ""}
+                    {d.approvalMode === "mass_motion"
+                      ? "Approval: Mass motion"
+                      : `Author: ${d.author}${d.coAuthor ? ` | Co-author: ${d.coAuthor}` : ""}`}
                   </p>
                   <span className="status">{d.status}</span>
                 </td>

@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "verification": "Read-only comparison of hosted GET snapshots; no database writes by this script",
+  "beforeFetchedAt": "2026-11-26T08:53:58.748Z",
+  "afterFetchedAt": "2026-11-26T12:57:14.021Z",
+  "added": {
+    "ordinances": 69,
+    "resolutions": 141,
+    "total": 210
+  },
+  "totals": {
+    "ordinances": 74,
+    "resolutions": 142
+  },
+  "preservedPreexistingRows": {
+    "terms": 15,
+    "officials": 162,
+    "committees": 375,
+    "sessions": 26,
+    "ordinances": 5,
+    "resolutions": 1
+  },
+  "all210DocumentsAndReferencesMatch": true,
+  "titleTextAndLineBreakPositionsMatch": true,
+  "savedSummaryExactlyEqualsSavedTitle": true,
+  "titleLineEndingEncodingConversions": 210,
+  "lineEndingEncodingNote": "The SQL Editor stored CRLF for multiline titles and summaries. Verification normalizes only CRLF to LF; all other characters and line-break positions match the source exactly.",
+  "allPublishedApprovedAuthored": true,
+  "allPdfUrlsNull": true,
+  "noHeldOnlyIdentityAdded": true,
+  "sourceRowsCovered": 212,
+  "sourceRowsHeld": 446,
+  "beforeSha256": "6321c9b4bf2dab3e3768bf58bcf95fb67da099c8e77023b7409d0ffe82871806",
+  "afterSha256": "96565f5eee338d605e2284a38be0870f8d40d1f3d6c367f939ca2eba38f82ce9",
+  "manifestSha256": "90d4c72f98ce81bd9658efeb8598a1ee7269083bc677d95a98c2c3a532d05d99"
+}

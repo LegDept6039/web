@@ -747,10 +747,14 @@ h1,
   background: var(--light);
 }
 .news-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   background: white;
   border: 1px solid var(--line);
 }
 .news-image {
+  flex-shrink: 0;
   height: 210px;
   position: relative;
   display: block;
@@ -774,6 +778,10 @@ h1,
   font-weight: 600;
 }
 .news-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
   padding: 22px;
 }
 .meta {
@@ -784,6 +792,11 @@ h1,
   color: #637685;
 }
 .news-card h3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   font-family: Georgia, serif;
   font-size: 22px;
   font-weight: 400;
@@ -798,8 +811,24 @@ h1,
   line-height: 1.8;
   color: var(--muted);
 }
+.news-card-body > p {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.news-card .news-source {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
 .news-card .text-link {
-  margin-top: 22px;
+  margin-top: auto;
+  padding-top: 22px;
+  flex-shrink: 0;
   font-size: 11px;
 }
 .service-heading {
@@ -1263,6 +1292,29 @@ footer {
   font-size: 11px;
   margin-top: 15px;
 }
+.program-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.program-card h3,
+.program-card > p,
+.program-card > .eyebrow,
+.program-card > small {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.program-card > p {
+  -webkit-line-clamp: 3;
+}
+.program-card .text-link {
+  margin-top: auto;
+  padding-top: 20px;
+  flex-shrink: 0;
+}
 .branch-links {
   display: flex;
   gap: 10px;
@@ -1392,12 +1444,38 @@ footer {
   letter-spacing: normal;
   overflow-wrap: anywhere;
 }
+.barangay-detail-content {
+  min-width: 0;
+}
+.barangay-detail-content .barangay-leadership {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+.barangay-detail.barangay-detail-with-map {
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr) minmax(260px, 320px);
+  grid-template-areas: "picture content map";
+  gap: 32px;
+}
+.barangay-detail-with-map > .barangay-detail-picture {
+  grid-area: picture;
+}
+.barangay-detail-with-map > .barangay-detail-content {
+  grid-area: content;
+}
+.barangay-detail-with-map > .barangay-map {
+  grid-area: map;
+}
 .barangay-body {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 @media (max-width: 1100px) {
   .barangay-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .barangay-detail.barangay-detail-with-map {
+    grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+    grid-template-areas: "picture content" "picture map";
+    gap: 28px;
+  }
 }
 @media (max-width: 1000px) {
   .barangay-detail { grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 28px; }
@@ -1408,6 +1486,10 @@ footer {
 @media (max-width: 640px) {
   .barangay-content.section { padding-top: 24px; }
   .barangay-detail { grid-template-columns: minmax(0, 1fr); }
+  .barangay-detail.barangay-detail-with-map {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "picture" "content" "map";
+  }
   .barangay-detail > div:first-child { width: 100%; max-width: 360px; }
 }
 @media (max-width: 480px) {
@@ -2930,7 +3012,7 @@ footer {
   overflow: hidden;
 }
 .news-card-compact .text-link {
-  margin-top: 12px;
+  padding-top: 12px;
 }
 
 /* Public department portraits and directory cards. */
@@ -2996,6 +3078,9 @@ footer {
 .department-profile .department-photo {
   max-width: 300px;
   margin-bottom: 0;
+}
+.department-profile.department-profile-without-photo {
+  grid-template-columns: minmax(0, 1fr);
 }
 .department-biography {
   overflow-wrap: anywhere;
@@ -3210,12 +3295,21 @@ footer {
 .term-selector-compact select:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 .term-selector-compact p { margin: 0; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .council-empty { padding: 24px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.council-roster { border: 1px solid var(--line); border-radius: 8px; overflow: clip; background: #fff; }
+.council-roster-table { width: 100%; table-layout: fixed; border-collapse: collapse; text-align: left; font-size: 14px; line-height: 1.5; }
+.council-roster-table th, .council-roster-table td { padding: 10px 14px; vertical-align: top; overflow-wrap: anywhere; }
+.council-roster-table thead { background: #eaf1f6; }
+.council-roster-table thead th:first-child { width: 50%; }
+.council-roster-table th { font-weight: 600; }
+.council-roster-table tbody tr + tr { border-top: 1px solid var(--line); }
+.council-roster-table th p { margin-top: 2px; color: var(--muted); font-size: 13px; font-weight: 400; }
 @media (max-width: 640px) {
   .council-page .page-hero { padding-block: 16px 24px; }
   .council-page .breadcrumb { margin-bottom: 16px; }
   .council-content { padding-block: 24px 40px; }
   .council-toolbar { align-items: stretch; flex-direction: column; gap: 16px; margin-bottom: 20px; }
   .term-selector.term-selector-compact { flex: auto; width: 100%; }
+  .council-roster-table th, .council-roster-table td { padding: 8px 10px; font-size: 13px; }
 }
 
 /* Branch pages retain the shared department sections and show their own image. */

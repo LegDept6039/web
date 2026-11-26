@@ -1,4 +1,5 @@
 import { test, expect, type Page, type Download } from "@playwright/test";
+import { parseDocumentCsv } from "../lib/legislative/document-csv";
 
 const office = "10000000-0000-4000-8000-000000000004";
 const headers = [
@@ -12,15 +13,16 @@ const headers = [
   "committee_id",
   "session_id",
   "attachment_url",
+  "approval_mode",
 ];
 const addUrl = `/admin/content/documents/new?office=${office}&type=executive-order`;
 const exportUrl = `/admin/document-transfer/export?office=${office}&type=executive-order`;
 
-function csv(rows: Array<Record<string, string>>) {
+function csv(rows: Array<Record<string, string>>, columns = headers) {
   return [
-    headers,
+    columns,
     ...rows.map((row) =>
-      headers.map(
+      columns.map(
         (header) =>
           row[header] ?? (header === "description" ? "Report details." : ""),
       ),
@@ -90,7 +92,9 @@ test("Legislative editor imports multiple records and exports their CSV from Add
     .getByRole("link", { name: "Download CSV Template", exact: true })
     .click();
   const template = await downloadText(await templateDownload);
-  for (const header of headers) expect(template).toContain(header);
+  for (const header of headers.filter((header) => header !== "approval_mode"))
+    expect(template).toContain(header);
+  expect(template).not.toContain("approval_mode");
   await dialog.getByLabel("CSV File", { exact: true }).setInputFiles({
     name: "executive-orders.csv",
     mimeType: "text/csv",
@@ -376,6 +380,26 @@ test("document list and Add Document support valid ordinance relationships and r
   const dialog = page.getByRole("dialog", {
     name: "Import Legislative Documents",
   });
+  const importHeaders = headers.filter((header) => header !== "session_id");
+  for (const type of ["ordinance", "resolution"]) {
+    await dialog
+      .getByRole("combobox", { name: "Document Type", exact: true })
+      .selectOption(type);
+    const templateDownload = page.waitForEvent("download");
+    await dialog
+      .getByRole("link", { name: "Download CSV Template", exact: true })
+      .click();
+    const template = await downloadText(await templateDownload);
+    expect(template.replace(/^\uFEFF/, "").trim()).toBe(
+      importHeaders.join(","),
+    );
+    await expect(dialog).toContainText(
+      "The date automatically links the matching session",
+    );
+    await expect(dialog).not.toContainText(
+      "A number, author, committee and session are required",
+    );
+  }
   await dialog
     .getByRole("combobox", { name: "Document Type", exact: true })
     .selectOption("ordinance");
@@ -433,12 +457,23 @@ test("document list and Add Document support valid ordinance relationships and r
   await dialog.getByLabel("CSV File", { exact: true }).setInputFiles({
     name: "valid-ordinance.csv",
     mimeType: "text/csv",
-    buffer: Buffer.from(csv([valid])),
+    buffer: Buffer.from(csv([valid], importHeaders)),
   });
   await dialog
     .getByRole("button", { name: "Import Records", exact: true })
     .click();
   await expect(dialog.getByRole("status")).toContainText(/1/);
+  const imported = parseDocumentCsv(
+    await exportedCsv(
+      page,
+      `/admin/document-transfer/export?office=${office}&type=ordinance`,
+    ),
+  ).find((record) => record.title === valid.title);
+  expect(imported).toMatchObject({
+    author_id: valid.author_id,
+    committee_id: valid.committee_id,
+    session_id: "term-session",
+  });
   await page.goto(`/admin/content/ordinances?office=${office}`);
   await expect(
     page.getByRole("row").filter({ hasText: valid.title }),
