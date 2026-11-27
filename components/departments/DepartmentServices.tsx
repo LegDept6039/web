@@ -1,6 +1,7 @@
 import { ChevronDown, FileText } from "lucide-react";
 import type { Service } from "@/types";
 import { ServiceBody } from "@/components/services/ServiceBody";
+import { ServiceFormDownload } from "@/components/services/ServiceFormDownload";
 
 export function DepartmentServices({ services }: { services: Service[] }) {
   if (!services.length) return null;
@@ -38,6 +39,7 @@ export function DepartmentServices({ services }: { services: Service[] }) {
                 </span>
               </summary>
               <ServiceBody body={body} richBody={service.richBody} />
+              <ServiceFormDownload service={service} />
             </details>
           );
         })}

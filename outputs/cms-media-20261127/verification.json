@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-27",
+  "environment": "Local production build with isolated Supabase transport fixtures and local PGlite SQL databases",
+  "hostedMigrationsApplied": false,
+  "hostedContentWritesPerformed": false,
+  "checks": {
+    "productionBuild": "Passed, exit 0",
+    "scopedLint": "Passed, exit 0",
+    "dataAndSqlScenarios": 40,
+    "galleryDesktopMobileScenarios": 10,
+    "galleryEditorValidationReruns": 4,
+    "serviceFormDesktopMobileScenarios": 4,
+    "contactDesktopMobileScenarios": 6,
+    "screenshotsReviewed": true,
+    "contactRunnerNote": "All assertions passed; completed runner stopped after Windows teardown lingered. Port 3048 closed."
+  },
+  "migrationsInOrder": [
+    "supabase/migrations/202611270038_service_form_attachments.sql",
+    "supabase/migrations/202611270039_content_photo_galleries.sql"
+  ],
+  "migrationPrerequisite": "Migration 037 and earlier dependencies installed",
+  "preservation": "Existing IDs, content, ownership, publication, ordering, staff access and media remain unchanged by these migrations.",
+  "deploymentInstructions": "docs/CMS-MEDIA-AND-CONTACTS.md"
+}

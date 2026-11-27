@@ -36,6 +36,9 @@ export default async function Page({
   const d = await getDepartment(slug);
   if (!d) notFound();
   if (d.slug && slug !== d.slug) permanentRedirect(`/departments/${d.slug}`);
+  const bodyParagraphs = (d.body || "")
+    .split(/\r?\n/)
+    .filter((paragraph) => paragraph.trim());
   const [{ news, programs, contacts, services }, parent, branches] =
     await Promise.all([
       getDepartmentContent(d.officeId || d.id),
@@ -95,19 +98,20 @@ export default async function Page({
             )}
           </div>
         </section>
-        <section className="mt-16">
-          <h2>
-            {d.parentDepartmentId ? "About the Branch" : "About the Department"}
-          </h2>
-          <div className="department-body">
-            {(d.body || d.description)
-              .split(/\r?\n/)
-              .filter(Boolean)
-              .map((p, i) => (
-                <p key={i}>{p}</p>
+        {bodyParagraphs.length > 0 && (
+          <section className="mt-16" aria-labelledby="department-about-heading">
+            <h2 id="department-about-heading">
+              {d.parentDepartmentId
+                ? "About the Branch"
+                : "About the Department"}
+            </h2>
+            <div className="department-body">
+              {bodyParagraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
               ))}
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
         {branches.length > 0 && (
           <section
             className="mt-16"

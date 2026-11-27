@@ -1,0 +1,36 @@
+{
+  "auditedAt": "2026-11-27T07:30:27.309Z",
+  "status": "Hosted public record audit unavailable",
+  "httpStatus": 401,
+  "reason": "Invalid API key",
+  "xmlPublishableKeyExactMatch": true,
+  "access": "Read-only public publishable-key Supabase REST request; no writes.",
+  "scope": "Published, active, nonarchived Executive departments and branches.",
+  "fullRecordTextRecorded": false,
+  "hostedRecordCountsVerified": false,
+  "sourceAudit": {
+    "sharedPublicRoute": "app/(public)/departments/[slug]/page.tsx",
+    "originalDuplicateSource": "The public About section fell back from empty body to description.",
+    "headDescriptionFallback": false,
+    "separateColumnsInAdminAndSuperadminForms": true,
+    "separateColumnsInSaveActions": true,
+    "separateColumnsInTypedDecoder": true
+  },
+  "appliedFix": {
+    "aboutUsesBodyOnly": true,
+    "emptyAboutSectionHidden": true,
+    "descriptionAndHeadBiographyRemainIndependent": true,
+    "storedContentModified": false
+  },
+  "validation": {
+    "productionTestBuildPassed": true,
+    "scopedLintPassed": true,
+    "biographyDataTestPassed": true,
+    "desktopMobileFieldIndependenceScenariosPassed": 8,
+    "existingMhoProfileScenariosPassed": 2,
+    "totalBrowserScenariosPassed": 10,
+    "browserRunnerCompletion": "Assertions passed; owned runners canceled after teardown stalled. Fixture ports 3045 and 3003 closed.",
+    "browserDataSource": "Isolated Supabase transport fixture, not hosted writes"
+  },
+  "departments": []
+}

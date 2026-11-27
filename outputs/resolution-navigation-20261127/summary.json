@@ -1,0 +1,56 @@
+[
+  {
+    "phase": "baseline",
+    "first": {
+      "archive": {
+        "median": 1858.7000000476837,
+        "minimum": 1837,
+        "maximum": 1895.2999999523163
+      },
+      "detail": {
+        "median": 409.6999999284744,
+        "minimum": 397.7000000476837,
+        "maximum": 529
+      }
+    },
+    "repeat": {
+      "archive": {
+        "median": 1908.5,
+        "minimum": 1559.2000000476837,
+        "maximum": 2336.2000000476837
+      },
+      "detail": {
+        "median": 321.89999997615814,
+        "minimum": 302.89999997615814,
+        "maximum": 423
+      }
+    }
+  },
+  {
+    "phase": "after",
+    "first": {
+      "archive": {
+        "median": 447.7000000476837,
+        "minimum": 423.10000002384186,
+        "maximum": 514
+      },
+      "detail": {
+        "median": 265,
+        "minimum": 253.89999997615814,
+        "maximum": 348.60000002384186
+      }
+    },
+    "repeat": {
+      "archive": {
+        "median": 491.2999999523163,
+        "minimum": 347.7000000476837,
+        "maximum": 514.7000000476837
+      },
+      "detail": {
+        "median": 222,
+        "minimum": 162.19999992847443,
+        "maximum": 278.39999997615814
+      }
+    }
+  }
+]

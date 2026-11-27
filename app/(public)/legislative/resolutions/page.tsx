@@ -1,10 +1,10 @@
 import { publicTerm } from "@/lib/legislative/terms-server";
-import { inTerm, philippineDate } from "@/lib/legislative/terms";
+import { philippineDate } from "@/lib/legislative/terms";
 import { TermSelector } from "@/components/legislative/TermSelector";
 import type { Metadata } from "next";
-import { getResolutions } from "@/lib/api";
+import { getResolutionArchive } from "@/lib/legislative/resolution-archive-server";
 import { PageHero } from "@/components/shared/ui";
-import { DocumentDirectory } from "@/components/legislative/DocumentDirectory";
+import { ResolutionArchive } from "@/components/legislative/ResolutionArchive";
 export const metadata: Metadata = {
   title: "Resolutions",
   description:
@@ -13,9 +13,18 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ term?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { terms, selected } = await publicTerm((await searchParams).term);
+  const params = await searchParams;
+  const value = (key: string) =>
+    typeof params[key] === "string" ? params[key] : undefined;
+  const { terms, selected } = await publicTerm(value("term"));
+  const result = await getResolutionArchive({
+    term: selected,
+    year: value("year"),
+    q: value("q"),
+    page: value("page"),
+  });
   return (
     <>
       <PageHero
@@ -29,12 +38,7 @@ export default async function Page({
           selected={selected}
           today={philippineDate()}
         />
-        <DocumentDirectory
-          kind="resolutions"
-          documents={(await getResolutions()).filter((d) =>
-            inTerm(d, selected),
-          )}
-        />
+        <ResolutionArchive result={result} term={selected} />
       </section>
     </>
   );

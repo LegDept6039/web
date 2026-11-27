@@ -11,6 +11,9 @@ import {
 import { DepartmentEditorFields } from "@/components/admin/DepartmentEditorFields";
 import { DepartmentContactFields } from "@/components/admin/DepartmentContactFields";
 import { DepartmentServiceFields } from "@/components/admin/DepartmentServiceFields";
+import { GalleryImageFields } from "@/components/admin/GalleryImageFields";
+import { ServiceFormAttachment } from "@/components/admin/ServiceFormAttachment";
+import { stageServiceFormUpload } from "@/lib/admin/service-form-upload";
 import { serviceEditorBody } from "@/lib/content/service";
 import { OfficialEditorFields } from "@/components/admin/OfficialEditorFields";
 import dynamic from "next/dynamic";
@@ -82,6 +85,7 @@ export function ContentForm({
   );
   const rich = useRef(initialRich);
   const selectedFiles = useRef<Record<string, File>>({});
+  const galleryFiles = useRef<File[]>([]);
   const [uploadStatus, setUploadStatus] = useState("");
   const [error, action, pending] = useActionState(
     async (state: string, form: FormData) => {
@@ -97,6 +101,18 @@ export function ContentForm({
       }
       for (const [name, file] of Object.entries(selectedFiles.current))
         form.set(name, file);
+      if (collection === "services") {
+        try {
+          await stageServiceFormUpload(
+            form,
+            String(form.get("office_id") || selectedOffice),
+            setUploadStatus,
+          );
+        } catch (error) {
+          setUploadStatus("");
+          return error instanceof Error ? error.message : "Form upload failed.";
+        }
+      }
       const pdf = form.get("document_pdf");
       form.delete("document_pdf");
       if (
@@ -138,7 +154,12 @@ export function ContentForm({
       }
       const file = form.get("news_image");
       form.delete("news_image"); // Image bytes go directly to Storage, never through a Server Action.
-      if (collection === "news" && file instanceof File && file.size) {
+      form.delete("gallery_images_files");
+      if (
+        (collection === "news" || collection === "programs") &&
+        file instanceof File &&
+        file.size
+      ) {
         try {
           if (
             file.size > 10 * 1024 * 1024 ||
@@ -154,6 +175,7 @@ export function ContentForm({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              collection,
               officeId,
               original: form.get("original"),
               type: file.type,
@@ -174,6 +196,47 @@ export function ContentForm({
         } catch (error) {
           setUploadStatus("");
           return error instanceof Error ? error.message : "Upload failed.";
+        }
+      }
+      if (collection === "news" || collection === "programs") {
+        const paths: string[] = [];
+        try {
+          for (const [index, image] of galleryFiles.current.entries()) {
+            setUploadStatus(
+              `Uploading gallery photo ${index + 1} of ${galleryFiles.current.length}...`,
+            );
+            const response = await fetch("/admin/news-upload", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                collection,
+                officeId: selectedOffice,
+                original: form.get("original"),
+                type: image.type,
+                size: image.size,
+              }),
+            });
+            const upload = await response.json();
+            if (!response.ok)
+              throw new Error(
+                upload.error || "Unable to prepare photo upload.",
+              );
+            const result = await fetch(upload.signedUrl, {
+              method: "PUT",
+              headers: { "Content-Type": image.type },
+              body: image,
+            });
+            if (!result.ok)
+              throw new Error("Gallery photo upload failed. Please retry.");
+            paths.push(upload.path);
+          }
+          form.set("gallery_upload_paths", JSON.stringify(paths));
+          setUploadStatus("Checking photos and saving record...");
+        } catch (error) {
+          setUploadStatus("");
+          return error instanceof Error
+            ? error.message
+            : "Gallery upload failed.";
         }
       }
       const result = await saveContent(state, form);
@@ -398,7 +461,7 @@ export function ContentForm({
           {collection === "departments" && (
             <DepartmentEditorFields row={row} editable={canWrite} />
           )}
-          {collection === "news" && (
+          {(collection === "news" || collection === "programs") && (
             <>
               <label>
                 Featured image (JPG, JPEG, PNG; up to 10 MB)
@@ -429,10 +492,24 @@ export function ContentForm({
                   width={300}
                   height={200}
                   src={preview || String(row.image)}
-                  alt="News image preview"
+                  alt={
+                    collection === "news"
+                      ? "News image preview"
+                      : "Program image preview"
+                  }
                 />
               )}
               {photoError && <p role="alert">{photoError}</p>}
+              <GalleryImageFields
+                images={
+                  Array.isArray(row.gallery_images)
+                    ? (row.gallery_images as string[])
+                    : []
+                }
+                onFilesChange={(files) => {
+                  galleryFiles.current = files;
+                }}
+              />
             </>
           )}
           {legislative && isDocumentCollection(collection) && (
@@ -475,9 +552,15 @@ export function ContentForm({
                   rich.current = doc;
                 }}
               />
+              <ServiceFormAttachment
+                id={original}
+                name={String(row.form_name || "")}
+                hasAttachment={Boolean(row.form_path)}
+              />
             </DepartmentServiceFields>
           )}
           {Object.entries(definition.fields).map(([name, field]) => {
+            if (name === "galleryImages") return null;
             if (collection === "services") return null;
             if (
               collection === "contacts" &&
@@ -519,7 +602,10 @@ export function ContentForm({
               return original ? (
                 <input key={name} type="hidden" name="id" value={original} />
               ) : null;
-            if (collection === "news" && ["image", "category"].includes(name))
+            if (
+              (collection === "news" && ["image", "category"].includes(name)) ||
+              (collection === "programs" && name === "image")
+            )
               return null;
             if (collection === "news" && name === "content")
               return (

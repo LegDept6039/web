@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useId } from "react";
 import { DepartmentBiography } from "./DepartmentBiography";
 import { ImageEditOverlay } from "./ImageEditOverlay";
 import { DepartmentPhotoVisibility } from "./DepartmentPhotoVisibility";
@@ -10,6 +11,7 @@ export function DepartmentEditorFields({
   row: Record<string, unknown>;
   editable: boolean;
 }) {
+  const helpId = useId();
   const value = (key: string) => String(row[key] || "");
   const isBranch = Boolean(row.parent_department_id);
   return (
@@ -65,10 +67,16 @@ export function DepartmentEditorFields({
             Description
             <textarea
               name="description"
+              aria-label="Description"
+              aria-describedby={`${helpId}-description`}
               defaultValue={value("description")}
               required
               rows={4}
             />
+            <span id={`${helpId}-description`} className="staff-note">
+              Short overview shown on directory cards and beside the head
+              profile.
+            </span>
           </label>
           <DepartmentBiography
             initial={value("head_description")}
@@ -85,7 +93,17 @@ export function DepartmentEditorFields({
         </h2>
         <label>
           Body (optional)
-          <textarea name="body" defaultValue={value("body")} rows={10} />
+          <textarea
+            name="body"
+            aria-label="Body (optional)"
+            aria-describedby={`${helpId}-body`}
+            defaultValue={value("body")}
+            rows={10}
+          />
+          <span id={`${helpId}-body`} className="staff-note">
+            Detailed information for the About section. Leave blank to hide that
+            section.
+          </span>
         </label>
       </section>
       <section

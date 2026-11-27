@@ -7,9 +7,11 @@ import { formatDate } from "@/lib/utils";
 export function DocumentDetail({
   document: d,
   kind,
+  backHref,
 }: {
   document: LegislativeDocument;
   kind: "ordinances" | "resolutions";
+  backHref?: string;
 }) {
   const label = kind === "ordinances" ? "Ordinance" : "Resolution";
   const number = d.number.trim();
@@ -102,7 +104,7 @@ export function DocumentDetail({
               )}
             </div>
           </section>
-          <Link className="text-link" href={`/legislative/${kind}`}>
+          <Link className="text-link" href={backHref || `/legislative/${kind}`}>
             <ArrowLeft size={16} />
             Back to {kind}
           </Link>

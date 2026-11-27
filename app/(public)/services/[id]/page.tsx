@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { getServices } from "@/lib/api";
 import { PageHero } from "@/components/shared/ui";
 import { ServiceBody } from "@/components/services/ServiceBody";
+import { ServiceFormDownload } from "@/components/services/ServiceFormDownload";
 export async function generateMetadata({
   params,
 }: {
@@ -44,6 +45,7 @@ export default async function Page({
               </ol>
             </>
           )}
+          <ServiceFormDownload service={s} />
           <div className="info-card mt-8">
             <h3>Before your visit</h3>
             <p>

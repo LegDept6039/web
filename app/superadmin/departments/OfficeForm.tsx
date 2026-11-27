@@ -1,7 +1,7 @@
 "use client";
 import { DepartmentBiography } from "@/components/admin/DepartmentBiography";
 import { DepartmentPhotoVisibility } from "@/components/admin/DepartmentPhotoVisibility";
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useId, useRef, useState } from "react";
 import { saveOffice, saveBranch, deleteOffice } from "./actions";
 import type { Office } from "@/lib/offices/permissions";
 import { PublicationFields } from "@/components/admin/PublicationFields";
@@ -27,6 +27,7 @@ export function OfficeForm({
     sort_order?: number;
   };
 }) {
+  const helpId = useId();
   const [branch, setBranch] = useState(office?.department || "executive");
   const selectedFiles = useRef<Record<string, File>>({});
   const [message, action, pending] = useActionState(
@@ -161,13 +162,28 @@ export function OfficeForm({
           Short description
           <textarea
             name="description"
+            aria-label="Short description"
+            aria-describedby={`${helpId}-description`}
             maxLength={10000}
             defaultValue={office?.description}
           />
+          <span id={`${helpId}-description`} className="staff-note">
+            Short overview shown on directory cards and beside the head profile.
+          </span>
         </label>
         <label>
           Body / About content
-          <textarea name="body" defaultValue={office?.body} maxLength={30000} />
+          <textarea
+            name="body"
+            aria-label="Body / About content"
+            aria-describedby={`${helpId}-body`}
+            defaultValue={office?.body}
+            maxLength={30000}
+          />
+          <span id={`${helpId}-body`} className="staff-note">
+            Detailed information for the About section. Leave blank to hide that
+            section.
+          </span>
         </label>
         <label>
           Department Head Name
@@ -233,7 +249,11 @@ export function OfficeForm({
         </p>
         {message && <p role="alert">{message}</p>}
         <button className="button button-blue" disabled={pending}>
-          {pending ? "Saving..." : branchMode ? "Save branch" : "Save department"}
+          {pending
+            ? "Saving..."
+            : branchMode
+              ? "Save branch"
+              : "Save department"}
         </button>
       </form>
       {office && (
@@ -249,7 +269,9 @@ export function OfficeForm({
             </p>
             <label>
               <input type="checkbox" name="confirm" required />
-              {branchMode ? "Deactivate this branch" : "Deactivate this department"}
+              {branchMode
+                ? "Deactivate this branch"
+                : "Deactivate this department"}
             </label>
             {deleteMessage && <p role="alert">{deleteMessage}</p>}
             <button className="button" disabled={deleting}>

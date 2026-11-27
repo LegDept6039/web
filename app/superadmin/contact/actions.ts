@@ -3,16 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth/server";
-import { validateContactSettings } from "@/lib/municipal-contact/validation";
+import { validateContactSettingsForSave } from "@/lib/municipal-contact/validation";
 
 export async function saveMunicipalContact(
   _message: string,
   form: FormData,
 ): Promise<string> {
   const { client } = await requireStaff(true, true);
-  let values: ReturnType<typeof validateContactSettings>;
+  let values: ReturnType<typeof validateContactSettingsForSave>;
   try {
-    values = validateContactSettings(Object.fromEntries(form));
+    values = validateContactSettingsForSave(Object.fromEntries(form));
   } catch (error) {
     return error instanceof Error
       ? error.message

@@ -8,6 +8,8 @@ import { officeContext, contentAllowed, allowed } from "@/lib/offices/server";
 import { collectionName, parseContent } from "@/lib/admin/content";
 import { uploadOfficialPhoto } from "@/lib/admin/photo";
 import { uploadNewsImage } from "@/lib/admin/news-image";
+import { prepareGalleryImages } from "@/lib/admin/gallery-images";
+import { prepareServiceForm } from "@/lib/admin/service-form";
 import { uploadFile } from "@/lib/admin/upload-file";
 import { legislativeRoles, isLegislativeRole } from "@/lib/officials/roles";
 import { parseLegislative } from "@/lib/legislative/validation";
@@ -42,8 +44,11 @@ export async function saveContent(
   const original = String(form.get("original") || "");
   if (["news", "programs", "services"].includes(collection) && original)
     form.set("id", original);
-  if (collection === "news")
-    form.set("image", "/images/department-placeholder.svg");
+  if (collection === "news" || collection === "programs")
+    form.set(
+      "image",
+      collection === "news" ? "/images/department-placeholder.svg" : "",
+    );
   if (collection === "contacts") {
     const value = String(form.get("value") || "").trim();
     if (!value || value.length > 1000)
@@ -338,11 +343,29 @@ export async function saveContent(
         : existing?.[photoColumn] || null;
   if (original && original !== row[definition.key])
     return "An existing record ID cannot be changed.";
+  let serviceForm: Awaited<ReturnType<typeof prepareServiceForm>> | undefined;
+  if (collection === "services") {
+    try {
+      serviceForm = await prepareServiceForm(
+        client,
+        context.user.id,
+        office!,
+        form,
+        existing,
+      );
+      Object.assign(row, serviceForm.values);
+    } catch (error) {
+      return error instanceof Error ? error.message : "Form upload failed.";
+    }
+  }
   let newsImage: Awaited<ReturnType<typeof uploadNewsImage>> | undefined;
-  if (collection === "news") {
+  let galleryPaths: string[] = [];
+  if (collection === "news" || collection === "programs") {
     // Allocate a stable server UUID before naming the image; the same UUID is inserted.
     row.id = original || crypto.randomUUID();
-    row.image = existing?.image || "/images/department-placeholder.svg";
+    row.image =
+      existing?.image ||
+      (collection === "news" ? "/images/department-placeholder.svg" : null);
     const stagedPath = String(form.get("news_upload_path") || "");
     if (stagedPath) {
       const department = context.offices.find((o) => o.id === office);
@@ -355,14 +378,37 @@ export async function saveContent(
           String(row.id),
           String(row.slug),
           stagedPath,
+          collection,
         );
         row.image = newsImage.url;
-        row.image_path = newsImage.path;
-        row.image_mime = newsImage.mime;
-        row.image_size = newsImage.size;
+        if (collection === "news") {
+          row.image_path = newsImage.path;
+          row.image_mime = newsImage.mime;
+          row.image_size = newsImage.size;
+        }
       } catch (error) {
         return error instanceof Error ? error.message : "Image upload failed.";
       }
+    }
+    const department = context.offices.find((o) => o.id === office);
+    if (!department) return "Choose an owning department.";
+    try {
+      const gallery = await prepareGalleryImages(
+        client,
+        context.user.id,
+        department,
+        collection,
+        String(row.id),
+        String(row.slug),
+        form,
+        existing?.gallery_images,
+      );
+      row.gallery_images = gallery.urls;
+      galleryPaths = gallery.uploadedPaths;
+    } catch (error) {
+      if (newsImage)
+        await client.storage.from("municipal-media").remove([newsImage.path]);
+      return error instanceof Error ? error.message : "Gallery upload failed.";
     }
   }
   if (collection === "departments")
@@ -441,6 +487,10 @@ export async function saveContent(
         .eq("updated_at", String(form.get("updated_at")))
         .select(definition.key)
     : await client.from(definition.table).insert(row).select(definition.key);
+  if ((result.error || !result.data?.length) && serviceForm?.uploadedPath)
+    await client.storage
+      .from("municipal-service-forms")
+      .remove([serviceForm.uploadedPath]);
   if ((result.error || !result.data?.length) && documentPdf)
     await client.storage.from("municipal-media").remove([documentPdf.path]);
   if ((result.error || !result.data?.length) && uploaded) {
@@ -448,6 +498,8 @@ export async function saveContent(
   }
   if ((result.error || !result.data?.length) && newsImage)
     await client.storage.from("municipal-media").remove([newsImage.path]);
+  if ((result.error || !result.data?.length) && galleryPaths.length)
+    await client.storage.from("municipal-media").remove(galleryPaths);
   if ((result.error || !result.data?.length) && departmentImage)
     await client.storage.from("municipal-media").remove([departmentImage.path]);
   if (

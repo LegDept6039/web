@@ -20,12 +20,18 @@ export async function POST(request: Request) {
   }
   if (!input || typeof input !== "object" || Array.isArray(input))
     return Response.json({ error: "Invalid upload request." }, { status: 400 });
+  const collection = input.collection ?? "news";
+  if (collection !== "news" && collection !== "programs")
+    return Response.json(
+      { error: "Invalid image collection." },
+      { status: 400 },
+    );
   const department = context.offices.find((o) => o.id === input.officeId);
   if (
     !department ||
     !contentAllowed(
       context,
-      "news",
+      collection,
       { office_id: department.id, content_scope: department.department },
       "write",
     )
@@ -36,11 +42,11 @@ export async function POST(request: Request) {
     );
   if (input.original) {
     const { data, error } = await context.client
-      .from("news")
+      .from(collection)
       .select("*")
       .eq("id", input.original)
       .maybeSingle();
-    if (error || !data || !contentAllowed(context, "news", data, "write"))
+    if (error || !data || !contentAllowed(context, collection, data, "write"))
       return Response.json(
         { error: "No editing access to this record." },
         { status: 403 },
@@ -56,7 +62,7 @@ export async function POST(request: Request) {
       { error: "Choose a JPG or PNG image up to 10 MB." },
       { status: 400 },
     );
-  const path = `news/${department.id}/${context.user.id}/${crypto.randomUUID()}.${input.type === "image/jpeg" ? "jpg" : "png"}`;
+  const path = `${collection}/${department.id}/${context.user.id}/${crypto.randomUUID()}.${input.type === "image/jpeg" ? "jpg" : "png"}`;
   const { data, error } = await context.client.storage
     .from("municipal-news-staging")
     .createSignedUploadUrl(path);
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         error:
-          "Cannot prepare upload. Apply migration 011 and check Storage permissions.",
+          "Cannot prepare upload. Apply migration 039 and check Storage permissions.",
       },
       { status: 400 },
     );

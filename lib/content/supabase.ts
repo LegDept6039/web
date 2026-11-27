@@ -53,7 +53,7 @@ export async function readSupabaseCollection<K extends Collection>(
         (["news", "programs"].includes(collection)
           ? ",source,rich_body"
           : collection === "services"
-            ? ",rich_body"
+            ? ",rich_body,form_path"
             : "") +
         (["ordinances", "resolutions"].includes(collection)
           ? ",author_record:officials!author_id(name),co_author_record:officials!co_author_id(name),committee_record:committees!committee_id(name),session_record:sessions!session_id(name,number)"

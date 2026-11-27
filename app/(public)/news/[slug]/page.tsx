@@ -2,7 +2,7 @@ import { RichText } from "@/components/shared/RichText";
 import { NewsSource } from "@/components/news/NewsSource";
 export const dynamicParams = true;
 import Link from "next/link";
-import Image from "next/image";
+import { PhotoGallery } from "@/components/shared/PhotoGallery";
 import { notFound } from "next/navigation";
 import { getNews, getArticle } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
@@ -39,15 +39,12 @@ export default async function Page({
         <p className="meta mt-5">
           {formatDate(a.date)} · Municipal information portal
         </p>
-        <div className="article-image">
-          <Image
-            src={a.image}
-            alt={a.title}
-            fill
-            sizes="(max-width: 800px) 100vw, 790px"
-            priority
-          />
-        </div>
+        <PhotoGallery
+          title={a.title}
+          coverImage={a.image}
+          images={a.galleryImages}
+          preload
+        />
         <div className="article-body">
           <RichText document={a.richBody} legacy={a.content} />
         </div>

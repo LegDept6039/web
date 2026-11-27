@@ -1,0 +1,139 @@
+.gallery {
+  margin-block: 24px 28px;
+}
+
+.viewer {
+  position: relative;
+  display: grid;
+  align-items: center;
+}
+
+.withControls {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 12px;
+}
+
+.frame {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--light);
+}
+
+.image {
+  object-fit: contain;
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: white;
+  color: var(--navy);
+}
+
+.arrow:hover {
+  border-color: var(--blue);
+  background: var(--light);
+}
+
+.count {
+  margin-top: 8px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.thumbnails {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin: 8px 0 0;
+  padding: 8px;
+  list-style: none;
+  scrollbar-width: thin;
+}
+
+.thumbnails li {
+  flex: 0 0 auto;
+}
+
+.thumbnail {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 64px;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  background: var(--light);
+  color: var(--muted);
+}
+
+.thumbnail img {
+  object-fit: cover;
+}
+
+.thumbnail[aria-current="true"] {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 1px white inset;
+}
+
+.thumbnail:hover {
+  border-color: var(--blue);
+}
+
+.unavailable {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .withControls {
+    display: block;
+  }
+
+  .arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    transform: translateY(-50%);
+    background: #fffffff2;
+  }
+
+  .arrow:first-child {
+    left: 6px;
+  }
+
+  .arrow:last-child {
+    right: 6px;
+  }
+
+  .thumbnail {
+    width: 72px;
+    height: 54px;
+  }
+
+  .thumbnails {
+    gap: 7px;
+  }
+}

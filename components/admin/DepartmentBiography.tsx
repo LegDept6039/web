@@ -19,7 +19,7 @@ export function DepartmentBiography({
         aria-label={label}
         value={value}
         maxLength={BIOGRAPHY_LIMIT}
-        aria-describedby={id}
+        aria-describedby={`${id}-help ${id}`}
         aria-invalid={over || undefined}
         onChange={(e) => {
           setValue(e.target.value);
@@ -37,6 +37,10 @@ export function DepartmentBiography({
           );
         }}
       />
+      <span id={`${id}-help`} className="staff-note">
+        Biography or message about the head. Leave blank to omit it from the
+        public page.
+      </span>
       <span id={id} className="staff-note" aria-live="polite">
         {value.length} / {BIOGRAPHY_LIMIT}
         {over &&

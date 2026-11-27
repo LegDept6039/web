@@ -87,13 +87,20 @@ test("ordinances search, year filter, empty state, reset and record detail", asy
 });
 
 test("resolution co-author and year searches", async ({ page }) => {
-  await page.goto("/legislative/resolutions");
+  await page.goto("/legislative/resolutions?term=unassigned");
   await page
     .getByRole("combobox", { name: "Filter by year" })
     .selectOption("2025");
+  await expect(page).toHaveURL(
+    (url) => url.searchParams.get("year") === "2025",
+  );
+  await expect(page.locator(".legislative-table tbody tr")).toHaveCount(1);
   await page
     .getByRole("textbox", { name: "Search resolutions" })
     .fill("Sample Council Member C");
+  await page
+    .getByRole("textbox", { name: "Search resolutions" })
+    .press("Enter");
   await expect(page.locator(".legislative-table tbody tr")).toHaveCount(1);
   await page.getByRole("link", { name: "View record" }).click();
   await expect(page.getByText("Co-author", { exact: true })).toBeVisible();
@@ -197,13 +204,17 @@ test("compact legislative tables prioritize full long titles on both screen size
   page,
 }, info) => {
   for (const kind of ["ordinances", "resolutions"]) {
-    await page.goto(`/legislative/${kind}`);
+    await page.goto(`/legislative/${kind}?term=unassigned`);
     // Exercise a client filter first so hydration cannot overwrite the stress-test text.
     const number = await page
       .locator(".legislative-table tbody tr td")
       .first()
       .innerText();
     await page.getByRole("textbox", { name: `Search ${kind}` }).fill(number);
+    if (kind === "resolutions")
+      await page
+        .getByRole("textbox", { name: "Search resolutions" })
+        .press("Enter");
     await expect(page.locator(".legislative-table tbody tr")).toHaveCount(1);
     const title = page.locator(".record-title h2").first();
     const long =

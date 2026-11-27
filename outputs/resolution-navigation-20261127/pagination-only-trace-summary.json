@@ -1,0 +1,1919 @@
+{
+  "visibleMs": 1975.1873999999998,
+  "events": [
+    {
+      "name": "RunTask",
+      "durationMs": 1590.251,
+      "ts": 914901169491,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {}
+    },
+    {
+      "name": "ThreadControllerImpl::RunTask",
+      "durationMs": 1590.022,
+      "ts": 914901169494,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "src_file": "third_party/blink/renderer/platform/loader/fetch/url_loader/background_url_loader.cc",
+        "src_func": "PostTaskToMainThread",
+        "src_line": 447
+      }
+    },
+    {
+      "name": "Decode Image",
+      "durationMs": 1026.164,
+      "ts": 914901185905,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "imageType": "png"
+      }
+    },
+    {
+      "name": "RunTask",
+      "durationMs": 203.404,
+      "ts": 914900751857,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {}
+    },
+    {
+      "name": "ThreadControllerImpl::RunTask",
+      "durationMs": 203.371,
+      "ts": 914900751861,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "src_file": "ipc/ipc_mojo_bootstrap.cc",
+        "src_func": "Accept",
+        "src_line": 1136
+      }
+    },
+    {
+      "name": "Receive mojo message",
+      "durationMs": 203.351,
+      "ts": 914900751872,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "chrome_mojo_event_info": {
+          "data_num_bytes": 232,
+          "ipc_hash": 3544143186,
+          "mojo_interface_tag": "blink.mojom.DevToolsSession",
+          "payload_size": 176
+        }
+      }
+    },
+    {
+      "name": "CpuProfiler::StartProfiling",
+      "durationMs": 203.031,
+      "ts": 914900752102,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {}
+    },
+    {
+      "name": "RunTask",
+      "durationMs": 81.942,
+      "ts": 914902801443,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {}
+    },
+    {
+      "name": "ThreadControllerImpl::RunTask",
+      "durationMs": 81.859,
+      "ts": 914902801444,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "src_file": "third_party/blink/renderer/core/html/html_link_element.cc",
+        "src_func": "ScheduleEvent",
+        "src_line": 466
+      }
+    },
+    {
+      "name": "EventDispatch",
+      "durationMs": 81.836,
+      "ts": 914902801459,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "type": "load"
+        }
+      }
+    },
+    {
+      "name": "v8.callFunction",
+      "durationMs": 81.639,
+      "ts": 914902801633,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "columnNumber": 214275,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "functionName": "fS",
+          "isolate": "1618327640987096890",
+          "lineNumber": 1,
+          "sampleTraceId": 5838478842332000,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js"
+        },
+        "scriptId": 0,
+        "startPosition": -1
+      }
+    },
+    {
+      "name": "FunctionCall",
+      "durationMs": 81.474,
+      "ts": 914902801637,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "columnNumber": 214275,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "functionName": "fS",
+          "isolate": "1618327640987096890",
+          "lineNumber": 1,
+          "sampleTraceId": 5838478842332001,
+          "scriptId": "6",
+          "url": "http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js"
+        }
+      }
+    },
+    {
+      "name": "Layout",
+      "durationMs": 68.093,
+      "ts": 914902813224,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "beginData": {
+          "dirtyObjects": 620,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "partialLayout": false,
+          "totalObjects": 801
+        },
+        "endData": {
+          "layoutRoots": [
+            {
+              "depth": 1,
+              "nodeId": 3,
+              "nodeName": "#document",
+              "quads": [
+                [
+                  0,
+                  0,
+                  1440,
+                  0,
+                  1440,
+                  1000,
+                  0,
+                  1000
+                ]
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "RunTask",
+      "durationMs": 62.326,
+      "ts": 914902905374,
+      "tid": 8008,
+      "pid": 25236,
+      "args": {}
+    },
+    {
+      "name": "ThreadControllerImpl::RunTask",
+      "durationMs": 62.3,
+      "ts": 914902905391,
+      "tid": 8008,
+      "pid": 25236,
+      "args": {
+        "src_file": "gpu/command_buffer/service/scheduler.cc",
+        "src_func": "TryScheduleSequence",
+        "src_line": 439
+      }
+    },
+    {
+      "name": "GPUTask",
+      "durationMs": 62.236,
+      "ts": 914902905426,
+      "tid": 8008,
+      "pid": 25236,
+      "args": {
+        "data": {
+          "renderer_pid": 15280,
+          "used_bytes": 15073280
+        }
+      }
+    },
+    {
+      "name": "RunTask",
+      "durationMs": 40.459,
+      "ts": 914902935062,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {}
+    },
+    {
+      "name": "ThreadControllerImpl::RunTask",
+      "durationMs": 40.405,
+      "ts": 914902935071,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "src_file": "ipc/ipc_mojo_bootstrap.cc",
+        "src_func": "Accept",
+        "src_line": 1136
+      }
+    },
+    {
+      "name": "Receive mojo message",
+      "durationMs": 40.326,
+      "ts": 914902935087,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "chrome_mojo_event_info": {
+          "data_num_bytes": 232,
+          "ipc_hash": 3544143186,
+          "mojo_interface_tag": "blink.mojom.DevToolsSession",
+          "payload_size": 176
+        }
+      }
+    }
+  ],
+  "functions": [
+    {
+      "functionName": "(program) :0",
+      "sampledMs": 1937.155
+    },
+    {
+      "functionName": "dontForceLayout http://127.0.0.1:3040/_next/static/chunks/280abr9-vs5lr.js:1",
+      "sampledMs": 76.583
+    },
+    {
+      "functionName": "(idle) :0",
+      "sampledMs": 70.788
+    },
+    {
+      "functionName": " http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js:1",
+      "sampledMs": 11.009
+    },
+    {
+      "functionName": "query :5719",
+      "sampledMs": 6.37
+    },
+    {
+      "functionName": "fetch :0",
+      "sampledMs": 3.846
+    },
+    {
+      "functionName": "read :0",
+      "sampledMs": 3.691
+    },
+    {
+      "functionName": "e http://127.0.0.1:3040/_next/static/chunks/43qi2ef0_-07u.js:1",
+      "sampledMs": 3.52
+    },
+    {
+      "functionName": "uo http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js:1",
+      "sampledMs": 3.468
+    },
+    {
+      "functionName": "decode :0",
+      "sampledMs": 2.889
+    },
+    {
+      "functionName": "cu http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js:1",
+      "sampledMs": 2.845
+    },
+    {
+      "functionName": "uE http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js:1",
+      "sampledMs": 2.391
+    },
+    {
+      "functionName": "uk http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js:1",
+      "sampledMs": 2.269
+    },
+    {
+      "functionName": "removeChild :0",
+      "sampledMs": 2.016
+    },
+    {
+      "functionName": "k http://127.0.0.1:3040/_next/static/chunks/2zsj6vbxccfpw.js:1",
+      "sampledMs": 1.899
+    },
+    {
+      "functionName": "I http://127.0.0.1:3040/_next/static/chunks/2zsj6vbxccfpw.js:1",
+      "sampledMs": 1.889
+    },
+    {
+      "functionName": " :5717",
+      "sampledMs": 1.811
+    },
+    {
+      "functionName": "sh http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js:1",
+      "sampledMs": 1.723
+    },
+    {
+      "functionName": "eA http://127.0.0.1:3040/_next/static/chunks/196x_tfexoucg.js:1",
+      "sampledMs": 1.682
+    },
+    {
+      "functionName": "E http://127.0.0.1:3040/_next/static/chunks/2zsj6vbxccfpw.js:1",
+      "sampledMs": 1.635
+    },
+    {
+      "functionName": "L http://127.0.0.1:3040/_next/static/chunks/2zsj6vbxccfpw.js:1",
+      "sampledMs": 1.609
+    },
+    {
+      "functionName": "(garbage collector) :0",
+      "sampledMs": 1.606
+    },
+    {
+      "functionName": "e http://127.0.0.1:3040/_next/static/chunks/2zsj6vbxccfpw.js:2",
+      "sampledMs": 1.605
+    },
+    {
+      "functionName": "ef http://127.0.0.1:3040/_next/static/chunks/43qi2ef0_-07u.js:1",
+      "sampledMs": 1.589
+    },
+    {
+      "functionName": "insertBefore :0",
+      "sampledMs": 1.588
+    }
+  ],
+  "imageEvents": [
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914900746689,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 151,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:34 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.89",
+          "responseTime": 1795710214109.962,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 20.192,
+            "receiveHeadersStart": 20.101,
+            "requestTime": 914900.72538,
+            "sendEnd": 0.444,
+            "sendStart": 0.323,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914900751371,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 123,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:34 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.90",
+          "responseTime": 1795710214114.42,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 23.983,
+            "receiveHeadersStart": 23.896,
+            "requestTime": 914900.726043,
+            "sendEnd": 0.388,
+            "sendStart": 0.265,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914900957583,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 1497,
+          "didFail": false,
+          "encodedDataLength": 1250,
+          "finishTime": 914900.755197,
+          "requestId": "15280.89"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914900959267,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 1498,
+          "didFail": false,
+          "encodedDataLength": 1246,
+          "finishTime": 914900.755669,
+          "requestId": "15280.90"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914900960099,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 1387,
+          "didFail": false,
+          "encodedDataLength": 1194,
+          "finishTime": 914900.754837,
+          "requestId": "15280.87"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914900961197,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 1390,
+          "didFail": false,
+          "encodedDataLength": 1195,
+          "finishTime": 914900.755451,
+          "requestId": "15280.88"
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914901017923,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "auto",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "High",
+          "requestId": "15280.91",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/legislative/resolutions?_rsc=JLpW-AfKvbbG9w_Z"
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914901033640,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 123,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:34 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.91",
+          "responseTime": 1795710214394.314,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 10.954,
+            "receiveHeadersStart": 10.811,
+            "requestTime": 914901.019022,
+            "sendEnd": 0.637,
+            "sendStart": 0.462,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914901038764,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "auto",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "link",
+            "type": "script"
+          },
+          "isLinkPreload": true,
+          "priority": "VeryHigh",
+          "renderBlocking": "non_blocking",
+          "requestId": "15280.92",
+          "requestMethod": "GET",
+          "resourceType": "Stylesheet",
+          "url": "http://127.0.0.1:3040/_next/static/chunks/2a-up3-x4exqw.css"
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914901056970,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 129,
+          "connectionReused": true,
+          "encodedDataLength": 333,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "public, max-age=31536000, immutable"
+            },
+            {
+              "name": "ETag",
+              "value": "W/\"330-1a218a7e762\""
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Accept-Ranges",
+              "value": "bytes"
+            },
+            {
+              "name": "Content-Length",
+              "value": "816"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:34 GMT"
+            },
+            {
+              "name": "Last-Modified",
+              "value": "Thu, 26 Nov 2026 16:19:46 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/css; charset=UTF-8"
+            },
+            {
+              "name": "Vary",
+              "value": "Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/css",
+          "protocol": "http/1.1",
+          "requestId": "15280.92",
+          "responseTime": 1795710214410.369,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 5.52,
+            "receiveHeadersStart": 5.376,
+            "requestTime": 914901.040513,
+            "sendEnd": 0.702,
+            "sendStart": 0.518,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914901057271,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 816,
+          "didFail": false,
+          "encodedDataLength": 1149,
+          "finishTime": 914901.046755,
+          "requestId": "15280.92"
+        }
+      }
+    },
+    {
+      "name": "PaintImage",
+      "durationMs": 0.167,
+      "ts": 914901062051,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "height": 60,
+          "isCSS": false,
+          "isPicture": false,
+          "loadingAttribute": "lazy",
+          "nodeId": 2,
+          "nodeName": "IMG",
+          "srcHeight": 64,
+          "srcWidth": 64,
+          "srcsetAttribute": "/_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=64&q=75 1x, /_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=128&q=75 2x",
+          "url": "http://127.0.0.1:3040/_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=64&q=75",
+          "width": 60,
+          "x": 120,
+          "y": 1148.171875
+        }
+      }
+    },
+    {
+      "name": "ImageDecodeTask",
+      "durationMs": 0.029,
+      "ts": 914901064467,
+      "tid": 2872,
+      "pid": 15280,
+      "args": {
+        "pixelRefId": 42382739938136
+      }
+    },
+    {
+      "name": "ImageUploadTask",
+      "durationMs": 0.013,
+      "ts": 914901064507,
+      "tid": 2872,
+      "pid": 15280,
+      "args": {
+        "pixelRefId": 42382755122264
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914901069823,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "auto",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "",
+            "type": "other"
+          },
+          "isLinkPreload": false,
+          "priority": "High",
+          "requestId": "15280.93",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/icon.png?icon.1ercyn6fdszv_.png"
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914901071081,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.94",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/executive?_rsc=Jc7qGtfAiiXFPKWR"
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914901089041,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 129,
+          "connectionReused": true,
+          "encodedDataLength": 315,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "cache-control",
+              "value": "public, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "x-nextjs-cache",
+              "value": "HIT"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:34 GMT"
+            },
+            {
+              "name": "content-type",
+              "value": "image/png"
+            },
+            {
+              "name": "vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch"
+            }
+          ],
+          "mimeType": "image/png",
+          "protocol": "http/1.1",
+          "requestId": "15280.93",
+          "responseTime": 1795710214452.522,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 17.28,
+            "receiveHeadersStart": 17.166,
+            "requestTime": 914901.070876,
+            "sendEnd": 0.881,
+            "sendStart": 0.675,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914901111051,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 151,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:34 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.94",
+          "responseTime": 1795710214462.518,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 25.99,
+            "receiveHeadersStart": 25.901,
+            "requestTime": 914901.072136,
+            "sendEnd": 0.596,
+            "sendStart": 0.353,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914901118194,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.95",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/executive?_rsc=A15wme46L60zbf7K"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914901123277,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 326,
+          "didFail": false,
+          "encodedDataLength": 558,
+          "finishTime": 914901.099186,
+          "requestId": "15280.94"
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914901140184,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 151,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:34 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.95",
+          "responseTime": 1795710214497.235,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 8.392,
+            "receiveHeadersStart": 8.302,
+            "requestTime": 914901.124452,
+            "sendEnd": 0.819,
+            "sendStart": 0.616,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914901147752,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 1353,
+          "didFail": false,
+          "encodedDataLength": 1196,
+          "finishTime": 914901.136223,
+          "requestId": "15280.95"
+        }
+      }
+    },
+    {
+      "name": "Decode Image",
+      "durationMs": 1026.164,
+      "ts": 914901185905,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "imageType": "png"
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914902759453,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 12661586,
+          "didFail": false,
+          "encodedDataLength": 12661916,
+          "finishTime": 914901.165129,
+          "requestId": "15280.93"
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914902762518,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "auto",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "script",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "renderBlocking": "non_blocking",
+          "requestId": "15280.96",
+          "requestMethod": "GET",
+          "resourceType": "Script",
+          "url": "http://127.0.0.1:3040/_next/static/chunks/3bsfdlox1yvh7.js"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914902765862,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 36813,
+          "didFail": false,
+          "encodedDataLength": 12085,
+          "finishTime": 914901.479349,
+          "requestId": "15280.91"
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914902775581,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 123,
+          "connectionReused": true,
+          "encodedDataLength": 379,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "public, max-age=31536000, immutable"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "ETag",
+              "value": "W/\"1a5f-1a218a7e5b4\""
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Accept-Ranges",
+              "value": "bytes"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:36 GMT"
+            },
+            {
+              "name": "Last-Modified",
+              "value": "Thu, 26 Nov 2026 16:19:46 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/javascript; charset=UTF-8"
+            },
+            {
+              "name": "Vary",
+              "value": "Accept-Encoding"
+            }
+          ],
+          "mimeType": "application/javascript",
+          "protocol": "http/1.1",
+          "requestId": "15280.96",
+          "responseTime": 1795710216136.389,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 8.733,
+            "receiveHeadersStart": 8.583,
+            "requestTime": 914902.763325,
+            "sendEnd": 0.569,
+            "sendStart": 0.404,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914902775816,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 6751,
+          "didFail": false,
+          "encodedDataLength": 3145,
+          "finishTime": 914902.772782,
+          "requestId": "15280.96"
+        }
+      }
+    },
+    {
+      "name": "ImageUploadTask",
+      "durationMs": 0.574,
+      "ts": 914902889451,
+      "tid": 42304,
+      "pid": 8376,
+      "args": {
+        "pixelRefId": 36816519285592
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914902917590,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.99",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?returnTo=%2Flegislative%2Fresolutions%3Fterm%3D4a551127-9393-41b8-8b55-e42c88279751&_rsc=Jc7qGtfAiiXFPKWR"
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914902918855,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.100",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/legislative/resolutions/2986bf80-f69a-4065-9202-250849f81a3d?returnTo=%2Flegislative%2Fresolutions%3Fterm%3D4a551127-9393-41b8-8b55-e42c88279751&_rsc=Jc7qGtfAiiXFPKWR"
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914902919824,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.101",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/legislative/resolutions/63ec85d7-005c-4dc4-9d0f-7cf50e56330e?returnTo=%2Flegislative%2Fresolutions%3Fterm%3D4a551127-9393-41b8-8b55-e42c88279751&_rsc=Jc7qGtfAiiXFPKWR"
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914902975885,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 123,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:36 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.99",
+          "responseTime": 1795710216302.987,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 19.476,
+            "receiveHeadersStart": 19.282,
+            "requestTime": 914902.919224,
+            "sendEnd": 1.512,
+            "sendStart": 1.054,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914902977156,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 129,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:36 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.100",
+          "responseTime": 1795710216312.011,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 26.518,
+            "receiveHeadersStart": 26.325,
+            "requestTime": 914902.921205,
+            "sendEnd": 0.94,
+            "sendStart": 0.686,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914902978094,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 151,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:36 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.101",
+          "responseTime": 1795710216320.993,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 33.994,
+            "receiveHeadersStart": 33.834,
+            "requestTime": 914902.922679,
+            "sendEnd": 0.888,
+            "sendStart": 0.638,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914902983115,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.102",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?returnTo=%2Flegislative%2Fresolutions%3Fterm%3D4a551127-9393-41b8-8b55-e42c88279751&_rsc=A15wme46L60zbf7K"
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914902986902,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.103",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/legislative/resolutions/2986bf80-f69a-4065-9202-250849f81a3d?returnTo=%2Flegislative%2Fresolutions%3Fterm%3D4a551127-9393-41b8-8b55-e42c88279751&_rsc=A15wme46L60zbf7K"
+        }
+      }
+    },
+    {
+      "name": "ResourceSendRequest",
+      "durationMs": null,
+      "ts": 914902991042,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "fetchPriorityHint": "low",
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "initiator": {
+            "fetchType": "fetch",
+            "type": "script"
+          },
+          "isLinkPreload": false,
+          "priority": "Low",
+          "requestId": "15280.104",
+          "requestMethod": "GET",
+          "resourceType": "Other",
+          "url": "http://127.0.0.1:3040/legislative/resolutions/63ec85d7-005c-4dc4-9d0f-7cf50e56330e?returnTo=%2Flegislative%2Fresolutions%3Fterm%3D4a551127-9393-41b8-8b55-e42c88279751&_rsc=A15wme46L60zbf7K"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914902992376,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 571,
+          "didFail": false,
+          "encodedDataLength": 671,
+          "finishTime": 914902.959592,
+          "requestId": "15280.99"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914902992714,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 571,
+          "didFail": false,
+          "encodedDataLength": 672,
+          "finishTime": 914902.960215,
+          "requestId": "15280.100"
+        }
+      }
+    },
+    {
+      "name": "ResourceFinish",
+      "durationMs": null,
+      "ts": 914902992954,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "decodedBodyLength": 571,
+          "didFail": false,
+          "encodedDataLength": 672,
+          "finishTime": 914902.960761,
+          "requestId": "15280.101"
+        }
+      }
+    },
+    {
+      "name": "ResourceReceiveResponse",
+      "durationMs": null,
+      "ts": 914903009798,
+      "tid": 8732,
+      "pid": 15280,
+      "args": {
+        "data": {
+          "connectionId": 151,
+          "connectionReused": true,
+          "encodedDataLength": 363,
+          "frame": "D46A02DFAAF713EB4448FCC41FAB81A8",
+          "fromCache": false,
+          "fromServiceWorker": false,
+          "headers": [
+            {
+              "name": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "private, no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "name": "Content-Encoding",
+              "value": "gzip"
+            },
+            {
+              "name": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "name": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "name": "Date",
+              "value": "Thu, 26 Nov 2026 16:23:36 GMT"
+            },
+            {
+              "name": "Content-Type",
+              "value": "text/x-component"
+            },
+            {
+              "name": "Vary",
+              "value": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding"
+            }
+          ],
+          "mimeType": "text/x-component",
+          "protocol": "http/1.1",
+          "requestId": "15280.102",
+          "responseTime": 1795710216372.212,
+          "statusCode": 200,
+          "timing": {
+            "connectEnd": -1,
+            "connectStart": -1,
+            "dnsEnd": -1,
+            "dnsStart": -1,
+            "proxyEnd": -1,
+            "proxyStart": -1,
+            "pushEnd": 0,
+            "pushStart": 0,
+            "receiveHeadersEnd": 23.299,
+            "receiveHeadersStart": 23.164,
+            "requestTime": 914902.984568,
+            "sendEnd": 1.36,
+            "sendStart": 0.899,
+            "sslEnd": -1,
+            "sslStart": -1,
+            "workerReady": -1,
+            "workerStart": -1
+          }
+        }
+      }
+    }
+  ],
+  "browserImages": [
+    {
+      "src": "http://127.0.0.1:3040/_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=96&q=75",
+      "naturalWidth": 96,
+      "naturalHeight": 96,
+      "width": 65,
+      "height": 65
+    },
+    {
+      "src": "http://127.0.0.1:3040/_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=64&q=75",
+      "naturalWidth": 64,
+      "naturalHeight": 64,
+      "width": 60,
+      "height": 60
+    }
+  ],
+  "imageResources": [
+    {
+      "url": "http://127.0.0.1:3040/_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=96&q=75",
+      "initiatorType": "link",
+      "decodedBodySize": 5108,
+      "duration": 23.399999976158142,
+      "startTime": 97.5,
+      "responseEnd": 120.89999997615814
+    },
+    {
+      "url": "http://127.0.0.1:3040/_next/image?url=%2Fimages%2Fmunicipality%2Fpinamungajan.jpg&w=1920&q=75",
+      "initiatorType": "link",
+      "decodedBodySize": 302280,
+      "duration": 39.5,
+      "startTime": 98.39999997615814,
+      "responseEnd": 137.89999997615814
+    },
+    {
+      "url": "http://127.0.0.1:3040/_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=64&q=75",
+      "initiatorType": "img",
+      "decodedBodySize": 2896,
+      "duration": 7.900000095367432,
+      "startTime": 248.79999995231628,
+      "responseEnd": 256.7000000476837
+    },
+    {
+      "url": "http://127.0.0.1:3040/icon.png?icon.1ercyn6fdszv_.png",
+      "initiatorType": "other",
+      "decodedBodySize": 12661586,
+      "duration": 94.5,
+      "startTime": 929,
+      "responseEnd": 1023.5
+    },
+    {
+      "url": "http://127.0.0.1:3040/_next/image?url=https%3A%2F%2Fvkdlklboooqfcxytzbaq.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fmunicipal-media%2Fofficials%2Fe600b3ec-4293-439f-90d4-70b3027ff31f%2F73c40493-b0b9-40f6-8708-8c7370b70fb1.webp&w=256&q=75",
+      "initiatorType": "img",
+      "decodedBodySize": 10138,
+      "duration": 22,
+      "startTime": 2453,
+      "responseEnd": 2475
+    },
+    {
+      "url": "http://127.0.0.1:3040/_next/image?url=https%3A%2F%2Fvkdlklboooqfcxytzbaq.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fmunicipal-media%2Fofficials%2Fe600b3ec-4293-439f-90d4-70b3027ff31f%2Faa126d02-27e1-4aa2-8b46-c181c80f06a8.webp&w=256&q=75",
+      "initiatorType": "img",
+      "decodedBodySize": 9774,
+      "duration": 24.200000047683716,
+      "startTime": 2453.2999999523163,
+      "responseEnd": 2477.5
+    },
+    {
+      "url": "http://127.0.0.1:3040/_next/image?url=https%3A%2F%2Fvkdlklboooqfcxytzbaq.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fmunicipal-media%2Fofficials%2Fe600b3ec-4293-439f-90d4-70b3027ff31f%2F31085789-45de-4360-b43b-f155d15c1ab3.webp&w=256&q=75",
+      "initiatorType": "img",
+      "decodedBodySize": 8928,
+      "duration": 25.600000023841858,
+      "startTime": 2453.5,
+      "responseEnd": 2479.100000023842
+    },
+    {
+      "url": "http://127.0.0.1:3040/_next/image?url=https%3A%2F%2Fvkdlklboooqfcxytzbaq.supabase.co%2Fstorage%2Fv1%2Fobject%2Fpublic%2Fmunicipal-media%2Fofficials%2Fe600b3ec-4293-439f-90d4-70b3027ff31f%2F50d2d49b-427b-4927-97c3-c5564210b721.webp&w=256&q=75",
+      "initiatorType": "img",
+      "decodedBodySize": 10852,
+      "duration": 25.799999952316284,
+      "startTime": 2453.5,
+      "responseEnd": 2479.2999999523163
+    },
+    {
+      "url": "http://127.0.0.1:3040/icon.png?icon.1ercyn6fdszv_.png",
+      "initiatorType": "other",
+      "decodedBodySize": 12661586,
+      "duration": 95.20000004768372,
+      "startTime": 3628.399999976158,
+      "responseEnd": 3723.600000023842
+    }
+  ]
+}

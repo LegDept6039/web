@@ -9,8 +9,9 @@ export async function uploadNewsImage(
   recordId: string,
   slug: string,
   stagedPath: string,
+  collection: "news" | "programs" = "news",
 ) {
-  const prefix = `news/${department.id}/${userId}/`;
+  const prefix = `${collection}/${department.id}/${userId}/`;
   if (
     !stagedPath.startsWith(prefix) ||
     !/^[0-9a-f-]{36}\.(jpg|png)$/.test(stagedPath.slice(prefix.length))
@@ -23,13 +24,13 @@ export async function uploadNewsImage(
   try {
     const { bytes, mime, extension } = await validateNewsImage(data);
     // Immutable version directory prevents collisions/cached replacements; basename carries the real record ID.
-    const path = `${prefix}${crypto.randomUUID()}/${imagePart(department.short_name || department.slug)}_news_${imagePart(slug)}_${recordId}.${extension}`;
+    const path = `${prefix}${crypto.randomUUID()}/${imagePart(department.short_name || department.slug)}_${collection}_${imagePart(slug)}_${recordId}.${extension}`;
     const { error: uploadError } = await client.storage
       .from("municipal-media")
       .upload(path, bytes, { contentType: mime, upsert: false });
     if (uploadError)
       throw new Error(
-        "News image could not be saved. Check migration 011 and Storage access.",
+        "Image could not be saved. Check migration 039 and Storage access.",
       );
     return {
       path,

@@ -36,6 +36,7 @@ export interface LegislativeDocument extends ContentRecord {
 export type Ordinance = LegislativeDocument;
 export type Resolution = LegislativeDocument;
 export interface NewsArticle extends ContentRecord {
+  galleryImages?: string[];
   richBody?: import("@/lib/content/rich-text").RichNode;
   id?: string;
   source?: { name: string; slug?: string };
@@ -64,6 +65,8 @@ export interface Session extends ContentRecord {
   image: string;
 }
 export interface Service extends ContentRecord {
+  formUrl?: string;
+  formName?: string;
   richBody?: import("@/lib/content/rich-text").RichNode;
   body?: string;
   officeId?: string;
@@ -94,6 +97,7 @@ export interface Department extends ContentRecord {
   description: string;
 }
 export interface Program extends ContentRecord {
+  galleryImages?: string[];
   richBody?: import("@/lib/content/rich-text").RichNode;
   source?: { name: string; slug?: string };
   slug?: string;

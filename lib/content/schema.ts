@@ -49,7 +49,7 @@ type Definition<T> = {
     [
       P in keyof Omit<
         T,
-        "source" | "richBody" | "committeeName" | "sessionName"
+        "source" | "richBody" | "committeeName" | "sessionName" | "formUrl"
       >
     ]-?: Field;
   };
@@ -137,6 +137,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "news",
     key: "id",
     fields: {
+      galleryImages: { ...list("gallery_images"), optional: true },
       id: { ...text("id"), optional: true },
       officeId: { ...text("office_id"), optional: true },
       barangayId: { ...text("barangay_id"), optional: true },
@@ -184,6 +185,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "services",
     key: "id",
     fields: {
+      formName: { ...text("form_name"), optional: true },
       body: { ...text("body"), optional: true },
       officeId: { ...text("office_id"), optional: true },
       contentScope: {
@@ -235,6 +237,7 @@ export const definitions: { [K in Collection]: Definition<Collections[K]> } = {
     table: "programs",
     key: "id",
     fields: {
+      galleryImages: { ...list("gallery_images"), optional: true },
       slug: { ...text("slug"), optional: true },
       image: url("image", true),
       officeId: { ...text("office_id"), optional: true },
@@ -426,6 +429,17 @@ export function decodeRecord<K extends Collection>(
     row.rich_body != null
   )
     output.richBody = validateRichText(row.rich_body);
+  if (["news", "programs"].includes(collection) && output.galleryImages) {
+    const images = output.galleryImages as string[];
+    if (images.length > 12 || images.some((image) => !isSafeContentUrl(image)))
+      throw new Error("Invalid gallery photos. Check this record in Supabase.");
+  }
+  if (
+    collection === "services" &&
+    typeof row.form_path === "string" &&
+    row.form_path
+  )
+    output.formUrl = `/services/files/${encodeURIComponent(String(output.id))}`;
   for (const [join, key] of [
     ["committee_record", "committeeName"],
     ["session_record", "sessionName"],

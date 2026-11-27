@@ -1,6 +1,6 @@
 import { RichText } from "@/components/shared/RichText";
 import Link from "next/link";
-import Image from "next/image";
+import { PhotoGallery } from "@/components/shared/PhotoGallery";
 import { notFound } from "next/navigation";
 import { getProgram } from "@/lib/api";
 export async function generateMetadata({
@@ -43,16 +43,11 @@ export default async function ProgramPage({
           </p>
         )}
         <p className="meta">{program.status}</p>
-        {program.image && (
-          <div className="article-image">
-            <Image
-              src={program.image}
-              alt={program.name}
-              fill
-              sizes="(max-width: 800px) 100vw, 790px"
-            />
-          </div>
-        )}
+        <PhotoGallery
+          title={program.name}
+          coverImage={program.image}
+          images={program.galleryImages}
+        />
         <div className="article-body">
           <RichText document={program.richBody} legacy={program.description} />
         </div>

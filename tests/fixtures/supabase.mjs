@@ -204,6 +204,27 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
     resolutions = [],
     municipal_documents = [];
   const programs = [];
+  if (process.env.PORTAL_GALLERY_TEST_FIXTURE === "1") {
+    const base = { office_id: officeIds.mho, content_scope: "executive", published: true,
+      is_sample: false, sort_order: 1, created_at: now, updated_at: now, rich_body: null };
+    const cover = "/images/news/gallery-cover.png";
+    const photos = Array.from({ length: 6 }, (_, index) => `/images/news/gallery-${index + 1}.png`);
+    for (const [variant, gallery_images] of [["cover", []], ["pair", photos.slice(0, 1)], ["many", [cover, ...photos]]])
+      news.push({ ...base, id: `gallery-news-${variant}`, slug: `gallery-news-${variant}`,
+        title: `Gallery news ${variant}`, category: "Municipal news", date: "2026-11-27",
+        excerpt: "Public gallery test story.", content: ["The full news story remains readable below its photographs."],
+        image: cover, gallery_images });
+    for (const [variant, image, gallery_images] of [["none", null, []], ["cover", cover, []], ["many", cover, [cover, ...photos.slice(0, 5)]]])
+      programs.push({ ...base, id: `gallery-program-${variant}`, slug: `gallery-program-${variant}`,
+        name: `Gallery program ${variant}`, description: "The complete program information remains readable below its photographs.",
+        category: "Community", status: "Ongoing", image, gallery_images });
+    news.push({ ...base, id: "gallery-news-draft", slug: "gallery-news-draft", title: "Private gallery news",
+      category: "Municipal news", date: "2026-11-27", excerpt: "Private gallery.", content: ["Private story."],
+      image: cover, gallery_images: photos, published: false });
+    programs.push({ ...base, id: "gallery-program-draft", slug: "gallery-program-draft", name: "Private gallery program",
+      description: "Private program.", category: "Community", status: "Ongoing", image: cover,
+      gallery_images: photos, published: false });
+  }
   if (process.env.PORTAL_EXECUTIVE_PREVIEW_TEST_FIXTURE === "1") {
     const base = { office_id: officeIds.mho, content_scope: "executive", published: true,
       is_sample: false, sort_order: 1, created_at: now, updated_at: now, rich_body: null };
@@ -888,6 +909,22 @@ if (process.env.PORTAL_AUTH_TEST_FIXTURE === "1") {
       return new Response("%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF\n", {
         headers: { "Content-Type": "application/pdf" },
       });
+    if (
+      url.pathname.startsWith("/storage/v1/object/municipal-service-forms/") &&
+      method === "GET"
+    ) {
+      const path = decodeURIComponent(url.pathname.slice("/storage/v1/object/municipal-service-forms/".length));
+      const service = services.find((record) => record.form_path === path);
+      const owner = departments.find((department) => department.id === service?.office_id);
+      const publicVisible = service?.published && owner?.department === "executive" && publicDepartmentVisible(owner);
+      const staffVisible = service && credentialsReady(actor) && (actor?.role === "superadmin" ||
+        access.some((assignment) => assignment.user_id === actor?.user_id && assignment.office_id === service.office_id));
+      if (!service || !(publicVisible || staffVisible || serviceRole))
+        return response({ message: "Object not found" }, 404);
+      return new Response("%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF\n", {
+        headers: { "Content-Type": "application/pdf" },
+      });
+    }
     if (
       (url.pathname.startsWith("/storage/v1/object/municipal-news-staging/") ||
         url.pathname.startsWith(

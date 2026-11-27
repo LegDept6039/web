@@ -226,11 +226,15 @@ test("MHO profile photo, owned news/programs, forged office rejection and public
   ).toBeVisible();
   await expect(
     page
-      .locator(".department-body")
+      .locator(".department-description")
       .getByText("Community health care and preventive services.", {
         exact: true,
       }),
   ).toBeVisible();
+  await expect(page.locator(".department-body")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "About the Department", exact: true }),
+  ).toHaveCount(0);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

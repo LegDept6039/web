@@ -122,7 +122,7 @@ test.describe("Municipal contact settings", () => {
     const values: ContactDraft = {
       municipality_name: `Pinamungajan Municipal Hall ${info.project.name}`,
       address: "Municipal Hall\nPinamungajan, Cebu\nPhilippines",
-      telephone: "032 468 9319",
+      telephone: "0324689319",
       email: "municipal-contact@example.test",
       office_hours: "Monday to Friday\n8:00 AM to 5:00 PM",
       social_label: "Official Municipal Updates",

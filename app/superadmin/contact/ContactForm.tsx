@@ -3,6 +3,10 @@
 import { useActionState, useState } from "react";
 import type { MunicipalContactSettings } from "@/lib/municipal-contact/validation";
 import { saveMunicipalContact } from "./actions";
+import {
+  contactNumberInput,
+  editableContactNumber,
+} from "@/lib/content/department-contact";
 
 export function ContactForm({
   settings,
@@ -13,7 +17,7 @@ export function ContactForm({
   const [values, setValues] = useState({
     municipality_name: settings.municipality_name,
     address: settings.address,
-    telephone: settings.telephone || "",
+    telephone: editableContactNumber("LANDLINE", settings.telephone || ""),
     email: settings.email || "",
     office_hours: settings.office_hours || "",
     social_label: settings.social_label || "",
@@ -66,8 +70,16 @@ export function ContactForm({
               name="telephone"
               type="tel"
               maxLength={100}
+              inputMode="numeric"
+              pattern="[0-9]+"
+              title="Enter the area code and landline number using digits only."
               value={values.telephone}
-              onChange={(event) => update("telephone", event.target.value)}
+              onChange={(event) =>
+                update(
+                  "telephone",
+                  contactNumberInput("LANDLINE", event.target.value),
+                )
+              }
             />
           </label>
           <label>

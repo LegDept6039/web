@@ -1,3 +1,5 @@
+import { normalizeContactNumber } from "@/lib/content/department-contact";
+
 export interface MunicipalContactSettings {
   id: "municipal";
   municipality_name: string;
@@ -98,4 +100,14 @@ export function validateContactSettings(
     social_url,
     map_embed_url,
   };
+}
+
+/** Save validation is stricter than the reader to preserve legacy public data. */
+export function validateContactSettingsForSave(
+  input: Record<string, unknown>,
+): ContactSettingsInput {
+  const settings = validateContactSettings(input);
+  if (settings.telephone)
+    settings.telephone = normalizeContactNumber("LANDLINE", settings.telephone);
+  return settings;
 }

@@ -271,10 +271,10 @@ test("new department becomes public, assignable and manageable without adding so
     page.getByRole("heading", { name: "Agriculture Head", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "09170000000", exact: true }),
-  ).toHaveAttribute("href", "tel:09170000000");
+    page.getByRole("link", { name: "+639170000000", exact: true }),
+  ).toHaveAttribute("href", "tel:+639170000000");
   await expect(
-    page.getByRole("link", { name: "09280000000", exact: true }),
+    page.getByRole("link", { name: "+639280000000", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "office@example.test", exact: true }),
@@ -300,11 +300,11 @@ test("new department becomes public, assignable and manageable without adding so
     directoryCard.getByRole("heading", { name, level: 3, exact: true }),
   ).toBeVisible();
   await expect(
-    directoryCard.getByRole("link", { name: "09170000000", exact: true }),
-  ).toHaveAttribute("href", "tel:09170000000");
+    directoryCard.getByRole("link", { name: "+639170000000", exact: true }),
+  ).toHaveAttribute("href", "tel:+639170000000");
   await expect(
-    directoryCard.getByRole("link", { name: "09280000000", exact: true }),
-  ).toHaveAttribute("href", "tel:09280000000");
+    directoryCard.getByRole("link", { name: "+639280000000", exact: true }),
+  ).toHaveAttribute("href", "tel:+639280000000");
   await expect(
     directoryCard.getByRole("link", {
       name: "office@example.test",

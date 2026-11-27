@@ -7,6 +7,7 @@ import {
 } from "@/lib/content/rich-text";
 import { publicationPosition } from "./publication";
 import { departmentHeadPhotoVisibility } from "./department-photo-visibility";
+import { normalizeContactNumber } from "@/lib/content/department-contact";
 import {
   definitions,
   decodeRecord,
@@ -93,6 +94,8 @@ export function parseContent(collection: Collection, form: FormData) {
   // Plain-text submissions clear any previously stored formatting instead of
   // leaving a stale rich document attached to a changed body.
   if (collection === "services") row.rich_body = serviceDocument;
+  if (collection === "contacts")
+    row.value = normalizeContactNumber(String(row.type), String(row.value));
   decodeRecord(collection, row);
   if (
     ["officials", "contacts", "programs", "news", "services"].includes(

@@ -1,0 +1,829 @@
+{
+  "phase": "baseline-profile",
+  "methodology": {
+    "environment": "Local Next.js production next start, real hosted public Supabase reads",
+    "origin": "http://127.0.0.1:3040",
+    "browser": "158.0.8127.37",
+    "viewport": "1440x1000",
+    "cpuThrottling": false,
+    "networkThrottling": false,
+    "trials": 1,
+    "visits": "Five fresh browser contexts. Each first archive/detail visit paired with repeat via homepage in same context. Server process is warm; browser first visit is not a Vercel cold start.",
+    "timer": "Actual archive/detail anchor click to matching DOM and two animation frames. Detail additionally verifies visible body. Table ready means populated table rows, not a skeleton.",
+    "navigation": "Homepage loaded before timing; Legislative menu opened immediately before archive anchor click. Natural Next Link prefetch stays enabled.",
+    "privacy": "Only timing, byte/row counts, field names, public URLs and record number retained; no response text, cookies or credentials.",
+    "buildId": "Yg4JnnCDKXFPA8ZqWmtoW"
+  },
+  "runs": [
+    {
+      "trial": 1,
+      "visit": "first",
+      "archive": {
+        "name": "archive",
+        "startedAt": 1795709893006,
+        "finishedAt": 1795709895441,
+        "url": "/legislative/resolutions",
+        "clickToReadableMs": 2099.5999999046326,
+        "playwrightClickToVisibleMs": 2214.5118999999995,
+        "fullReload": false,
+        "tableRows": 142,
+        "resultCount": "142 resolutions found Published legislative records",
+        "title": null,
+        "metrics": {
+          "TaskDurationMs": 2131.384,
+          "ScriptDurationMs": 126.54500000000002,
+          "LayoutDurationMs": 87.54699999999998,
+          "RecalcStyleDurationMs": 20.495999999999995,
+          "nodes": 3868,
+          "jsHeapBytes": 7688248
+        },
+        "requests": [
+          {
+            "url": "/legislative/committees?_rsc=5CB68i4pnAekjehf",
+            "type": "Fetch",
+            "startedAt": 914579.686382,
+            "wallStartedAt": 1795709893051.142,
+            "requestId": "50760.82",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 19.210000056773424,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 64.74900001194328,
+            "transferredBytes": 569
+          },
+          {
+            "url": "/legislative/public-hearings?_rsc=5CB68i4pnAekjehf",
+            "type": "Fetch",
+            "startedAt": 914579.692501,
+            "wallStartedAt": 1795709893057.3572,
+            "requestId": "50760.83",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 31.51400003116578,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 65.1320000179112,
+            "transferredBytes": 570
+          },
+          {
+            "url": "/legislative/members?_rsc=tXyZJ52UQVBCVsD3",
+            "type": "Fetch",
+            "startedAt": 914579.696751,
+            "wallStartedAt": 1795709893061.5562,
+            "requestId": "50760.84",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 40.32200004439801,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 63.36499995086342,
+            "transferredBytes": 1257
+          },
+          {
+            "url": "/legislative/sessions?_rsc=tXyZJ52UQVBCVsD3",
+            "type": "Fetch",
+            "startedAt": 914579.700821,
+            "wallStartedAt": 1795709893065.896,
+            "requestId": "50760.85",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 55.607999907806516,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 60.46099995728582,
+            "transferredBytes": 1203
+          },
+          {
+            "url": "/legislative/ordinances?_rsc=tXyZJ52UQVBCVsD3",
+            "type": "Fetch",
+            "startedAt": 914579.755238,
+            "wallStartedAt": 1795709893119.991,
+            "requestId": "50760.86",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 19.989000051282346,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 52.08600009791553,
+            "transferredBytes": 1195
+          },
+          {
+            "url": "/legislative/resolutions?_rsc=tXyZJ52UQVBCVsD3",
+            "type": "Fetch",
+            "startedAt": 914579.765418,
+            "wallStartedAt": 1795709893130.517,
+            "requestId": "50760.87",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 25.708999950438738,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 43.15899999346584,
+            "transferredBytes": 1195,
+            "decodedBodyBytes": 1390
+          },
+          {
+            "url": "/legislative/committees?_rsc=tXyZJ52UQVBCVsD3",
+            "type": "Fetch",
+            "startedAt": 914579.76918,
+            "wallStartedAt": 1795709893133.828,
+            "requestId": "50760.88",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 49.84900006093085,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 40.07200000341982,
+            "transferredBytes": 1251
+          },
+          {
+            "url": "/legislative/public-hearings?_rsc=tXyZJ52UQVBCVsD3",
+            "type": "Fetch",
+            "startedAt": 914579.771979,
+            "wallStartedAt": 1795709893136.7441,
+            "requestId": "50760.89",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 48.84400009177625,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 37.616000045090914,
+            "transferredBytes": 1246
+          },
+          {
+            "url": "/legislative/resolutions?_rsc=JLpW-AfKvbbG9w_Z",
+            "type": "Fetch",
+            "startedAt": 914579.812617,
+            "wallStartedAt": 1795709893177.276,
+            "requestId": "50760.90",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 19.285000045783818,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 506.2519999919459,
+            "transferredBytes": 25304,
+            "decodedBodyBytes": 173647
+          },
+          {
+            "url": "/_next/image?url=%2Fimages%2Flogos%2Fseal.png&w=64&q=75",
+            "type": "Image",
+            "startedAt": 914579.854306,
+            "wallStartedAt": 1795709893218.885,
+            "requestId": "50760.35",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "image/webp",
+            "ttfbMs": 14.619999914430082,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 11.01699995342642,
+            "transferredBytes": 3315
+          },
+          {
+            "url": "/executive?_rsc=Jc7qGtfAiiXFPKWR",
+            "type": "Fetch",
+            "startedAt": 914579.861782,
+            "wallStartedAt": 1795709893226.4011,
+            "requestId": "50760.92",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 10.152000002563,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 30.48999991733581,
+            "transferredBytes": 559
+          },
+          {
+            "url": "/icon.png?icon.1ercyn6fdszv_.png",
+            "type": "Other",
+            "startedAt": 914579.864638,
+            "wallStartedAt": 1795709893229.2039,
+            "requestId": "50760.93",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "image/png",
+            "ttfbMs": 23.705999949015677,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 99.26599997561425,
+            "transferredBytes": 12661916
+          },
+          {
+            "url": "/executive?_rsc=A15wme46L60zbf7K",
+            "type": "Fetch",
+            "startedAt": 914579.912022,
+            "wallStartedAt": 1795709893276.611,
+            "requestId": "50760.94",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 18.8520000083372,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 16.388000105507672,
+            "transferredBytes": 1192
+          },
+          {
+            "url": "/_next/static/chunks/3z6uyng084h_r.js",
+            "type": "Script",
+            "startedAt": 914581.680857,
+            "wallStartedAt": 1795709895046.555,
+            "requestId": "50760.95",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "application/javascript",
+            "ttfbMs": 9.98299999628216,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 8.388999965973198,
+            "transferredBytes": 2519
+          },
+          {
+            "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?_rsc=Jc7qGtfAiiXFPKWR",
+            "type": "Fetch",
+            "startedAt": 914581.898156,
+            "wallStartedAt": 1795709895262.792,
+            "requestId": "50760.97",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 14.74800007417798,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 20.896000089123845,
+            "transferredBytes": 616
+          },
+          {
+            "url": "/legislative/resolutions/2986bf80-f69a-4065-9202-250849f81a3d?_rsc=Jc7qGtfAiiXFPKWR",
+            "type": "Fetch",
+            "startedAt": 914581.898559,
+            "wallStartedAt": 1795709895263.123,
+            "requestId": "50760.98",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 16.45500003360212,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 21.238000015728176,
+            "transferredBytes": 616
+          },
+          {
+            "url": "/legislative/resolutions/63ec85d7-005c-4dc4-9d0f-7cf50e56330e?_rsc=Jc7qGtfAiiXFPKWR",
+            "type": "Fetch",
+            "startedAt": 914581.898844,
+            "wallStartedAt": 1795709895263.4001,
+            "requestId": "50760.99",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 20.49500006251037,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 21.275000064633787,
+            "transferredBytes": 616
+          },
+          {
+            "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?_rsc=A15wme46L60zbf7K",
+            "type": "Fetch",
+            "startedAt": 914581.921963,
+            "wallStartedAt": 1795709895286.583,
+            "requestId": "50760.100",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 14.57600004505366,
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          },
+          {
+            "url": "/legislative/resolutions/2986bf80-f69a-4065-9202-250849f81a3d?_rsc=A15wme46L60zbf7K",
+            "type": "Fetch",
+            "startedAt": 914581.923831,
+            "wallStartedAt": 1795709895288.415,
+            "requestId": "50760.101",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 22.017000010237098,
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          },
+          {
+            "url": "/legislative/resolutions/63ec85d7-005c-4dc4-9d0f-7cf50e56330e?_rsc=A15wme46L60zbf7K",
+            "type": "Fetch",
+            "startedAt": 914581.925314,
+            "wallStartedAt": 1795709895289.9229,
+            "requestId": "50760.102",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 28.3460000064224,
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ],
+        "totalTransferredBytes": 12705139,
+        "navigationTransferredBytes": 37389,
+        "destinationTransferredBytes": 26499,
+        "destinationRequests": [
+          {
+            "url": "/legislative/resolutions?_rsc=tXyZJ52UQVBCVsD3",
+            "type": "Fetch",
+            "startedAt": 914579.765418,
+            "wallStartedAt": 1795709893130.517,
+            "requestId": "50760.87",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 25.708999950438738,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 43.15899999346584,
+            "transferredBytes": 1195,
+            "decodedBodyBytes": 1390
+          },
+          {
+            "url": "/legislative/resolutions?_rsc=JLpW-AfKvbbG9w_Z",
+            "type": "Fetch",
+            "startedAt": 914579.812617,
+            "wallStartedAt": 1795709893177.276,
+            "requestId": "50760.90",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 19.285000045783818,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 506.2519999919459,
+            "transferredBytes": 25304,
+            "decodedBodyBytes": 173647
+          }
+        ],
+        "browserTiming": {
+          "click": 3362.100000023842,
+          "readable": 5461.699999928474,
+          "resources": [
+            {
+              "startTime": 3189.7999999523163,
+              "responseStart": 3244.899999976158,
+              "responseEnd": 3251.600000023842,
+              "duration": 61.800000071525574,
+              "transferSize": 491,
+              "encodedBodySize": 191,
+              "decodedBodySize": 388,
+              "responseEndToReadableMs": 2210.0999999046326
+            },
+            {
+              "startTime": 3331,
+              "responseStart": 3354.6999999284744,
+              "responseEnd": 3373.5,
+              "duration": 42.5,
+              "transferSize": 1102,
+              "encodedBodySize": 802,
+              "decodedBodySize": 1390,
+              "responseEndToReadableMs": 2088.1999999284744
+            },
+            {
+              "startTime": 3377.6999999284744,
+              "responseStart": 3394.2999999523163,
+              "responseEnd": 3883.7999999523163,
+              "duration": 506.10000002384186,
+              "transferSize": 25164,
+              "encodedBodySize": 24864,
+              "decodedBodySize": 173485,
+              "responseEndToReadableMs": 1577.8999999761581
+            }
+          ],
+          "longTasks": [
+            {
+              "startTime": 3534.399999976158,
+              "duration": 1708
+            },
+            {
+              "startTime": 5318.199999928474,
+              "duration": 114
+            }
+          ]
+        }
+      },
+      "detail": {
+        "name": "detail",
+        "startedAt": 1795709895543,
+        "finishedAt": 1795709897352,
+        "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b",
+        "clickToReadableMs": 355.89999997615814,
+        "playwrightClickToVisibleMs": 443.6186999999991,
+        "fullReload": false,
+        "tableRows": null,
+        "resultCount": null,
+        "title": "Resolution No. 232-2026",
+        "metrics": {
+          "TaskDurationMs": 194.60399999999998,
+          "ScriptDurationMs": 49.48600000000003,
+          "LayoutDurationMs": 42.86499999999999,
+          "RecalcStyleDurationMs": 3.3030000000000004,
+          "nodes": 4312,
+          "jsHeapBytes": 10886308
+        },
+        "requests": [
+          {
+            "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?_rsc=m3rc26lCe9xWj1se",
+            "type": "Fetch",
+            "startedAt": 914582.240014,
+            "wallStartedAt": 1795709895604.646,
+            "requestId": "50760.103",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 23.326999973505735,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 274.4410000741482,
+            "transferredBytes": 3185,
+            "decodedBodyBytes": 7234
+          },
+          {
+            "url": "/_next/static/chunks/2b24mtmwhsz6z.js",
+            "type": "Script",
+            "startedAt": 914582.514101,
+            "wallStartedAt": 1795709895878.745,
+            "requestId": "50760.104",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "application/javascript",
+            "ttfbMs": 11.06299995444715,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 9.442999958992004,
+            "transferredBytes": 1231
+          },
+          {
+            "url": "/icon.png?icon.1ercyn6fdszv_.png",
+            "type": "Other",
+            "startedAt": 914582.574873,
+            "wallStartedAt": 1795709895939.451,
+            "requestId": "50760.106",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "image/png",
+            "ttfbMs": 23.65400001872331,
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          },
+          {
+            "url": "/legislative/sessions/9acabcad-c7fe-41b1-b5ba-99a370c760e8?_rsc=ZLB7_41avvnE8xUa",
+            "type": "Fetch",
+            "startedAt": 914582.591592,
+            "wallStartedAt": 1795709895956.29,
+            "requestId": "50760.107",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 23.69499998167157,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 13.28399998601526,
+            "transferredBytes": 614
+          },
+          {
+            "url": "/legislative/sessions/9acabcad-c7fe-41b1-b5ba-99a370c760e8?_rsc=5tRxLSuRLAVtUR94",
+            "type": "Fetch",
+            "startedAt": 914582.621115,
+            "wallStartedAt": 1795709895985.713,
+            "requestId": "50760.108",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 41.16100003011525,
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ],
+        "totalTransferredBytes": 5030,
+        "navigationTransferredBytes": 3799,
+        "destinationTransferredBytes": 3185,
+        "destinationRequests": [
+          {
+            "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?_rsc=m3rc26lCe9xWj1se",
+            "type": "Fetch",
+            "startedAt": 914582.240014,
+            "wallStartedAt": 1795709895604.646,
+            "requestId": "50760.103",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 23.326999973505735,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 274.4410000741482,
+            "transferredBytes": 3185,
+            "decodedBodyBytes": 7234
+          }
+        ],
+        "browserTiming": {
+          "click": 5801.899999976158,
+          "readable": 6157.799999952316,
+          "resources": [
+            {
+              "startTime": 5463.199999928474,
+              "responseStart": 5475.199999928474,
+              "responseEnd": 5484,
+              "duration": 20.800000071525574,
+              "transferSize": 537,
+              "encodedBodySize": 237,
+              "decodedBodySize": 487,
+              "responseEndToReadableMs": 673.7999999523163
+            },
+            {
+              "startTime": 5487,
+              "responseStart": 5500.299999952316,
+              "responseEnd": 5755.5,
+              "duration": 268.5,
+              "transferSize": 1469,
+              "encodedBodySize": 1169,
+              "decodedBodySize": 1983,
+              "responseEndToReadableMs": 402.2999999523163
+            },
+            {
+              "startTime": 5805.100000023842,
+              "responseStart": 5826.600000023842,
+              "responseEnd": 6079.399999976158,
+              "duration": 274.2999999523163,
+              "transferSize": 3079,
+              "encodedBodySize": 2779,
+              "decodedBodySize": 7234,
+              "responseEndToReadableMs": 78.39999997615814
+            }
+          ],
+          "longTasks": []
+        }
+      }
+    },
+    {
+      "trial": 1,
+      "visit": "repeat",
+      "archive": {
+        "name": "archive",
+        "startedAt": 1795709899067,
+        "finishedAt": 1795709901127,
+        "url": "/legislative/resolutions",
+        "clickToReadableMs": 1786.7000000476837,
+        "playwrightClickToVisibleMs": 1862.3796000000002,
+        "fullReload": false,
+        "tableRows": 142,
+        "resultCount": "142 resolutions found Published legislative records",
+        "title": null,
+        "metrics": {
+          "TaskDurationMs": 1788.03,
+          "ScriptDurationMs": 114.21900000000001,
+          "LayoutDurationMs": 38.64299999999999,
+          "RecalcStyleDurationMs": 23.369000000000007,
+          "nodes": 8394,
+          "jsHeapBytes": 10450984
+        },
+        "requests": [
+          {
+            "url": "/legislative/resolutions?_rsc=JLpW-AfKvbbG9w_Z",
+            "type": "Fetch",
+            "startedAt": 914585.802959,
+            "wallStartedAt": 1795709899167.745,
+            "requestId": "50760.153",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 32.22100005950779,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 436.1880000215024,
+            "transferredBytes": 25303,
+            "decodedBodyBytes": 173647
+          },
+          {
+            "url": "/icon.png?icon.1ercyn6fdszv_.png",
+            "type": "Other",
+            "startedAt": 914585.843513,
+            "wallStartedAt": 1795709899208.088,
+            "requestId": "50760.154",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "image/png",
+            "ttfbMs": 18.850999884307384,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 90.89099999982864,
+            "transferredBytes": 12661916
+          }
+        ],
+        "totalTransferredBytes": 12687219,
+        "navigationTransferredBytes": 25303,
+        "destinationTransferredBytes": 25303,
+        "destinationRequests": [
+          {
+            "url": "/legislative/resolutions?_rsc=JLpW-AfKvbbG9w_Z",
+            "type": "Fetch",
+            "startedAt": 914585.802959,
+            "wallStartedAt": 1795709899167.745,
+            "requestId": "50760.153",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 32.22100005950779,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 436.1880000215024,
+            "transferredBytes": 25303,
+            "decodedBodyBytes": 173647
+          }
+        ],
+        "browserTiming": {
+          "click": 9358.799999952316,
+          "readable": 11145.5,
+          "resources": [
+            {
+              "startTime": 3189.7999999523163,
+              "responseStart": 3244.899999976158,
+              "responseEnd": 3251.600000023842,
+              "duration": 61.800000071525574,
+              "transferSize": 491,
+              "encodedBodySize": 191,
+              "decodedBodySize": 388,
+              "responseEndToReadableMs": 7893.899999976158
+            },
+            {
+              "startTime": 3331,
+              "responseStart": 3354.6999999284744,
+              "responseEnd": 3373.5,
+              "duration": 42.5,
+              "transferSize": 1102,
+              "encodedBodySize": 802,
+              "decodedBodySize": 1390,
+              "responseEndToReadableMs": 7772
+            },
+            {
+              "startTime": 3377.6999999284744,
+              "responseStart": 3394.2999999523163,
+              "responseEnd": 3883.7999999523163,
+              "duration": 506.10000002384186,
+              "transferSize": 25164,
+              "encodedBodySize": 24864,
+              "decodedBodySize": 173485,
+              "responseEndToReadableMs": 7261.700000047684
+            },
+            {
+              "startTime": 9368.199999928474,
+              "responseStart": 9395.299999952316,
+              "responseEnd": 9804,
+              "duration": 435.8000000715256,
+              "transferSize": 25163,
+              "encodedBodySize": 24863,
+              "decodedBodySize": 173485,
+              "responseEndToReadableMs": 1341.5
+            }
+          ],
+          "longTasks": [
+            {
+              "startTime": 9505.799999952316,
+              "duration": 1472
+            },
+            {
+              "startTime": 11051.899999976158,
+              "duration": 67
+            }
+          ]
+        }
+      },
+      "detail": {
+        "name": "detail",
+        "startedAt": 1795709901254,
+        "finishedAt": 1795709903226,
+        "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b",
+        "clickToReadableMs": 322.5,
+        "playwrightClickToVisibleMs": 488.433500000001,
+        "fullReload": false,
+        "tableRows": null,
+        "resultCount": null,
+        "title": "Resolution No. 232-2026",
+        "metrics": {
+          "TaskDurationMs": 189.03399999999948,
+          "ScriptDurationMs": 47.77900000000002,
+          "LayoutDurationMs": 2.3160000000000402,
+          "RecalcStyleDurationMs": 2.1679999999999895,
+          "nodes": 8728,
+          "jsHeapBytes": 12110796
+        },
+        "requests": [
+          {
+            "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?_rsc=m3rc26lCe9xWj1se",
+            "type": "Fetch",
+            "startedAt": 914588.008266,
+            "wallStartedAt": 1795709901373.04,
+            "requestId": "50760.155",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 35.26400006376207,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 290.09400005452335,
+            "transferredBytes": 3186,
+            "decodedBodyBytes": 7234
+          },
+          {
+            "url": "/icon.png?icon.1ercyn6fdszv_.png",
+            "type": "Other",
+            "startedAt": 914588.324695,
+            "wallStartedAt": 1795709901689.281,
+            "requestId": "50760.156",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "image/png",
+            "ttfbMs": 19.808000070042908,
+            "fromDiskCache": false,
+            "fromServiceWorker": false
+          }
+        ],
+        "totalTransferredBytes": 3186,
+        "navigationTransferredBytes": 3186,
+        "destinationTransferredBytes": 3186,
+        "destinationRequests": [
+          {
+            "url": "/legislative/resolutions/0db434e9-2b0d-4b97-b366-9b9b208f019b?_rsc=m3rc26lCe9xWj1se",
+            "type": "Fetch",
+            "startedAt": 914588.008266,
+            "wallStartedAt": 1795709901373.04,
+            "requestId": "50760.155",
+            "method": "GET",
+            "status": 200,
+            "mimeType": "text/x-component",
+            "ttfbMs": 35.26400006376207,
+            "fromDiskCache": false,
+            "fromServiceWorker": false,
+            "durationMs": 290.09400005452335,
+            "transferredBytes": 3186,
+            "decodedBodyBytes": 7234
+          }
+        ],
+        "browserTiming": {
+          "click": 11568.699999928474,
+          "readable": 11891.199999928474,
+          "resources": [
+            {
+              "startTime": 5463.199999928474,
+              "responseStart": 5475.199999928474,
+              "responseEnd": 5484,
+              "duration": 20.800000071525574,
+              "transferSize": 537,
+              "encodedBodySize": 237,
+              "decodedBodySize": 487,
+              "responseEndToReadableMs": 6407.199999928474
+            },
+            {
+              "startTime": 5487,
+              "responseStart": 5500.299999952316,
+              "responseEnd": 5755.5,
+              "duration": 268.5,
+              "transferSize": 1469,
+              "encodedBodySize": 1169,
+              "decodedBodySize": 1983,
+              "responseEndToReadableMs": 6135.699999928474
+            },
+            {
+              "startTime": 5805.100000023842,
+              "responseStart": 5826.600000023842,
+              "responseEnd": 6079.399999976158,
+              "duration": 274.2999999523163,
+              "transferSize": 3079,
+              "encodedBodySize": 2779,
+              "decodedBodySize": 7234,
+              "responseEndToReadableMs": 5811.799999952316
+            },
+            {
+              "startTime": 11573.5,
+              "responseStart": 11601,
+              "responseEnd": 11863.299999952316,
+              "duration": 289.7999999523163,
+              "transferSize": 3080,
+              "encodedBodySize": 2780,
+              "decodedBodySize": 7234,
+              "responseEndToReadableMs": 27.899999976158142
+            }
+          ],
+          "longTasks": []
+        }
+      }
+    }
+  ]
+}
